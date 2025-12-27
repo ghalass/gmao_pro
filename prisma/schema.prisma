@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ****************** GESTION DES USERS PERMISSIONS & ROLES ******************
+
+// implicite relation between Permission and Role
+model Permission {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+  resource    String
+  action      Action?
+  roles       Role[]
+
+  @@unique([resource, action])
+  @@map("permission")
+}
+
+enum Action {
+  create
+  read
+  update
+  delete
+}
+
+model Role {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  description String?
+  permissions Permission[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  user        User[]
+
+  @@map("role")
+}
+
+model User {
+  id           String  @id @default(cuid())
+  name         String
+  email        String  @unique
+  password     String
+  active       Boolean @default(true)
+  roles        Role[]
+  entrepriseId String
+  isOwner      Boolean @default(false)
+
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  entreprise Entreprise @relation(fields: [entrepriseId], references: [id])
+
+  @@map("user")
+}
+
+model Entreprise {
+  id     String  @id @default(cuid())
+  name   String
+  lang   LANG    @default(fr)
+  active Boolean @default(true)
+  users  User[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("entreprise")
+}
+
+enum LANG {
+  ar
+  fr
+}
