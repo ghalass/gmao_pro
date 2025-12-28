@@ -24,15 +24,35 @@ export const getInitials = (name: string | undefined | null) => {
     .slice(0, 2);
 };
 
-export const getJoinedDate = (dateString: string) => {
+export const getJoinedDate = (dateString: string, lang: string = "fr") => {
   try {
+    // Vérifier d'abord si la chaîne est valide
+    if (!dateString || dateString.trim() === "") {
+      throw new Error("Date string is empty");
+    }
+
     const date = new Date(dateString);
-    return date.toLocaleDateString("fr-FR", {
+
+    // Vérifier si la date est valide
+    if (isNaN(date.getTime())) {
+      throw new Error("Invalid date");
+    }
+
+    let langString = "fr-FR";
+    switch (lang) {
+      case "ar":
+        langString = "ar-AR";
+        break;
+      default:
+        break;
+    }
+
+    return date.toLocaleDateString(langString, {
       year: "numeric",
       month: "long",
       day: "numeric",
     });
   } catch {
-    return "Date inconnue";
+    return lang === "ar" ? "تاريخ غير معروف" : "Date inconnue";
   }
 };

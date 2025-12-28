@@ -16,6 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import { useUser } from "@/context/UserContext";
 import { API, apiFetch } from "@/lib/api";
 import { getInitials, getJoinedDate } from "@/lib/utils";
+import { useCurrentLocale, useScopedI18n } from "@/locales/client";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, Edit3, Key, Mail, Save, Shield, User } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -45,6 +46,7 @@ interface ProfileFormData {
 const ProfilPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const locale = useCurrentLocale();
 
   const { refreshUser } = useUser();
 
@@ -213,6 +215,8 @@ const ProfilPage = () => {
     }
   }, [user]);
 
+  const profileTrans = useScopedI18n("pages.profile");
+
   return (
     <div className="container mx-auto py-8 space-y-8">
       {/* En-tête */}
@@ -220,24 +224,24 @@ const ProfilPage = () => {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <User className="h-8 w-8" />
-            Mon Profil
+            {profileTrans("title")}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Gérez vos informations personnelles et vos préférences
+            {profileTrans("subTitle")}
           </p>
         </div>
         <div className="flex items-center gap-2">
           {isEditing ? (
             <>
               <Button variant="outline" onClick={() => setIsEditing(false)}>
-                Annuler
+                {profileTrans("cancelButtonText")}
               </Button>
               <Button
                 onClick={handleSaveProfile}
                 className="flex items-center gap-2"
               >
                 <Save className="h-4 w-4" />
-                Sauvegarder
+                {profileTrans("saveButtonText")}
               </Button>
             </>
           ) : (
@@ -246,7 +250,7 @@ const ProfilPage = () => {
               className="flex items-center gap-2"
             >
               <Edit3 className="h-4 w-4" />
-              Modifier le profil
+              {profileTrans("editButtonText")}
             </Button>
           )}
         </div>
@@ -267,9 +271,9 @@ const ProfilPage = () => {
             <CardHeader className="flex flex-row items-center gap-2">
               <User className="h-5 w-5 text-primary" />
               <div>
-                <CardTitle>Informations personnelles</CardTitle>
+                <CardTitle>{profileTrans("infoPerso.title")}</CardTitle>
                 <CardDescription>
-                  Mettez à jour vos informations de compte
+                  {profileTrans("infoPerso.subTitle")}
                 </CardDescription>
               </div>
             </CardHeader>
@@ -287,7 +291,8 @@ const ProfilPage = () => {
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Calendar className="h-3.5 w-3.5" />
                     <span>
-                      Membre depuis {getJoinedDate(user?.createdAt || "")}
+                      {profileTrans("infoPerso.membreDepuis")}{" "}
+                      {getJoinedDate(user?.createdAt || "", locale)}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -299,7 +304,9 @@ const ProfilPage = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Nom complet *</Label>
+                  <Label htmlFor="name">
+                    {profileTrans("infoPerso.nomComplet")}
+                  </Label>
                   <Input
                     id="name"
                     value={formData.name}
@@ -308,11 +315,13 @@ const ProfilPage = () => {
                     placeholder="Votre nom complet"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Ce nom sera affiché dans l'application
+                    {profileTrans("infoPerso.nomCompletSubTitle")}
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Adresse email *</Label>
+                  <Label htmlFor="email">
+                    {profileTrans("infoPerso.email")}
+                  </Label>
                   <Input
                     id="email"
                     type="email"
@@ -322,7 +331,7 @@ const ProfilPage = () => {
                     placeholder="votre@email.com"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Utilisée pour la connexion
+                    {profileTrans("infoPerso.emailSubTitle")}
                   </p>
                 </div>
               </div>
@@ -334,15 +343,17 @@ const ProfilPage = () => {
             <CardHeader className="flex flex-row items-center gap-2">
               <Key className="h-5 w-5 text-primary" />
               <div>
-                <CardTitle>Changer le mot de passe</CardTitle>
+                <CardTitle>{profileTrans("passwordChange.title")}</CardTitle>
                 <CardDescription>
-                  Mettez à jour votre mot de passe de connexion
+                  {profileTrans("passwordChange.subTitle")}
                 </CardDescription>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="currentPassword">Mot de passe actuel *</Label>
+                <Label htmlFor="currentPassword">
+                  {profileTrans("passwordChange.actuelPassword")}
+                </Label>
                 <Input
                   id="currentPassword"
                   type="password"
@@ -355,7 +366,9 @@ const ProfilPage = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="newPassword">Nouveau mot de passe *</Label>
+                  <Label htmlFor="newPassword">
+                    {profileTrans("passwordChange.newPassword")}
+                  </Label>
                   <Input
                     id="newPassword"
                     type="password"
@@ -366,12 +379,12 @@ const ProfilPage = () => {
                     placeholder="••••••••"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Minimum 6 caractères
+                    {profileTrans("passwordChange.newPasswordSub")}
                   </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="confirmPassword">
-                    Confirmer le mot de passe *
+                    {profileTrans("passwordChange.confrimPassword")}
                   </Label>
                   <Input
                     id="confirmPassword"
@@ -395,7 +408,7 @@ const ProfilPage = () => {
                 className="flex items-center gap-2"
               >
                 <Key className="h-4 w-4" />
-                Changer le mot de passe
+                {profileTrans("passwordChange.buttonTitle")}
               </Button>
             </CardContent>
           </Card>
@@ -408,13 +421,17 @@ const ProfilPage = () => {
             <CardHeader className="flex flex-row items-center gap-2">
               <Shield className="h-5 w-5 text-primary" />
               <div>
-                <CardTitle>Rôles et permissions</CardTitle>
-                <CardDescription>Vos accès dans l'application</CardDescription>
+                <CardTitle>
+                  {profileTrans("roleAndPermissions.title")}
+                </CardTitle>
+                <CardDescription>
+                  {profileTrans("roleAndPermissions.subTitle")}
+                </CardDescription>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label>Rôles attribués</Label>
+                <Label>{profileTrans("roleAndPermissions.titleBody")}</Label>
                 <div className="flex flex-wrap gap-1">
                   {user?.roles && user.roles.length > 0 ? (
                     user.roles.map((role, index) => (
@@ -427,15 +444,17 @@ const ProfilPage = () => {
                       </Badge>
                     ))
                   ) : (
-                    <Badge variant="outline">Aucun rôle</Badge>
+                    <Badge variant="outline">
+                      {profileTrans("roleAndPermissions.notRoles")}
+                    </Badge>
                   )}
                 </div>
               </div>
               <Separator />
               <div className="space-y-2">
-                <Label>Dernière mise à jour</Label>
+                <Label>{profileTrans("roleAndPermissions.lastUpdate")}</Label>
                 <p className="text-sm text-muted-foreground">
-                  {getJoinedDate(user?.updatedAt || "")}
+                  {getJoinedDate(user?.updatedAt || "", locale)}
                 </p>
               </div>
             </CardContent>

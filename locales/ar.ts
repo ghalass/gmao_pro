@@ -70,6 +70,38 @@ export default {
         linkText: "العودة إلى الصفحة الرئيسية",
       },
     },
+    profile: {
+      title: "ملفي الشخصي",
+      subTitle: "إدارة معلوماتك الشخصية وتفضيلاتك",
+      editButtonText: "تعديل الملف الشخصي",
+      saveButtonText: "حفظ",
+      cancelButtonText: "إلغاء",
+      infoPerso: {
+        title: "المعلومات الشخصية",
+        subTitle: "قم بتحديث معلومات حسابك",
+        membreDepuis: "عضو منذ",
+        nomComplet: "الاسم الكامل *",
+        nomCompletSubTitle: "هذا الاسم سيظهر في التطبيق",
+        email: "عنوان البريد الإلكتروني *",
+        emailSubTitle: "تُستخدم لتسجيل الدخول",
+      },
+      passwordChange: {
+        title: "تغيير كلمة المرور",
+        subTitle: "قم بتحديث كلمة مرور تسجيل الدخول الخاصة بك",
+        actuelPassword: "كلمة المرور الحالية *",
+        newPassword: "كلمة المرور الجديدة *",
+        newPasswordSub: "6 أحرف على الأقل",
+        confrimPassword: "تأكيد كلمة المرور *",
+        buttonTitle: "تغيير كلمة المرور",
+      },
+      roleAndPermissions: {
+        title: "الأدوار والصلاحيات",
+        subTitle: "صلاحيات الوصول الخاصة بك في التطبيق",
+        notRoles: "لا توجد أدوار",
+        titleBody: "الأدوار الممنوحة",
+        lastUpdate: "آخر تحديث",
+      },
+    },
   },
   navbar: {
     authButtons: {
@@ -85,6 +117,22 @@ export default {
     dashboard: {
       title: "لوحة التحكم",
       description: "لوحة التحكم الرئيسية",
+    },
+  },
+  apis: {
+    common: {
+      checkBody: "جسم الطلب لا يجب أن يكون فارغًا",
+    },
+    auth: {
+      login: {
+        checkExistEntrepiseName: "اسم الشركة هذا غير موجود",
+        emailOrPasswordIncorrect: "البريد الإلكتروني أو كلمة المرور غير صحيحة!",
+        inActiveAccount: "حسابك غير مفعل بعد، يرجى التواصل مع المدير لتفعيله.",
+      },
+      register: {
+        checkExistEntrepiseName: "اسم المؤسسة هذا قد تم استخدامه من قبل",
+        emailUsed: "هذا البريد الإلكتروني قد تم استخدامه من قبل",
+      },
     },
   },
 } as const;

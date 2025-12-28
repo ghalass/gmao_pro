@@ -16,12 +16,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import LogoutButton from "./LogoutButton";
-import { useScopedI18n } from "@/locales/client";
+import { useCurrentLocale, useScopedI18n } from "@/locales/client";
 import { ROUTE } from "@/lib/routes";
 
 export default function AuthButtons() {
   const { user } = useUser();
   const tans = useScopedI18n("navbar");
+  const locale = useCurrentLocale();
+
   // Si user est null, afficher les boutons de connexion
   if (!user) {
     return (
@@ -76,7 +78,7 @@ export default function AuthButtons() {
 
   return (
     <div className="flex items-center gap-2">
-      <DropdownMenu>
+      <DropdownMenu dir={locale === "ar" ? "rtl" : "ltr"}>
         <DropdownMenuTrigger asChild>
           <button className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-accent transition-colors duration-200 group">
             <div className="w-8 h-8 bg-linear-to-br from-primary to-primary/70 rounded-full flex items-center justify-center text-primary-foreground text-sm font-medium">

@@ -1,18 +1,20 @@
-// app/api/auth/login/route.ts - Version corrigée avec relations implicites
-
+// app/api/auth/login/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession, verifyPassword } from "@/lib/auth";
+import { getScopedI18n } from "@/locales/server";
 
 export async function POST(request: NextRequest) {
   try {
+    const loginTrans = await getScopedI18n("apis");
+
     const body = await request.json();
     const { entrepriseName, email, password } = body;
 
     // check if data exist
     if (!body) {
       return NextResponse.json(
-        { message: "Le corps de la requête ne doit pas être vide" },
+        { message: loginTrans("common.checkBody") },
         { status: 400 }
       );
     }
@@ -23,7 +25,7 @@ export async function POST(request: NextRequest) {
     });
     if (!entrepiseExist)
       return NextResponse.json(
-        { message: "Ce nom d'entreprise n'existe pas" },
+        { message: loginTrans("auth.login.checkExistEntrepiseName") },
         { status: 404 }
       );
 
@@ -45,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { message: "Email ou mot de passe incorrect!" },
+        { message: loginTrans("auth.login.emailOrPasswordIncorrect") },
         { status: 401 }
       );
     }
@@ -53,7 +55,7 @@ export async function POST(request: NextRequest) {
     const isValid = await verifyPassword(password, user.password);
     if (!isValid) {
       return NextResponse.json(
-        { message: "Email ou mot de passe incorrect!" },
+        { message: loginTrans("auth.login.emailOrPasswordIncorrect") },
         { status: 401 }
       );
     }
@@ -61,8 +63,7 @@ export async function POST(request: NextRequest) {
     if (!user.active) {
       return NextResponse.json(
         {
-          message:
-            "Votre compte n'est pas encore activé, veuillez contacter un admin pour l'activation.",
+          message: loginTrans("auth.login.inActiveAccount"),
         },
         { status: 401 }
       );

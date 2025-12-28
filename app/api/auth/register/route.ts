@@ -2,16 +2,19 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth";
+import { getScopedI18n } from "@/locales/server";
 
 export async function POST(request: Request) {
   try {
+    const registerTrans = await getScopedI18n("apis");
+
     const body = await request.json();
     const { entrepriseName, email, name, password, lang } = body;
 
     // check if data exist
     if (!body) {
       return NextResponse.json(
-        { message: "Le corps de la requête ne doit pas être vide" },
+        { message: registerTrans("common.checkBody") },
         { status: 400 }
       );
     }
@@ -22,7 +25,7 @@ export async function POST(request: Request) {
     });
     if (entrepiseExist)
       return NextResponse.json(
-        { message: "Ce nom d'entrprise est déjà utilisé" },
+        { message: registerTrans("auth.register.checkExistEntrepiseName") },
         { status: 400 }
       );
 
@@ -39,7 +42,7 @@ export async function POST(request: Request) {
     const emailExist = await prisma.user.findFirst({ where: { email } });
     if (emailExist)
       return NextResponse.json(
-        { message: "Ce email est déjà utilisé" },
+        { message: registerTrans("auth.register.emailUsed") },
         { status: 400 }
       );
 
