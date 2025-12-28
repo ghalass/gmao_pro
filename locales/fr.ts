@@ -41,7 +41,7 @@ export default {
         text: "Choisir une langue",
       },
       footer: {
-        resetButtonText: "Réinitialiser",
+        resetButtonText: "Effacer tout",
         submitButton: {
           text: "S'inscrire",
           processingText: "Création...",
@@ -60,7 +60,7 @@ export default {
       email: "Votre Email",
       password: "Votre mot de passe",
       footer: {
-        resetButtonText: "Réinitialiser",
+        resetButtonText: "Effacer tout",
         submitButton: {
           text: "Se connecter",
           processingText: "Connexion...",

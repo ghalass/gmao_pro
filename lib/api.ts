@@ -4,6 +4,7 @@ export const API = {
     REGISTER: `/api/auth/register`,
     ME: `/api/auth/me`,
     LOGOUT: `/api/auth/logout`,
+    EDIT_PROFILE: `/api/auth/profile`,
   },
 };
 

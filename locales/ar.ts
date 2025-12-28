@@ -39,7 +39,7 @@ export default {
         text: "اختر لغة",
       },
       footer: {
-        resetButtonText: "إعادة تعيين",
+        resetButtonText: "محو لكل",
         submitButton: {
           text: "التسجيل",
           processingText: "جاري الإنشاء...",
@@ -58,7 +58,7 @@ export default {
       email: "البريد الإلكتروني",
       password: "كلمة المرور",
       footer: {
-        resetButtonText: "إعادة تعيين",
+        resetButtonText: "محو لكل",
         submitButton: {
           text: "تسجيل الدخول",
           processingText: "جاري الاتصال...",

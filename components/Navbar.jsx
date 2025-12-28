@@ -1,11 +1,10 @@
-"use client";
-
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import ModeToggle from "@/components/ModeToggle";
 import AuthButtons from "./AuthButtons";
 import { APP_NAME } from "@/lib/constantes";
 import Link from "next/link";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { ROUTE } from "@/lib/routes";
 
 export default function Navbar() {
   return (
@@ -13,8 +12,8 @@ export default function Navbar() {
       <div className="flex items-center gap-4">
         <SidebarTrigger className="hover:bg-accent transition-colors rounded-md p-2" />
         <div className="hidden sm:block">
-          <h1 className="text-lg font-semibold  text-primary">
-            <Link href={"/dashboard"}>
+          <h1 className="text-lg font-semibold text-primary">
+            <Link href={ROUTE.DASHBOARD}>
               {APP_NAME}{" "}
               <span className="text-xs text-foreground">by GHALASS</span>
             </Link>
@@ -22,7 +21,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-1">
         <LanguageSwitcher />
         <div className="h-6 w-px bg-border hidden sm:block" />
         <ModeToggle />

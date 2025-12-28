@@ -17,6 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import LogoutButton from "./LogoutButton";
 import { useScopedI18n } from "@/locales/client";
+import { ROUTE } from "@/lib/routes";
 
 export default function AuthButtons() {
   const { user } = useUser();
@@ -26,13 +27,13 @@ export default function AuthButtons() {
     return (
       <div className="flex items-center gap-2">
         <Link
-          href={`/login`}
+          href={ROUTE.AUTH.LOGIN}
           className="px-4 py-2 text-sm font-medium text-foreground hover:text-primary transition-colors rounded-md"
         >
           {tans("authButtons.login")}
         </Link>
         <Link
-          href={`/register`}
+          href={ROUTE.AUTH.REGISTER}
           className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors rounded-md shadow-sm"
         >
           {tans("authButtons.register")}
