@@ -1,5 +1,8 @@
 // locales/ar.ts
 export default {
+  common: {
+    loading: "جاري التحميل...",
+  },
   pages: {
     notFoundPage: {
       title: "عفوًا! هل أنت تائه؟",
@@ -84,6 +87,7 @@ export default {
         nomCompletSubTitle: "هذا الاسم سيظهر في التطبيق",
         email: "عنوان البريد الإلكتروني *",
         emailSubTitle: "تُستخدم لتسجيل الدخول",
+        successMessage: "تم تحديث الملف الشخصي بنجاح",
       },
       passwordChange: {
         title: "تغيير كلمة المرور",
@@ -93,6 +97,13 @@ export default {
         newPasswordSub: "6 أحرف على الأقل",
         confrimPassword: "تأكيد كلمة المرور *",
         buttonTitle: "تغيير كلمة المرور",
+        check: {
+          currentPasswordRequired: "كلمة المرور الحالية مطلوبة",
+          newPasswordRequired: "كلمة المرور الجديدة مطلوبة",
+          newPasswordLength: "يجب أن تحتوي كلمة المرور على الأقل 6 أحرف",
+          newPasswordMatch: "كلمات المرور غير متطابقة",
+        },
+        successMessage: "تم تغيير كلمة المرور بنجاح",
       },
       roleAndPermissions: {
         title: "الأدوار والصلاحيات",

@@ -54,12 +54,13 @@ model User {
   password     String
   active       Boolean @default(true)
   roles        Role[]
-  entrepriseId String
+  entrepriseId String?
   isOwner      Boolean @default(false)
+  isSuperAdmin Boolean @default(false)
 
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  entreprise Entreprise @relation(fields: [entrepriseId], references: [id])
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  entreprise Entreprise? @relation(fields: [entrepriseId], references: [id])
 
   @@map("user")
 }

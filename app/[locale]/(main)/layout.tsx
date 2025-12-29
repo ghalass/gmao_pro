@@ -17,7 +17,7 @@ export default function MainLayout({
             <Navbar />
           </div>
           <main className="flex-1 overflow-y-auto p-4 bg-background rounded-b-lg shadow-innerbordermb-2 mr-2">
-            <div className="max-w-[1600px] mx-auto ">{children}</div>
+            <div className="max-w-400 mx-auto ">{children}</div>
           </main>
         </div>
       </div>

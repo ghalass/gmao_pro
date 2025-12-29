@@ -6,7 +6,7 @@ import * as React from "react";
 import * as yup from "yup";
 import { fr, ar } from "yup-locales";
 import { useCurrentLocale, useScopedI18n } from "@/locales/client";
-import { API, apiFetch } from "@/lib/api";
+import { API, apiFetch, methods } from "@/lib/api";
 import { ROUTE } from "@/lib/routes";
 import { useUser } from "@/context/UserContext";
 
@@ -45,7 +45,7 @@ export function useLoginForm() {
   const loginWithAllData = React.useCallback(
     async (entrepriseName: string, email: string, password: string) => {
       return apiFetch(API.AUTH.LOGIN, {
-        method: "POST",
+        method: methods.POST,
         body: {
           entrepriseName,
           email,

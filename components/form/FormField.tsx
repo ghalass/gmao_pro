@@ -61,13 +61,13 @@ export function FormField({
   };
 
   return (
-    <form.Field
-      name={name}
-      validators={getValidators()}
-    >
+    <form.Field name={name} validators={getValidators()}>
       {(field: any) => {
         // Récupérer la première erreur
-        const error = field.state.meta.errors.length > 0 ? field.state.meta.errors[0] : undefined;
+        const error =
+          field.state.meta.errors.length > 0
+            ? field.state.meta.errors[0]
+            : undefined;
         const fieldName = field.name as string;
         const isTouched = field.state.meta.isTouched;
 
@@ -76,9 +76,7 @@ export function FormField({
 
         return (
           <Field className="gap-0.5">
-            <FieldLabel htmlFor={fieldName}>
-              {label}
-            </FieldLabel>
+            <FieldLabel htmlFor={fieldName}>{label}</FieldLabel>
             <Input
               id={fieldName}
               name={fieldName}

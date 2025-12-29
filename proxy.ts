@@ -101,7 +101,7 @@ export async function proxy(request: NextRequest) {
   const session = await getSession();
 
   // Liste des chemins publics
-  const publicPaths = ["/", "/login", "/register"];
+  const publicPaths = ["/", "/login", "/register", "/super-admin/login"];
 
   // Vérifier si c'est une page publique
   const isPublicPage = publicPaths.some((path) => {

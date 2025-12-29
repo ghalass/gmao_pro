@@ -3,7 +3,7 @@ import { useForm } from "@tanstack/react-form";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import * as React from "react";
-import { API, apiFetch } from "@/lib/api";
+import { API, apiFetch, methods } from "@/lib/api";
 import { ROUTE } from "@/lib/routes";
 import { useUser } from "@/context/UserContext";
 
@@ -12,7 +12,7 @@ export function useLogoutForm() {
   const { refreshUser } = useUser();
 
   const logoutWithAllData = React.useCallback(async () => {
-    return apiFetch(API.AUTH.LOGOUT, { method: "POST" });
+    return apiFetch(API.AUTH.LOGOUT, { method: methods.POST });
   }, []);
 
   const form = useForm({

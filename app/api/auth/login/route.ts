@@ -92,6 +92,8 @@ export async function POST(request: NextRequest) {
     session.roles = userRoles;
     session.permissions = userPermissions; // Stocker les permissions dans la session
     session.isLoggedIn = true;
+    session.entrepriseId = entrepiseExist.id;
+    session.entrepriseName = entrepiseExist.name;
     await session.save();
 
     // Supprimer le mot de passe avant de renvoyer l'utilisateur
@@ -110,7 +112,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Erreur lors de la connexion:", error);
     return NextResponse.json(
-      { error: "Erreur interne du serveur" },
+      { message: "Erreur interne du serveur" },
       { status: 500 }
     );
   }

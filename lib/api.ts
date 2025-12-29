@@ -1,3 +1,13 @@
+// lib/api.ts - Version corrigée
+
+// Configuration depuis .env
+const SIMULATE_DELAY = process.env.NEXT_PUBLIC_SIMULATE_API_DELAY === "true";
+const DELAY_MS = parseInt(process.env.NEXT_PUBLIC_API_DELAY_MS || "500");
+
+// Délai unique global
+let GLOBAL_API_DELAY = SIMULATE_DELAY ? DELAY_MS : 0;
+let DELAY_ENABLED = SIMULATE_DELAY;
+
 export const API = {
   AUTH: {
     LOGIN: `/api/auth/login`,
@@ -5,25 +15,97 @@ export const API = {
     ME: `/api/auth/me`,
     LOGOUT: `/api/auth/logout`,
     EDIT_PROFILE: `/api/auth/profile`,
+    CHANGE_PASSWORD: `/api/auth/change-password`,
+    SUPER_ADMIN_LOGIN: `/api/super-admin/login`,
+  },
+  SUPER_ADMIN: {
+    GET_ALL_ENTREPRISES: "/api/super-admin/entreprises",
+    GET_ONE_ENTREPRISE: (entrepriseId: string) =>
+      `/api/super-admin/entreprises/${entrepriseId}`,
+  },
+  USERS: {
+    ALL: "/api/users",
+    USER_DETAILS: (userId: string) => `/api/users/${userId}`,
+    USER_UPDATE: (userId: string) => `/api/users/${userId}`,
   },
 };
+
+export enum methods {
+  GET = "GET",
+  POST = "POST",
+  PUT = "PUT",
+  DELETE = "DELETE",
+  PATCH = "PATCH",
+}
 
 export async function apiFetch<T = any>(
   url: string,
   options?: {
-    method?: string;
+    method?: methods;
     body?: any;
     headers?: Record<string, string>;
+    skipDelay?: boolean; // Option pour désactiver manuellement
+    cookies?: Record<string, string>; // Option pour passer des cookies manuellement
   }
 ) {
+  // CORRECTION : Convertir l'URL relative en URL absolue si nécessaire
+  let fullUrl = url;
+
+  // Si l'URL ne commence pas par http:// ou https://
+  if (!url.startsWith("http")) {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    fullUrl = `${baseUrl}${url}`;
+  }
+
+  // Appliquer le délai automatiquement si activé et non désactivé manuellement
+  const shouldDelay = !options?.skipDelay && DELAY_ENABLED;
+
+  if (shouldDelay && GLOBAL_API_DELAY > 0) {
+    console.log(`⏱️ API delay: ${GLOBAL_API_DELAY}ms for ${fullUrl}`);
+    await new Promise((resolve) => setTimeout(resolve, GLOBAL_API_DELAY));
+  }
+
   try {
-    const response = await fetch(url, {
-      method: options?.method || "GET",
-      headers: {
-        "Content-Type": "application/json",
-        ...options?.headers,
-      },
+    // Préparer les headers
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...options?.headers,
+    };
+
+    // Ajouter les cookies si on est côté serveur
+    let cookiesToSend = options?.cookies;
+
+    if (!cookiesToSend && typeof window === "undefined") {
+      // On est côté serveur, essayer de récupérer les cookies automatiquement
+      try {
+        const { cookies } = await import("next/headers");
+        const cookieStore = await cookies();
+        const allCookies = cookieStore.getAll();
+
+        cookiesToSend = allCookies.reduce((acc, cookie) => {
+          acc[cookie.name] = cookie.value;
+          return acc;
+        }, {} as Record<string, string>);
+      } catch (error) {
+        console.error("Impossible de récupérer les cookies automatiquement");
+      }
+    }
+
+    // Ajouter les cookies au header si disponibles
+    if (cookiesToSend && Object.keys(cookiesToSend).length > 0) {
+      const cookieString = Object.entries(cookiesToSend)
+        .map(([key, value]) => `${key}=${value}`)
+        .join("; ");
+
+      headers["Cookie"] = cookieString;
+      // console.log("Cookies envoyés:", Object.keys(cookiesToSend));
+    }
+
+    const response = await fetch(fullUrl, {
+      method: options?.method || methods.GET,
+      headers,
       body: options?.body ? JSON.stringify(options.body) : undefined,
+      credentials: "include", // Important pour inclure les cookies
     });
 
     const data = await response.json();

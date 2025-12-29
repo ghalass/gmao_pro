@@ -1,5 +1,8 @@
 // locales/fr.ts
 export default {
+  common: {
+    loading: "Chargement en cours...",
+  },
   pages: {
     notFoundPage: {
       title: "Oups ! Perdu ?",
@@ -86,6 +89,7 @@ export default {
         nomCompletSubTitle: "Ce nom sera affiché dans l'application",
         email: "Adresse email *",
         emailSubTitle: "Utilisée pour la connexion",
+        successMessage: "Profil mis à jour avec succès",
       },
       passwordChange: {
         title: "Changer le mot de passe",
@@ -95,6 +99,14 @@ export default {
         newPasswordSub: "Minimum 6 caractères",
         confrimPassword: "Confirmer le mot de passe *",
         buttonTitle: "Changer le mot de passe",
+        check: {
+          currentPasswordRequired: "Le mot de passe actuel est requis",
+          newPasswordRequired: "Le nouveau mot de passe est requis",
+          newPasswordLength:
+            "Le mot de passe doit contenir au moins 6 caractères",
+          newPasswordMatch: "Les mots de passe ne correspondent pas",
+        },
+        successMessage: "Mot de passe changé avec succès",
       },
       roleAndPermissions: {
         title: "Rôles et permissions",

@@ -18,6 +18,7 @@ export type SessionData = {
   email: string;
   roles: string[];
   isLoggedIn: boolean;
+  isSuperAdmin?: boolean;
   permissions: {
     id: string;
     resource: string;
@@ -25,6 +26,8 @@ export type SessionData = {
     roleId: string;
     roleName: string;
   }[];
+  entrepriseId?: string;
+  entrepriseName?: string;
 };
 
 export const sessionOptions = {

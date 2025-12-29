@@ -99,7 +99,7 @@ export function AppSidebar() {
       collapsible="icon"
       side={locale === "ar" ? "right" : "left"}
     >
-      <SidebarContent>
+      <SidebarContent className="py-1">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>

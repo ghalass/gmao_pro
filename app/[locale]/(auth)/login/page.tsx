@@ -45,6 +45,7 @@ export default function LoginPage() {
                 customValidator={(value) =>
                   validateField("entrepriseName", value)
                 }
+                disabled={isSubmitting}
               />
 
               <FormField
@@ -52,6 +53,7 @@ export default function LoginPage() {
                 name="email"
                 label={tans("email")}
                 customValidator={(value) => validateField("email", value)}
+                disabled={isSubmitting}
               />
               <FormField
                 form={form}
@@ -59,6 +61,7 @@ export default function LoginPage() {
                 label={tans("password")}
                 type="password"
                 customValidator={(value) => validateField("password", value)}
+                disabled={isSubmitting}
               />
             </FieldGroup>
           </form>
@@ -69,6 +72,7 @@ export default function LoginPage() {
           goToRoute={ROUTE.AUTH.REGISTER}
           isSubmitting={isSubmitting}
           onReset={handleReset}
+          page="login"
         />
       </Card>
     </div>

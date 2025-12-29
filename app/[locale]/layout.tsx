@@ -61,7 +61,9 @@ export default async function RootLayout({
           >
             <LangProvider locale={locale}>
               <UserProvider>
-                <Toaster position="bottom-right" />
+                <Toaster
+                  position={locale === "ar" ? "bottom-left" : "bottom-right"}
+                />
                 {children}
               </UserProvider>
             </LangProvider>

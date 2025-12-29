@@ -47,18 +47,21 @@ export default function RegisterPage() {
                 customValidator={(value) =>
                   validateField("entrepriseName", value)
                 }
+                disabled={isSubmitting}
               />
               <FormField
                 form={form}
                 name="name"
                 label={tans("name")}
                 customValidator={(value) => validateField("name", value)}
+                disabled={isSubmitting}
               />
               <FormField
                 form={form}
                 name="email"
                 label={tans("email")}
                 customValidator={(value) => validateField("email", value)}
+                disabled={isSubmitting}
               />
               <FormField
                 form={form}
@@ -66,6 +69,7 @@ export default function RegisterPage() {
                 label={tans("password")}
                 type="password"
                 customValidator={(value) => validateField("password", value)}
+                disabled={isSubmitting}
               />
               <FormSelectField
                 form={form}
@@ -77,6 +81,7 @@ export default function RegisterPage() {
                   { label: "Français", value: "fr" },
                   { label: "العربية", value: "ar" },
                 ]}
+                disabled={isSubmitting}
               />
             </FieldGroup>
           </form>
@@ -87,6 +92,7 @@ export default function RegisterPage() {
           goToRoute={ROUTE.AUTH.LOGIN}
           isSubmitting={isSubmitting}
           onReset={handleReset}
+          page="register"
         />
       </Card>
     </div>

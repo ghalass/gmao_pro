@@ -24,10 +24,13 @@ export const getInitials = (name: string | undefined | null) => {
     .slice(0, 2);
 };
 
-export const getJoinedDate = (dateString: string, lang: string = "fr") => {
+export const getJoinedDate = (
+  dateString: string | null | Date,
+  lang: string = "fr"
+) => {
   try {
     // Vérifier d'abord si la chaîne est valide
-    if (!dateString || dateString.trim() === "") {
+    if (!dateString) {
       throw new Error("Date string is empty");
     }
 

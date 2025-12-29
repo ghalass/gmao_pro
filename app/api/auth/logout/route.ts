@@ -16,7 +16,7 @@ export async function POST() {
   } catch (error) {
     console.error("Erreur lors de la decconnexion:", error);
     return NextResponse.json(
-      { error: "Erreur interne du serveur" },
+      { message: "Erreur interne du serveur" },
       { status: 500 }
     );
   }

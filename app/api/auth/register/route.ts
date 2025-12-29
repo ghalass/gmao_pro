@@ -79,7 +79,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Erreur POST /api/auth/register:", error);
     return NextResponse.json(
-      { error: "Erreur lors de la création de l'utilisateur" },
+      { message: "Erreur lors de la création de l'utilisateur" },
       { status: 500 }
     );
   }

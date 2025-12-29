@@ -6,7 +6,7 @@ import * as React from "react";
 import * as yup from "yup";
 import { fr, ar } from "yup-locales";
 import { useCurrentLocale, useScopedI18n } from "@/locales/client";
-import { API, apiFetch } from "@/lib/api";
+import { API, apiFetch, methods } from "@/lib/api";
 import { ROUTE } from "@/lib/routes";
 
 export function useRegisterForm() {
@@ -51,7 +51,7 @@ export function useRegisterForm() {
       lang: string
     ) => {
       return apiFetch(API.AUTH.REGISTER, {
-        method: "POST",
+        method: methods.POST,
         body: {
           entrepriseName,
           name,

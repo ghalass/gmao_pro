@@ -11,6 +11,7 @@ interface AuthFooterProps {
   goToRoute: string;
   isSubmitting: boolean;
   onReset: () => void; // Ajoutez cette prop
+  page: "login" | "register";
 }
 
 const AuthFooter = ({
@@ -18,12 +19,16 @@ const AuthFooter = ({
   goToRoute,
   isSubmitting,
   onReset, // Recevez la fonction de reset
+  page,
 }: AuthFooterProps) => {
-  const tans = useScopedI18n("pages.login");
+  const tans =
+    page === "login"
+      ? useScopedI18n("pages.login")
+      : useScopedI18n("pages.register");
 
   return (
     <CardFooter className="flex flex-col gap-4">
-      <div className="flex flex-col sm:flex-row gap-2 w-full">
+      <div className="flex flex-row sm:flex-row gap-2 w-full">
         <Button
           type="submit"
           form={formName}

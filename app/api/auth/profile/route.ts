@@ -67,7 +67,6 @@ export async function PATCH(request: NextRequest) {
     const updateData: any = {};
 
     if (name) updateData.name = name;
-    if (email) updateData.email = email;
     if (password) updateData.password = await bcrypt.hash(password, 10);
 
     // Mettre à jour l'utilisateur
@@ -83,7 +82,7 @@ export async function PATCH(request: NextRequest) {
   } catch (error) {
     console.error("Erreur mise à jour profil:", error);
     return NextResponse.json(
-      { error: "Erreur lors de la mise à jour du profil" },
+      { message: "Erreur lors de la mise à jour du profil" },
       { status: 500 }
     );
   }

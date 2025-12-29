@@ -5,10 +5,12 @@ import { APP_NAME } from "@/lib/constantes";
 import Link from "next/link";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { ROUTE } from "@/lib/routes";
+import { getSession } from "@/lib/auth";
 
-export default function Navbar() {
+export default async function Navbar() {
+  const session = await getSession();
   return (
-    <header className="flex items-center justify-between px-4 py-3 border-l border-r border-t rounded-t-md bg-background/95 backdrop-blur">
+    <header className="flex items-center justify-between px-4 py-0 border-l border-r border-t rounded-t-md bg-background/95 backdrop-blur">
       <div className="flex items-center gap-4">
         <SidebarTrigger className="hover:bg-accent transition-colors rounded-md p-2" />
         <div className="hidden sm:block">
@@ -22,6 +24,8 @@ export default function Navbar() {
       </div>
 
       <div className="flex items-center gap-1">
+        <div>{session.entrepriseName}</div>
+        <div className="h-6 w-px bg-border hidden sm:block" />
         <LanguageSwitcher />
         <div className="h-6 w-px bg-border hidden sm:block" />
         <ModeToggle />
