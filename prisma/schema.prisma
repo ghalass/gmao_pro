@@ -21,10 +21,13 @@ model Permission {
   name        String  @unique
   description String?
   resource    String
-  action      Action?
+  action      Action
   roles       Role[]
 
-  @@unique([resource, action])
+  entrepriseId String
+  entreprise   Entreprise @relation(fields: [entrepriseId], references: [id])
+
+  @@unique([resource, action, entrepriseId])
   @@map("permission")
 }
 
@@ -37,13 +40,18 @@ enum Action {
 
 model Role {
   id          String       @id @default(cuid())
-  name        String       @unique
+  name        String
   description String?
   permissions Permission[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
   user        User[]
 
+  entrepriseId String?
+  entreprise   Entreprise? @relation(fields: [entrepriseId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, entrepriseId])
   @@map("role")
 }
 
@@ -54,23 +62,27 @@ model User {
   password     String
   active       Boolean @default(true)
   roles        Role[]
-  entrepriseId String?
   isOwner      Boolean @default(false)
   isSuperAdmin Boolean @default(false)
 
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  entreprise Entreprise? @relation(fields: [entrepriseId], references: [id])
+  entrepriseId String?
+  entreprise   Entreprise? @relation(fields: [entrepriseId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("user")
 }
 
 model Entreprise {
   id     String  @id @default(cuid())
-  name   String
+  name   String  @unique
   lang   LANG    @default(fr)
   active Boolean @default(true)
-  users  User[]
+
+  users       User[]
+  roles       Role[]
+  permissions Permission[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

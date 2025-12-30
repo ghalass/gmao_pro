@@ -25,8 +25,13 @@ export const API = {
   },
   USERS: {
     ALL: "/api/users",
+    USER_CREATE: "/api/users",
     USER_DETAILS: (userId: string) => `/api/users/${userId}`,
     USER_UPDATE: (userId: string) => `/api/users/${userId}`,
+    USER_DELETE: (userId: string) => `/api/users/${userId}`,
+  },
+  ROLES: {
+    ALL: "/api/roles",
   },
 };
 
@@ -61,7 +66,7 @@ export async function apiFetch<T = any>(
   const shouldDelay = !options?.skipDelay && DELAY_ENABLED;
 
   if (shouldDelay && GLOBAL_API_DELAY > 0) {
-    console.log(`⏱️ API delay: ${GLOBAL_API_DELAY}ms for ${fullUrl}`);
+    // console.log(`⏱️ API delay: ${GLOBAL_API_DELAY}ms for ${fullUrl}`);
     await new Promise((resolve) => setTimeout(resolve, GLOBAL_API_DELAY));
   }
 

@@ -28,16 +28,6 @@ export async function POST(request: Request) {
         { message: registerTrans("auth.register.checkExistEntrepiseName") },
         { status: 400 }
       );
-
-    // check if admin role exist, if not existe must create new
-    const adminRole = await prisma.role.findFirst({ where: { name: "admin" } });
-    if (!adminRole) {
-      const role = await prisma.role.create({ data: { name: "admin" } });
-      body.role = [role.id];
-    } else {
-      body.role = [adminRole.id];
-    }
-
     // check if email exist
     const emailExist = await prisma.user.findFirst({ where: { email } });
     if (emailExist)
@@ -50,6 +40,22 @@ export async function POST(request: Request) {
     const entreprise = await prisma.entreprise.create({
       data: { name: entrepriseName, lang },
     });
+
+    // check if admin role exist, if not existe must create new
+    const adminRole = await prisma.role.findFirst({
+      where: { name: "admin", entrepriseId: entreprise.id },
+    });
+    if (!adminRole) {
+      const role = await prisma.role.create({
+        data: {
+          name: "admin",
+          entreprise: { connect: { id: entreprise.id } },
+        },
+      });
+      body.role = [role.id];
+    } else {
+      body.role = [adminRole.id];
+    }
 
     // create user with admin role and entrprise isOwner=true
     const hashedPassword = await hashPassword(password);

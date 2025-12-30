@@ -1,0 +1,17 @@
+@baseUrl=http://localhost:3000/api/roles
+
+### CREATE
+POST {{baseUrl}}
+Content-Type: application/json
+Cookie: auth_session=Fe26.2*1*a94c3abf4a7f37405431876d922b25104e5c840f4a8c0b2bf3d0171b9b83a7b8*Qzy68Sh3FezcpgBKdnUbzQ*Ch3DQR98C30PmB-M5rLSk2MKaccG4Lmh5271jrBTOcbBdb6KqBmG7LiDd6wClvzDbXeH4l4gpzEGRvqppvpl3LWlGQ7mksXY8usN3yi9gG_J3LN8eOv9oNGXiBk5NG_NUOfd_tUPqxGxhYjykxuqD4pseDZENgsDQu77Vrn-Of73pVQNYQJOyzfZWUW_1EMEG21pf-6ZKXDG1icm64uOcXmoUmBwATzZVufFsZ7w94EVlg34ABoJi3Wxm062Joshrw7i9m2f4xK6-y8W5IauVQIjqvb8i-EE6qMfSAXzKQE*1768306093112*089a4e3051484bbc4f6c1d30dbaa51d62033c9a14bb2805ee30f3ed7de142252*HpHH5_-qZCY_pFMjD33FlW3nNFO2g3NXhJnEIgvK3-4~2
+
+{
+    "name":"testeur",
+    "description": "testeur"
+}
+
+
+### GET
+GET {{baseUrl}}
+Content-Type: application/json
+Cookie: auth_session=Fe26.2*1*a94c3abf4a7f37405431876d922b25104e5c840f4a8c0b2bf3d0171b9b83a7b8*Qzy68Sh3FezcpgBKdnUbzQ*Ch3DQR98C30PmB-M5rLSk2MKaccG4Lmh5271jrBTOcbBdb6KqBmG7LiDd6wClvzDbXeH4l4gpzEGRvqppvpl3LWlGQ7mksXY8usN3yi9gG_J3LN8eOv9oNGXiBk5NG_NUOfd_tUPqxGxhYjykxuqD4pseDZENgsDQu77Vrn-Of73pVQNYQJOyzfZWUW_1EMEG21pf-6ZKXDG1icm64uOcXmoUmBwATzZVufFsZ7w94EVlg34ABoJi3Wxm062Joshrw7i9m2f4xK6-y8W5IauVQIjqvb8i-EE6qMfSAXzKQE*1768306093112*089a4e3051484bbc4f6c1d30dbaa51d62033c9a14bb2805ee30f3ed7de142252*HpHH5_-qZCY_pFMjD33FlW3nNFO2g3NXhJnEIgvK3-4~2

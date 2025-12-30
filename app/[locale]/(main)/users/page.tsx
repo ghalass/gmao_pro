@@ -15,16 +15,15 @@ import {
   CheckCircle,
   Crown,
   Mail,
-  Plus,
   Shield,
   XCircle,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, getJoinedDate } from "@/lib/utils";
-import EditUser from "./_components/edit-user";
 import { User, Role } from "@/lib/generated/prisma/client";
-import { Button } from "@/components/ui/button";
 import NewUser from "./_components/new-user";
+import FormError from "@/components/form/FormError";
+import UserRowActions from "./_components/user-row-actions";
 
 type UserWithRole = User & {
   roles: Role[];
@@ -33,10 +32,14 @@ type UserWithRole = User & {
 const UsersPage = async () => {
   const usersResponse = await apiFetch(API.USERS.ALL);
 
+  if (!usersResponse.ok) {
+    return <FormError error={usersResponse.data.message} />;
+  }
+
   const users = usersResponse.data || [];
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="mx-auto p-4">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Utilisateurs</h1>
@@ -58,87 +61,80 @@ const UsersPage = async () => {
               <TableHead>Rôle</TableHead>
               <TableHead>Statut</TableHead>
               <TableHead>Date création</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="w-0 text-right"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8">
-                  <p className="text-muted-foreground">Aucun utilisateur</p>
+                <TableCell colSpan={6} className="h-24 text-center">
+                  Aucun utilisateur
                 </TableCell>
               </TableRow>
             ) : (
-              users.map((user: UserWithRole, index: number) => {
+              users?.map((currentUser: UserWithRole) => {
                 return (
-                  <TableRow key={index} className="hover:bg-muted/50">
-                    <TableCell>
+                  <TableRow key={currentUser.id}>
+                    <TableCell className="font-medium">
                       <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className="text-xs">
-                            {getInitials(user.name)}
+                        <Avatar>
+                          <AvatarFallback>
+                            {getInitials(currentUser.name)}
                           </AvatarFallback>
                         </Avatar>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="font-medium">{user.name}</p>
-                            {user.isOwner && (
-                              <Crown className="h-3 w-3 text-amber-500" />
+                        <div className="flex flex-col">
+                          <span className="flex items-center gap-2">
+                            {currentUser.name}
+                            {currentUser.isOwner && (
+                              <Crown className="h-4 w-4 text-yellow-500" />
                             )}
-                          </div>
-                          {user.isSuperAdmin && (
-                            <Badge
-                              variant="outline"
-                              className="text-xs mt-1 border-purple-200 text-purple-700 dark:border-purple-800 dark:text-purple-300"
-                            >
+                          </span>
+                          {currentUser.isSuperAdmin && (
+                            <Badge variant="outline" className="w-fit">
+                              <Shield className="mr-1 h-3 w-3" />
                               Super Admin
                             </Badge>
                           )}
                         </div>
                       </div>
                     </TableCell>
-
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Mail className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-sm">{user.email}</span>
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                        {currentUser.email}
                       </div>
                     </TableCell>
-
                     <TableCell>
-                      {user.roles?.length > 0 ? (
-                        <Badge variant="outline" className="text-xs">
-                          <Shield className="mr-1 h-3 w-3" />
-                          {user.roles[0].name}
+                      {currentUser.roles?.map((role, index) => (
+                        <Badge key={index} variant="secondary" className="mr-1">
+                          {role.name}
                         </Badge>
-                      ) : (
-                        <span className="text-sm text-muted-foreground">-</span>
+                      ))}
+                      {(!currentUser.roles ||
+                        currentUser.roles.length === 0) && (
+                        <span className="text-sm text-muted-foreground">
+                          Aucun rôle
+                        </span>
                       )}
                     </TableCell>
-
                     <TableCell>
-                      <Badge
-                        variant={user.active ? "default" : "secondary"}
-                        className="text-xs"
-                      >
-                        {user.active ? (
-                          <CheckCircle className="mr-1 h-3 w-3" />
+                      <div className="flex items-center gap-2">
+                        {currentUser.active ? (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
                         ) : (
-                          <XCircle className="mr-1 h-3 w-3" />
+                          <XCircle className="h-4 w-4 text-red-500" />
                         )}
-                        {user.active ? "Actif" : "Inactif"}
-                      </Badge>
-                    </TableCell>
-
-                    <TableCell>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="h-3 w-3" />
-                        {getJoinedDate(user.createdAt)}
+                        {currentUser.active ? "Actif" : "Inactif"}
                       </div>
                     </TableCell>
-
-                    <TableCell className="text-right">
-                      <EditUser user={user} />
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        {getJoinedDate(currentUser.createdAt)}
+                      </div>
+                    </TableCell>
+                    <TableCell className="w-0 text-right">
+                      <UserRowActions user={currentUser} />
                     </TableCell>
                   </TableRow>
                 );

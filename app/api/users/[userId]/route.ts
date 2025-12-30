@@ -76,11 +76,6 @@ export async function PATCH(
     const id = userId;
     const body = await request.json();
 
-    // return NextResponse.json(
-    //   { message: "Utilisateur introuvable" },
-    //   { status: 404 }
-    // );
-
     const { name, password, roles, active } = body;
 
     // Vérifier si l'utilisateur existe
@@ -137,6 +132,7 @@ export async function PATCH(
 
     // Gestion des rôles
     if (roles !== undefined) {
+      console.log("roles", roles);
       // Vérifier que roles est un tableau
       if (!Array.isArray(roles)) {
         return NextResponse.json(
@@ -209,10 +205,17 @@ export async function PATCH(
       where: { id },
       data: updateData,
       include: {
-        roles: true,
+        roles: {
+          select: {
+            name: true,
+          },
+        },
+        entreprise: { select: { name: true } },
       },
       omit: { password: true },
     });
+
+    console.log("user", user);
 
     return NextResponse.json(user);
   } catch (error) {
@@ -227,123 +230,124 @@ export async function PATCH(
 }
 
 // DELETE - Supprimer un utilisateur
-// export async function DELETE(
-//   request: NextRequest,
-//   context: { params: Promise<{ id: string }> }
-// ) {
-//   try {
-//     const protectionError = await protectDeleteRoute(request, the_resource);
-//     if (protectionError) return protectionError;
+// DELETE - Supprimer un utilisateur
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ userId: string }> }
+) {
+  try {
+    const protectionError = await protectDeleteRoute(request, the_resource);
+    if (protectionError) return protectionError;
 
-//     const { id } = await context.params;
+    const currentSession = await getSession();
 
-//     // Vérifier si l'utilisateur existe
-//     const existingUser = await prisma.user.findUnique({
-//       where: { id },
-//     });
+    const { userId } = await context.params;
+    const id = userId;
 
-//     if (!existingUser) {
-//       return NextResponse.json(
-//         { message: "Utilisateur introuvable" },
-//         { status: 404 }
-//       );
-//     }
+    // Vérifier si l'utilisateur existe
+    const existingUser = await prisma.user.findUnique({
+      where: { id },
+      include: { roles: true },
+    });
 
-//     // Vérifier si l'utilisateur tente de se supprimer lui-même
-//     const authHeader = request.headers.get("authorization");
-//     const session = await getSession();
+    if (!existingUser) {
+      return NextResponse.json(
+        { message: "Utilisateur introuvable" },
+        { status: 404 }
+      );
+    }
 
-//     const connectedUser = session?.userId;
-//     // const connectedUser_is_Admin = await isAdmin(connectedUser);
-//     const connectedUser_is_SuperAdmin = await isSuperAdmin(connectedUser);
-//     const toDelete_SuperAdmin = await isSuperAdmin(id); // utilisateur qui sera supprimer isSuperAdmin ?
-//     const toDelete_Admin = await isAdmin(id); // utilisateur qui sera supprimer isAdmin ?
+    if (
+      existingUser.roles.some(
+        (role) =>
+          role.name.toLowerCase() === "admin" ||
+          role.name.toLowerCase() === "super-admin"
+      ) ||
+      !currentSession?.isSuperAdmin
+    ) {
+      return NextResponse.json(
+        {
+          message:
+            "Impossible de supprimer un utilisateur avec le rôle admin ou super-admin.",
+        },
+        { status: 403 }
+      );
+    }
 
-//     // interdire de supprimer votre propre compte
-//     if (connectedUser === id) {
-//       return NextResponse.json(
-//         { message: "Vous ne pouvez pas supprimer votre propre compte." },
-//         { status: 400 }
-//       );
-//     }
+    // Vérifier si l'utilisateur tente de se supprimer lui-même
+    const authHeader = request.headers.get("authorization");
+    const session = await getSession();
 
-//     // interdire aux utilisateurs non super-admin de supprimer un super-admin
-//     if (toDelete_SuperAdmin && !connectedUser_is_SuperAdmin) {
-//       return NextResponse.json(
-//         { message: "Vous ne pouvez pas supprimer un compte d'un super admin." },
-//         { status: 400 }
-//       );
-//     }
+    const connectedUser = session?.userId;
+    // const connectedUser_is_Admin = await isAdmin(connectedUser);
+    const connectedUser_is_SuperAdmin = await isSuperAdmin(connectedUser);
+    const toDelete_SuperAdmin = await isSuperAdmin(id); // utilisateur qui sera supprimer isSuperAdmin ?
+    const toDelete_Admin = await isAdmin(id); // utilisateur qui sera supprimer isAdmin ?
 
-//     // seul super-admin peut suprimer un admin
-//     if (toDelete_Admin && !connectedUser_is_SuperAdmin) {
-//       return NextResponse.json(
-//         {
-//           message:
-//             "Vous ne pouvez pas supprimer un compte d'un admin, seul un super admin peut suprimer un admin.",
-//         },
-//         { status: 400 }
-//       );
-//     }
+    // interdire de supprimer votre propre compte
+    if (connectedUser === id) {
+      return NextResponse.json(
+        { message: "Vous ne pouvez pas supprimer votre propre compte." },
+        { status: 400 }
+      );
+    }
 
-//     if (authHeader) {
-//       try {
-//         const token = authHeader.replace("Bearer ", "");
-//         // Ici vous devriez décoder le JWT pour obtenir l'ID de l'utilisateur connecté
-//         // Pour l'instant, c'est un exemple - à adapter à votre système d'authentification
-//         if (existingUser.email.includes("admin")) {
-//           return NextResponse.json(
-//             {
-//               message:
-//                 "Impossible de supprimer un compte administrateur via cette interface",
-//             },
-//             { status: 400 }
-//           );
-//         }
-//       } catch (error) {
-//         // Ne pas bloquer la suppression si erreur de décodage
-//         console.warn("Erreur lors de la vérification du token:", error);
-//       }
-//     }
+    // interdire aux utilisateurs non super-admin de supprimer un super-admin
+    if (toDelete_SuperAdmin && !connectedUser_is_SuperAdmin) {
+      return NextResponse.json(
+        { message: "Vous ne pouvez pas supprimer un compte d'un super admin." },
+        { status: 400 }
+      );
+    }
 
-//     // Supprimer l'utilisateur (les rôles seront automatiquement déconnectés)
-//     await prisma.user.delete({
-//       where: { id },
-//     });
+    // seul super-admin peut suprimer un admin
+    if (toDelete_Admin && !connectedUser_is_SuperAdmin) {
+      return NextResponse.json(
+        {
+          message:
+            "Vous ne pouvez pas supprimer un compte d'un admin, seul un super admin peut suprimer un admin.",
+        },
+        { status: 400 }
+      );
+    }
 
-//     return NextResponse.json({
-//       message: "Utilisateur supprimé avec succès",
-//     });
-//   } catch (error) {
-//     console.error("Erreur DELETE /api/users/[id]:", error);
+    if (authHeader) {
+      try {
+        const token = authHeader.replace("Bearer ", "");
+        // Ici vous devriez décoder le JWT pour obtenir l'ID de l'utilisateur connecté
+        // Pour l'instant, c'est un exemple - à adapter à votre système d'authentification
+        if (existingUser.email.includes("admin")) {
+          return NextResponse.json(
+            {
+              message:
+                "Impossible de supprimer un compte administrateur via cette interface",
+            },
+            { status: 400 }
+          );
+        }
+      } catch (error) {
+        // Ne pas bloquer la suppression si erreur de décodage
+        console.warn("Erreur lors de la vérification du token:", error);
+      }
+    }
 
-//     // Gestion spécifique des erreurs Prisma
-//     if (error instanceof Prisma.PrismaClientKnownRequestError) {
-//       if (error.code === "P2025") {
-//         return NextResponse.json(
-//           { message: "Utilisateur non trouvé" },
-//           { status: 404 }
-//         );
-//       }
+    // Supprimer l'utilisateur (les rôles seront automatiquement déconnectés)
+    await prisma.user.delete({
+      where: { id },
+    });
 
-//       if (error.code === "P2003") {
-//         // Contrainte de clé étrangère (si l'utilisateur a d'autres relations)
-//         return NextResponse.json(
-//           {
-//             message:
-//               "Impossible de supprimer cet utilisateur car il est lié à d'autres données",
-//           },
-//           { status: 400 }
-//         );
-//       }
-//     }
+    return NextResponse.json({
+      message: "Utilisateur supprimé avec succès",
+    });
+  } catch (error) {
+    console.error("Erreur DELETE /api/users/[id]:", error);
 
-//     return NextResponse.json(
-//       {
-//         message: "Erreur lors de la suppression de l'utilisateur",
-//         details: error instanceof Error ? error.message : "Erreur inconnue",
-//       },
-//       { status: 500 }
-//     );
-//   }
-// }
+    return NextResponse.json(
+      {
+        message: "Erreur lors de la suppression de l'utilisateur",
+        details: error instanceof Error ? error.message : "Erreur inconnue",
+      },
+      { status: 500 }
+    );
+  }
+}
