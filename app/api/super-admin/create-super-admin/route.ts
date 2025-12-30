@@ -36,8 +36,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Étape 2: Vérifier si le rôle "super admin" existe déjà, sinon le créer
-    let superAdminRole = await prisma.role.findUnique({
-      where: { name: "super admin" },
+    let superAdminRole = await prisma.role.findFirst({
+      where: { name: "super admin", entrepriseId: null },
     });
     if (!superAdminRole) {
       superAdminRole = await prisma.role.create({

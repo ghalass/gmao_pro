@@ -32,6 +32,18 @@ export const API = {
   },
   ROLES: {
     ALL: "/api/roles",
+    ROLE_CREATE: "/api/roles",
+    ROLE_DETAILS: (roleId: string) => `/api/roles/${roleId}`,
+    ROLE_UPDATE: (roleId: string) => `/api/roles/${roleId}`,
+    ROLE_DELETE: (roleId: string) => `/api/roles/${roleId}`,
+  },
+  PERMISSIONS: {
+    ALL: "/api/permissions",
+    PERMISSION_CREATE: "/api/permissions",
+    PERMISSION_DETAILS: (id: string) => `/api/permissions/${id}`,
+    PERMISSION_UPDATE: (id: string) => `/api/permissions/${id}`,
+    PERMISSION_DELETE: (id: string) => `/api/permissions/${id}`,
+    RESOURCES: "/api/permissions/resources",
   },
 };
 
