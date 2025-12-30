@@ -8,6 +8,26 @@ import {
   ShieldUser,
   LockKeyhole,
   FileUpIcon,
+  Settings,
+  Truck,
+  Car,
+  Tractor,
+  MapPin,
+  Wrench,
+  ListOrdered,
+  Keyboard,
+  Gauge,
+  KeyboardMusic,
+  FolderCog2 as FolderCog2Icon,
+  CalendarCheck,
+  Ungroup,
+  NotepadText,
+  BookOpenCheck,
+  Boxes,
+  Puzzle,
+  FormInput as FormInputIcon,
+  Move,
+  ClockCheck,
 } from "lucide-react";
 
 import {
@@ -35,12 +55,17 @@ import { useCurrentLocale, useScopedI18n } from "@/locales/client";
 
 function useActivePath() {
   const pathname = usePathname();
+  const locale = useCurrentLocale();
 
   return (url: string) => {
+    // Retirer le préfixe de la locale du chemin actuel pour la comparaison
+    // Exemple: "/fr/users" -> "/users"
+    const pathWithoutLocale = pathname.replace(`/${locale}`, "") || "/";
+
     if (url === "/") {
-      return pathname === "/";
+      return pathWithoutLocale === "/";
     }
-    return pathname === url;
+    return pathWithoutLocale === url;
   };
 }
 
@@ -83,7 +108,178 @@ export function AppSidebar() {
     ],
   };
 
-  const allItems = [adminItems];
+  const configItems = {
+    title: "Configurations",
+    icon: Settings,
+
+    list: [
+      {
+        title: "Engin",
+        url: "/engins",
+        icon: Truck,
+        description: "Gérer les engins",
+      },
+      {
+        title: "Parc",
+        url: "/parcs",
+        icon: Car,
+        description: "Gérer les parcs",
+      },
+      {
+        title: "Type de parc",
+        url: "/typeparcs",
+        icon: Tractor,
+        description: "Gérer les type des parcs",
+      },
+      {
+        title: "Sites",
+        url: "/sites",
+        icon: MapPin,
+        description: "Gérer les sites",
+      },
+      {
+        title: "Panne",
+        url: "/pannes",
+        icon: Wrench,
+        description: "Gérer les pannes",
+      },
+      {
+        title: "Type de panne",
+        url: "/typepannes",
+        icon: ListOrdered,
+        description: "Gérer les type des pannes",
+      },
+    ],
+  };
+
+  const saisieItems = {
+    title: "Gestion de saisie",
+    icon: Settings,
+
+    list: [
+      {
+        title: "Journalier",
+        url: "/saisies",
+        icon: Truck,
+        description: "Gérer les saisies des engins",
+      },
+      {
+        title: "Saisies hrm",
+        url: "/saisies/all_hrm",
+        icon: Keyboard,
+        description: "Tout les saisies hrm",
+      },
+      {
+        title: "Saisies him",
+        url: "/saisies/all_him",
+        icon: Keyboard,
+        description: "Tout les saisies him",
+      },
+    ],
+  };
+
+  const backlogItems = {
+    title: "Gestion des backlog",
+    icon: Wrench,
+    list: [
+      {
+        title: "Dashboard",
+        url: "/anomalies/stats",
+        icon: Gauge,
+        description: "Dashboard",
+      },
+      {
+        title: "Backlog",
+        url: "/anomalies",
+        icon: Wrench,
+        description: "Gestion des anomalies",
+      },
+      {
+        title: "Saisie",
+        url: "/anomalies/saisie",
+        icon: KeyboardMusic,
+        description: "Saisie des anomalies",
+      },
+    ],
+  };
+
+  const rapportsItems = {
+    title: "Rapports",
+    icon: FolderCog2Icon,
+
+    list: [
+      {
+        title: "RJE",
+        url: "/rapports/rje",
+        icon: CalendarCheck,
+        description: "RJE",
+      },
+      {
+        title: "Unité physique",
+        url: "/rapports/unite-physique",
+        icon: Ungroup,
+        description: "Unité physique",
+      },
+      {
+        title: "Etat Mensuel",
+        url: "/rapports/etat-mensuel",
+        icon: NotepadText,
+        description: "Etat Mensuel",
+      },
+      {
+        title: "Analyse Indispo",
+        url: "/rapports/analyse-indispo-parc",
+        icon: BookOpenCheck,
+        description: "analyse-indispo",
+      },
+      {
+        title: "Etat Général",
+        url: "/rapports/etat-general",
+        icon: Boxes,
+        description: "etat-general",
+      },
+      {
+        title: "Paretos",
+        url: "/rapports/pareto",
+        icon: Boxes,
+        description: "Paretos",
+      },
+    ],
+  };
+
+  const gestionOrganesItems = {
+    title: "Gestion des organes",
+    icon: Puzzle,
+    list: [
+      {
+        title: "Organes",
+        url: "/organes",
+        icon: FormInputIcon,
+        description: "Gestion des organes",
+      },
+      {
+        title: "Mouvements",
+        url: "/organes/rapports/mvt-organe",
+        icon: Move,
+        description: "Rapport mensuel des mouvements des organes",
+      },
+      {
+        title: "HRM",
+        url: "/organes/rapports/heure-marche",
+        icon: ClockCheck,
+        description: "Rapport mensuel des heures de marche des organes",
+      },
+    ],
+  };
+
+  const allItems = [
+    adminItems,
+    configItems,
+    saisieItems,
+    backlogItems,
+    rapportsItems,
+    gestionOrganesItems,
+  ];
 
   const isActivePath = useActivePath();
   const locale = useCurrentLocale();

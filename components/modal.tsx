@@ -104,10 +104,7 @@ export function Modal({
           {label}
         </Button>
       </DialogTrigger>
-      <DialogContent
-        className="sm:max-w-md"
-        onInteractOutside={(e) => e.preventDefault()}
-      >
+      <DialogContent className="sm:max-w-md">
         {/* <form onSubmit={handleSubmit}> */}
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>

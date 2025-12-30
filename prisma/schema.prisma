@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../lib/generated/prisma"
@@ -84,8 +78,20 @@ model Entreprise {
   roles       Role[]
   permissions Permission[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  sites                Site[]
+  typeparcs            Typeparc[]
+  parcs                Parc[]
+  typeconsommationlubs Typeconsommationlub[]
+  engins               Engin[]
+  typepannes           Typepanne[]
+  pannes               Panne[]
+  organes              Organe[]
+  typeOrganes          TypeOrgane[]
+  typelubrifiants      Typelubrifiant[]
+  lubrifiants          Lubrifiant[]
+  saisiehrms           Saisiehrm[]
 
   @@map("entreprise")
 }
@@ -93,4 +99,477 @@ model Entreprise {
 enum LANG {
   ar
   fr
+}
+
+model Site {
+  id     String  @id @default(cuid())
+  name   String
+  active Boolean @default(true)
+
+  entrepriseId String
+  entreprise   Entreprise @relation(fields: [entrepriseId], references: [id])
+
+  // Relations
+  engins    Engin[]
+  Saisiehrm Saisiehrm[]
+  Objectif  Objectif[]
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  anomalies Anomalie[]
+
+  @@unique([name, entrepriseId])
+  @@map("site")
+}
+
+model Typeparc {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  entrepriseId String
+  entreprise   Entreprise @relation(fields: [entrepriseId], references: [id])
+
+  // Relations
+  parcs Parc[]
+
+  @@unique([name, entrepriseId])
+  @@map("typeparc")
+}
+
+model Parc {
+  id                   String                    @id @default(cuid())
+  name                 String
+  typeparcId           String
+  engins               Engin[]
+  typesConsommationLub TypeconsommationlubParc[]
+  lubrifiantParc       LubrifiantParc[]
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+
+  entrepriseId String
+  entreprise   Entreprise @relation(fields: [entrepriseId], references: [id])
+
+  // Relation 1-M avec Typeparc
+  typeparc Typeparc @relation(fields: [typeparcId], references: [id])
+
+  // Relations M-1 avec Objectif
+  objectifs   Objectif[] // ← PLURIEL
+  // Relation many-to-many implicite avec Panne
+  pannes      Panne[] // ← Relation implicite
+  // Relations M-M avec TypeOrgane
+  typeOrganes TypeOrgane[]
+
+  @@unique([name, entrepriseId])
+  @@map("parc")
+}
+
+model Typeconsommationlub {
+  id               String                    @id @default(cuid())
+  name             String
+  parcs            TypeconsommationlubParc[]
+  saisielubrifiant Saisielubrifiant[]
+  createdAt        DateTime                  @default(now())
+  updatedAt        DateTime                  @updatedAt
+
+  entrepriseId String
+  entreprise   Entreprise @relation(fields: [entrepriseId], references: [id])
+
+  @@unique([name, entrepriseId])
+  @@map("typeconsommation_lub")
+}
+
+model TypeconsommationlubParc {
+  parcId                String              @map("parc_id")
+  typeconsommationlubId String              @map("typeconsommationlub_id")
+  parc                  Parc                @relation(fields: [parcId], references: [id], onDelete: Restrict)
+  typeconsommationlub   Typeconsommationlub @relation(fields: [typeconsommationlubId], references: [id], onDelete: Restrict)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@id([parcId, typeconsommationlubId])
+  @@map("typeconsommation_lub_parc")
+}
+
+model LubrifiantParc {
+  parcId       String     @map("parc_id")
+  lubrifiantId String     @map("lubrifiant_id")
+  parc         Parc       @relation(fields: [parcId], references: [id], onDelete: Restrict)
+  lubrifiant   Lubrifiant @relation(fields: [lubrifiantId], references: [id], onDelete: Restrict)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@id([parcId, lubrifiantId])
+  @@map("lubrifiant_parc")
+}
+
+model Engin {
+  id                  String   @id @default(cuid())
+  name                String
+  active              Boolean  @default(true)
+  parcId              String
+  siteId              String
+  initialHeureChassis Float?   @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  entrepriseId String
+  entreprise   Entreprise @relation(fields: [entrepriseId], references: [id])
+
+  // Relations
+  parc       Parc        @relation(fields: [parcId], references: [id], onDelete: Restrict)
+  site       Site        @relation(fields: [siteId], references: [id], onDelete: Restrict)
+  saisiehrm  Saisiehrm[]
+  saisiehim  Saisiehim[]
+  anomalies  Anomalie[]
+  MvtOrganes MvtOrgane[]
+
+  @@unique([name, entrepriseId])
+  @@map("engin")
+}
+
+model Typepanne {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  entrepriseId String
+  entreprise   Entreprise @relation(fields: [entrepriseId], references: [id])
+
+  // Relations
+  pannes Panne[]
+
+  @@unique([name, entrepriseId])
+  @@map("typepanne")
+}
+
+model Panne {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  typepanneId String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  entrepriseId String
+  entreprise   Entreprise @relation(fields: [entrepriseId], references: [id])
+
+  // Relations
+  typepanne Typepanne   @relation(fields: [typepanneId], references: [id], onDelete: Restrict)
+  // Relation many-to-many implicite avec Parc
+  parcs     Parc[] // ← Relation implicite
+  saisiehim Saisiehim[]
+
+  @@unique([name, entrepriseId])
+  @@map("panne")
+}
+
+// ****************** GESTION DES HIM & HRM ******************
+
+model Saisiehrm {
+  id       String   @id @default(cuid())
+  du       DateTime
+  enginId  String
+  siteId   String
+  hrm      Float
+  compteur Float?
+
+  entrepriseId String
+  entreprise   Entreprise @relation(fields: [entrepriseId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  engin     Engin       @relation(fields: [enginId], references: [id], onDelete: Restrict)
+  site      Site        @relation(fields: [siteId], references: [id], onDelete: Restrict)
+  saisiehim Saisiehim[]
+
+  @@unique([du, enginId])
+  @@map("saisie_hrm")
+}
+
+model Saisiehim {
+  id          String  @id @default(cuid())
+  panneId     String
+  him         Float
+  ni          Int
+  saisiehrmId String
+  obs         String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  panne            Panne              @relation(fields: [panneId], references: [id], onDelete: Restrict)
+  saisiehrm        Saisiehrm          @relation(fields: [saisiehrmId], references: [id], onDelete: Restrict)
+  saisielubrifiant Saisielubrifiant[]
+  engin            Engin              @relation(fields: [enginId], references: [id])
+  enginId          String
+
+  @@unique([panneId, saisiehrmId])
+  @@map("saisie_him")
+}
+
+// ****************** GESTION DES BACKLOGS ******************
+
+model Anomalie {
+  id            String         @id @default(cuid())
+  numeroBacklog String         @unique // TO14-25-001, TO14-25-002, etc.
+  dateDetection DateTime
+  description   String
+  source        SourceAnomalie // VS, VJ, etc.
+  priorite      Priorite
+  besoinPDR     Boolean        @default(false)
+  quantite      Int? // Qté
+  reference     String? // Référence pièce
+  code          String? // Code
+  stock         String? // Stock
+  numeroBS      String? // N° BS
+  programmation String? // Programmation (VS, VJ, PH,…)
+  sortiePDR     String? // Sortie PDR
+  equipe        String? // Équipe
+  statut        StatutAnomalie
+  dateExecution DateTime?
+  confirmation  String? // Confirmation
+  observations  String? // Observations
+
+  // Relations
+  enginId String
+  siteId  String
+
+  engin Engin @relation(fields: [enginId], references: [id])
+  site  Site  @relation(fields: [siteId], references: [id])
+
+  // Timestamps
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @updatedAt
+  historiqueStatutAnomalies HistoriqueStatutAnomalie[]
+
+  @@map("anomalie")
+}
+
+model HistoriqueStatutAnomalie {
+  id             String         @id @default(cuid())
+  anomalieId     String
+  ancienStatut   StatutAnomalie
+  nouveauStatut  StatutAnomalie
+  dateChangement DateTime       @default(now())
+  commentaire    String?
+
+  anomalie Anomalie @relation(fields: [anomalieId], references: [id])
+
+  @@map("statut_anomalie")
+}
+
+// Enums pour les valeurs prédéfinies
+enum StatutEngin {
+  ACTIF
+  INACTIF
+  EN_MAINTENANCE
+  HORS_SERVICE
+}
+
+enum SourceAnomalie {
+  VS
+  VJ
+  INSPECTION
+  AUTRE
+}
+
+enum Priorite {
+  ELEVEE
+  MOYENNE
+  FAIBLE
+}
+
+enum StatutAnomalie {
+  ATTENTE_PDR
+  PDR_PRET
+  NON_PROGRAMMEE
+  PROGRAMMEE
+  EXECUTE
+}
+
+// ****************** GESTION DES ORGANES ******************
+
+model Organe {
+  id           String         @id @default(cuid())
+  name         String
+  typeOrganeId String
+  marque       String?
+  sn           String?
+  date_mes     DateTime?
+  origine      OrigineOrgane?
+  circuit      String?
+  hrm_initial  Decimal        @default(0)
+  obs          String?
+  active       Boolean?       @default(true)
+
+  entrepriseId String
+  entreprise   Entreprise @relation(fields: [entrepriseId], references: [id])
+
+  // Relations 1-M
+  type_organe          TypeOrgane       @relation(fields: [typeOrganeId], references: [id])
+  // Relations M-M
+  historiqueMouvements MvtOrgane[]
+  RevisionOrganes      RevisionOrgane[]
+
+  @@unique([name, typeOrganeId, entrepriseId])
+  @@map("organe")
+}
+
+enum OrigineOrgane {
+  BRC
+  APPRO
+  AUTRE
+}
+
+model TypeOrgane {
+  id   String @id @default(cuid())
+  name String
+
+  entrepriseId String
+  entreprise   Entreprise @relation(fields: [entrepriseId], references: [id])
+
+  // Relations M-M
+  parcs   Parc[]
+  // Relations M-1
+  organes Organe[]
+
+  @@unique([name, entrepriseId])
+  @@map("type_organe")
+}
+
+model MvtOrgane {
+  id         String                    @id @default(cuid())
+  organeId   String
+  enginId    String
+  date_mvt   DateTime
+  type_mvt   TypeMouvementOrgane
+  cause      String
+  type_cause TypeCauseMouvementOrgane?
+  obs        String?
+  test       String?
+
+  // Relations
+  organe Organe @relation(fields: [organeId], references: [id])
+  engin  Engin  @relation(fields: [enginId], references: [id])
+
+  @@unique([organeId, enginId, date_mvt, type_mvt])
+  @@map("mvt_organe")
+}
+
+enum TypeMouvementOrgane {
+  POSE
+  DEPOSE
+}
+
+enum TypeCauseMouvementOrgane {
+  PREVENTIF
+  INCIDENT
+}
+
+model RevisionOrgane {
+  id       String             @id @default(cuid())
+  organeId String
+  date_mvt DateTime
+  type_rg  TypeRevisionOrgane
+  obs      String?
+
+  // Relations
+  organe Organe @relation(fields: [organeId], references: [id])
+
+  @@unique([organeId, date_mvt, type_rg])
+  @@map("revision_organe")
+}
+
+enum TypeRevisionOrgane {
+  VP
+  RG
+  INTERVENTION
+}
+
+// ****************** LUBRIFIANTS ******************
+
+model Typelubrifiant {
+  id   String @id @default(cuid())
+  name String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  entrepriseId String
+  entreprise   Entreprise @relation(fields: [entrepriseId], references: [id])
+
+  // Relations
+  lubrifiants Lubrifiant[]
+
+  @@unique([name, entrepriseId])
+  @@map("type_lubrifiant")
+}
+
+model Lubrifiant {
+  id               String @id @default(cuid())
+  name             String
+  typelubrifiantId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  entrepriseId String
+  entreprise   Entreprise @relation(fields: [entrepriseId], references: [id])
+
+  // Relations
+  typelubrifiant   Typelubrifiant     @relation(fields: [typelubrifiantId], references: [id], onDelete: Restrict)
+  saisielubrifiant Saisielubrifiant[]
+  lubrifiantParc   LubrifiantParc[]
+
+  @@unique([name, entrepriseId])
+  @@map("lubrifiant")
+}
+
+model Saisielubrifiant {
+  id                    String  @id @default(cuid())
+  lubrifiantId          String
+  qte                   Float
+  obs                   String?
+  saisiehimId           String
+  typeconsommationlubId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  lubrifiant          Lubrifiant           @relation(fields: [lubrifiantId], references: [id], onDelete: Restrict)
+  saisiehim           Saisiehim            @relation(fields: [saisiehimId], references: [id], onDelete: Restrict)
+  typeconsommationlub Typeconsommationlub? @relation(fields: [typeconsommationlubId], references: [id], onDelete: Restrict)
+
+  @@map("saisie_lubrifiant")
+}
+
+model Objectif {
+  id          String @id @default(cuid())
+  annee       Int
+  parcId      String
+  siteId      String
+  dispo       Float?
+  mtbf        Float?
+  tdm         Float?
+  spe_huile   Float?
+  spe_go      Float?
+  spe_graisse Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  parc Parc @relation(fields: [parcId], references: [id], onDelete: Restrict)
+  site Site @relation(fields: [siteId], references: [id], onDelete: Restrict)
+
+  @@unique([annee, parcId, siteId])
+  @@map("objectif")
 }

@@ -25,16 +25,18 @@ export async function GET(
     if (protectionError) return protectionError;
 
     const { userId } = await context.params;
-    const id = userId;
-    if (!id) {
-      return NextResponse.json(
-        { message: "ID de l'utilisateur requis" },
-        { status: 400 }
-      );
+    const session = await getSession();
+    const entrepriseId = session?.entrepriseId;
+
+    if (!entrepriseId) {
+      return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id },
+    const user = await prisma.user.findFirst({
+      where: {
+        id: userId,
+        entrepriseId,
+      },
       include: {
         roles: {
           include: {
@@ -73,14 +75,22 @@ export async function PATCH(
     if (protectionError) return protectionError;
 
     const { userId } = await context.params;
-    const id = userId;
-    const body = await request.json();
+    const session = await getSession();
+    const entrepriseId = session?.entrepriseId;
 
+    if (!entrepriseId) {
+      return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
+    }
+
+    const body = await request.json();
     const { name, password, roles, active } = body;
 
     // Vérifier si l'utilisateur existe
     const existingUser = await prisma.user.findFirst({
-      where: { id },
+      where: {
+        id: userId,
+        entrepriseId,
+      },
       include: {
         roles: true,
       },
@@ -202,7 +212,7 @@ export async function PATCH(
 
     // Mettre à jour l'utilisateur
     const user = await prisma.user.update({
-      where: { id },
+      where: { id: userId },
       data: updateData,
       include: {
         roles: {
@@ -242,11 +252,19 @@ export async function DELETE(
     const currentSession = await getSession();
 
     const { userId } = await context.params;
-    const id = userId;
+    const session = await getSession();
+    const entrepriseId = session?.entrepriseId;
 
-    // Vérifier si l'utilisateur existe
-    const existingUser = await prisma.user.findUnique({
-      where: { id },
+    if (!entrepriseId) {
+      return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
+    }
+
+    // Vérifier si l'utilisateur existe et appartient à l'entreprise
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        id: userId,
+        entrepriseId,
+      },
       include: { roles: true },
     });
 
@@ -276,16 +294,15 @@ export async function DELETE(
 
     // Vérifier si l'utilisateur tente de se supprimer lui-même
     const authHeader = request.headers.get("authorization");
-    const session = await getSession();
 
-    const connectedUser = session?.userId;
-    // const connectedUser_is_Admin = await isAdmin(connectedUser);
+    // session is already declared above as currentSession (renamed for clarity or just use currentSession)
+    const connectedUser = currentSession?.userId;
     const connectedUser_is_SuperAdmin = await isSuperAdmin(connectedUser);
-    const toDelete_SuperAdmin = await isSuperAdmin(id); // utilisateur qui sera supprimer isSuperAdmin ?
-    const toDelete_Admin = await isAdmin(id); // utilisateur qui sera supprimer isAdmin ?
+    const toDelete_SuperAdmin = await isSuperAdmin(userId);
+    const toDelete_Admin = await isAdmin(userId);
 
     // interdire de supprimer votre propre compte
-    if (connectedUser === id) {
+    if (connectedUser === userId) {
       return NextResponse.json(
         { message: "Vous ne pouvez pas supprimer votre propre compte." },
         { status: 400 }
@@ -333,7 +350,7 @@ export async function DELETE(
 
     // Supprimer l'utilisateur (les rôles seront automatiquement déconnectés)
     await prisma.user.delete({
-      where: { id },
+      where: { id: userId },
     });
 
     return NextResponse.json({

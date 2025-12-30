@@ -262,10 +262,7 @@ const EditUser = ({
           form.handleSubmit();
         }}
       >
-        <DialogContent
-          className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto"
-          onInteractOutside={(e) => e.preventDefault()}
-        >
+        <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Modifier l'utilisateur</DialogTitle>
             <DialogDescription>

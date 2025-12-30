@@ -19,9 +19,18 @@ export async function GET(
     if (protectionError) return protectionError;
 
     const { roleId } = await context.params;
+    const session = await getSession();
+    const entrepriseId = session?.entrepriseId;
 
-    const role = await prisma.role.findUnique({
-      where: { id: roleId },
+    if (!entrepriseId) {
+      return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
+    }
+
+    const role = await prisma.role.findFirst({
+      where: {
+        id: roleId,
+        entrepriseId,
+      },
       include: {
         permissions: true,
         entreprise: true,
@@ -52,11 +61,21 @@ export async function PATCH(
     if (protectionError) return protectionError;
 
     const { roleId } = await context.params;
+    const session = await getSession();
+    const entrepriseId = session?.entrepriseId;
+
+    if (!entrepriseId) {
+      return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
+    }
+
     const body = await request.json();
     const { name, description, permissions } = body;
 
-    const existingRole = await prisma.role.findUnique({
-      where: { id: roleId },
+    const existingRole = await prisma.role.findFirst({
+      where: {
+        id: roleId,
+        entrepriseId,
+      },
       include: { permissions: true },
     });
 
@@ -123,9 +142,18 @@ export async function DELETE(
     if (protectionError) return protectionError;
 
     const { roleId } = await context.params;
+    const session = await getSession();
+    const entrepriseId = session?.entrepriseId;
 
-    const existingRole = await prisma.role.findUnique({
-      where: { id: roleId },
+    if (!entrepriseId) {
+      return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
+    }
+
+    const existingRole = await prisma.role.findFirst({
+      where: {
+        id: roleId,
+        entrepriseId,
+      },
       include: { _count: { select: { user: true } } },
     });
 

@@ -45,6 +45,48 @@ export const API = {
     PERMISSION_DELETE: (id: string) => `/api/permissions/${id}`,
     RESOURCES: "/api/permissions/resources",
   },
+  SITES: {
+    ALL: "/api/sites",
+    SITE_CREATE: "/api/sites",
+    SITE_DETAILS: (id: string) => `/api/sites/${id}`,
+    SITE_UPDATE: (id: string) => `/api/sites/${id}`,
+    SITE_DELETE: (id: string) => `/api/sites/${id}`,
+  },
+  TYPEPARCS: {
+    ALL: "/api/typeparcs",
+    TYPEPARC_CREATE: "/api/typeparcs",
+    TYPEPARC_DETAILS: (id: string) => `/api/typeparcs/${id}`,
+    TYPEPARC_UPDATE: (id: string) => `/api/typeparcs/${id}`,
+    TYPEPARC_DELETE: (id: string) => `/api/typeparcs/${id}`,
+  },
+  TYPEPANNES: {
+    ALL: "/api/typepannes",
+    TYPEPANNE_CREATE: "/api/typepannes",
+    TYPEPANNE_DETAILS: (id: string) => `/api/typepannes/${id}`,
+    TYPEPANNE_UPDATE: (id: string) => `/api/typepannes/${id}`,
+    TYPEPANNE_DELETE: (id: string) => `/api/typepannes/${id}`,
+  },
+  PANNES: {
+    ALL: "/api/pannes",
+    PANNE_CREATE: "/api/pannes",
+    PANNE_DETAILS: (id: string) => `/api/pannes/${id}`,
+    PANNE_UPDATE: (id: string) => `/api/pannes/${id}`,
+    PANNE_DELETE: (id: string) => `/api/pannes/${id}`,
+  },
+  PARCS: {
+    ALL: "/api/parcs",
+    PARC_CREATE: "/api/parcs",
+    PARC_DETAILS: (id: string) => `/api/parcs/${id}`,
+    PARC_UPDATE: (id: string) => `/api/parcs/${id}`,
+    PARC_DELETE: (id: string) => `/api/parcs/${id}`,
+  },
+  ENGINS: {
+    ALL: "/api/engins",
+    ENGIN_CREATE: "/api/engins",
+    ENGIN_DETAILS: (id: string) => `/api/engins/${id}`,
+    ENGIN_UPDATE: (id: string) => `/api/engins/${id}`,
+    ENGIN_DELETE: (id: string) => `/api/engins/${id}`,
+  },
 };
 
 export enum methods {
