@@ -103,6 +103,9 @@ const NewEngin = ({ parcs, sites }: NewEnginProps) => {
     if (modalOpen) {
       form.reset();
       setError(null);
+    } else {
+      setError(null);
+      form.reset();
     }
   }, [modalOpen, form]);
 

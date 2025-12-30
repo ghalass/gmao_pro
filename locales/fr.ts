@@ -132,6 +132,10 @@ export default {
       title: "Dashboard",
       description: "Tableau de bord principal",
     },
+    saisiehrm: {
+      title: "Saisies HRM",
+      description: "Gérer les saisies HRM",
+    },
   },
   apis: {
     common: {

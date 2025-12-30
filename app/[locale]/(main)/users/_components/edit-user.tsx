@@ -219,18 +219,19 @@ const EditUser = ({
   // Réinitialiser le form quand le modal s'ouvre
   useEffect(() => {
     if (modalOpen) {
-      form.reset();
-      // Mettre à jour avec les valeurs de l'utilisateur actuel
-      form.setFieldValue("name", user?.name || "");
-      form.setFieldValue("email", user?.email || "");
-      form.setFieldValue("active", user?.active || false);
-      form.setFieldValue("roles", user?.roles?.map((role) => role.id) || []);
-      form.setFieldValue("changePassword", false);
-      form.setFieldValue("password", "");
-      form.setFieldValue("passwordConfirmation", "");
-
-      // Réinitialiser l'erreur
+      form.reset({
+        name: user?.name || "",
+        email: user?.email || "",
+        active: user?.active || false,
+        roles: user?.roles?.map((role) => role.id) || [],
+        changePassword: false,
+        password: "",
+        passwordConfirmation: "",
+      });
       setError(null);
+    } else {
+      setError(null);
+      form.reset();
     }
   }, [modalOpen, user]);
 

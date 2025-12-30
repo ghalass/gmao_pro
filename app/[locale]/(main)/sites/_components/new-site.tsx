@@ -81,6 +81,9 @@ const NewSite = () => {
     if (modalOpen) {
       form.reset();
       setError(null);
+    } else {
+      setError(null);
+      form.reset();
     }
   }, [modalOpen, form]);
 

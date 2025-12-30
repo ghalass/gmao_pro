@@ -232,6 +232,9 @@ const NewUser = () => {
       form.reset();
       // Réinitialiser l'erreur
       setError(null);
+    } else {
+      setError(null);
+      form.reset();
     }
   }, [modalOpen, form]);
 

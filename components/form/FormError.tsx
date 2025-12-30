@@ -7,7 +7,7 @@ const FormError = ({ error }: { error: string | null | undefined }) => {
       {error && (
         <Alert variant="destructive">
           <AlertCircleIcon />
-          <AlertTitle>{error}</AlertTitle>
+          <AlertTitle className="line-clamp-none">{error}</AlertTitle>
         </Alert>
       )}
     </>

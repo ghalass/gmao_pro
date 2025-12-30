@@ -125,15 +125,16 @@ const EditRole = ({ role, open, onOpenChange }: EditRoleProps) => {
 
   useEffect(() => {
     if (open) {
-      form.reset();
-      form.setFieldValue("name", role.name);
-      form.setFieldValue("description", role.description || "");
-      form.setFieldValue(
-        "permissions",
-        role.permissions.map((p) => p.id)
-      );
+      form.reset({
+        name: role.name,
+        description: role.description || "",
+        permissions: role.permissions.map((p) => p.id) || [],
+      });
       setError(null);
       getAllPermissions();
+    } else {
+      setError(null);
+      form.reset();
     }
   }, [open, role, form, getAllPermissions]);
 

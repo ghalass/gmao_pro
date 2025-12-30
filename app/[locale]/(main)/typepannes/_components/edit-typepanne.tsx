@@ -85,10 +85,14 @@ const EditTypepanne = ({
 
   useEffect(() => {
     if (open && typepanne) {
-      form.reset();
-      form.setFieldValue("name", typepanne.name);
-      form.setFieldValue("description", typepanne.description || "");
+      form.reset({
+        name: typepanne.name,
+        description: typepanne.description || "",
+      });
       setError(null);
+    } else {
+      setError(null);
+      form.reset();
     }
   }, [open, typepanne, form]);
 

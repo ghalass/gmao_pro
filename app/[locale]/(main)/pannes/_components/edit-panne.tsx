@@ -107,12 +107,16 @@ const EditPanne = ({
 
   useEffect(() => {
     if (open && panne) {
-      form.reset();
-      form.setFieldValue("name", panne.name);
-      form.setFieldValue("description", panne.description || "");
-      form.setFieldValue("typepanneId", panne.typepanneId);
-      form.setFieldValue("parcIds", panne.parcs?.map((p: any) => p.id) || []);
+      form.reset({
+        name: panne.name,
+        description: panne.description || "",
+        typepanneId: panne.typepanneId,
+        parcIds: panne.parcs?.map((p: any) => p.id) || [],
+      });
       setError(null);
+    } else {
+      setError(null);
+      form.reset();
     }
   }, [open, panne, form]);
 

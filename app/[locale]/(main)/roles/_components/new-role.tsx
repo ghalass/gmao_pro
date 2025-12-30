@@ -121,6 +121,9 @@ const NewRole = () => {
       form.reset();
       setError(null);
       getAllPermissions();
+    } else {
+      setError(null);
+      form.reset();
     }
   }, [modalOpen, form, getAllPermissions]);
 

@@ -95,6 +95,9 @@ const NewParc = ({ typeparcs, pannes }: NewParcProps) => {
     if (modalOpen) {
       form.reset();
       setError(null);
+    } else {
+      setError(null);
+      form.reset();
     }
   }, [modalOpen, form]);
 

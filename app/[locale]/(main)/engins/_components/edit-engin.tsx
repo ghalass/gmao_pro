@@ -107,13 +107,17 @@ const EditEngin = ({
 
   useEffect(() => {
     if (open && engin) {
-      form.reset();
-      form.setFieldValue("name", engin.name);
-      form.setFieldValue("active", engin.active);
-      form.setFieldValue("parcId", engin.parcId);
-      form.setFieldValue("siteId", engin.siteId);
-      form.setFieldValue("initialHeureChassis", engin.initialHeureChassis || 0);
+      form.reset({
+        name: engin.name,
+        active: engin.active,
+        parcId: engin.parcId,
+        siteId: engin.siteId,
+        initialHeureChassis: engin.initialHeureChassis || 0,
+      });
       setError(null);
+    } else {
+      setError(null);
+      form.reset();
     }
   }, [open, engin, form]);
 

@@ -165,15 +165,9 @@ export function AppSidebar() {
       },
       {
         title: "Saisies hrm",
-        url: "/saisies/all_hrm",
+        url: "/saisiehrms",
         icon: Keyboard,
         description: "Tout les saisies hrm",
-      },
-      {
-        title: "Saisies him",
-        url: "/saisies/all_him",
-        icon: Keyboard,
-        description: "Tout les saisies him",
       },
     ],
   };

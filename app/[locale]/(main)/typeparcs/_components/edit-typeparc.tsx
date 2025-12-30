@@ -77,9 +77,13 @@ const EditTypeparc = ({ typeparc, open, onOpenChange }: EditTypeparcProps) => {
 
   useEffect(() => {
     if (open && typeparc) {
-      form.reset();
-      form.setFieldValue("name", typeparc.name);
+      form.reset({
+        name: typeparc.name,
+      });
       setError(null);
+    } else {
+      setError(null);
+      form.reset();
     }
   }, [open, typeparc, form]);
 

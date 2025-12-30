@@ -87,6 +87,20 @@ export const API = {
     ENGIN_UPDATE: (id: string) => `/api/engins/${id}`,
     ENGIN_DELETE: (id: string) => `/api/engins/${id}`,
   },
+  SAISIEHRMS: {
+    ALL: "/api/saisiehrms",
+    CREATE: "/api/saisiehrms",
+    DETAILS: (id: string) => `/api/saisiehrms/${id}`,
+    UPDATE: (id: string) => `/api/saisiehrms/${id}`,
+    DELETE: (id: string) => `/api/saisiehrms/${id}`,
+  },
+  SAISIEHIMS: {
+    ALL: "/api/saisiehims",
+    CREATE: "/api/saisiehims",
+    DETAILS: (id: string) => `/api/saisiehims/${id}`,
+    UPDATE: (id: string) => `/api/saisiehims/${id}`,
+    DELETE: (id: string) => `/api/saisiehims/${id}`,
+  },
 };
 
 export enum methods {

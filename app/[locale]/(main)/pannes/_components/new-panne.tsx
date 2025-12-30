@@ -102,6 +102,9 @@ const NewPanne = ({ typepannes, parcs }: NewPanneProps) => {
     if (modalOpen) {
       form.reset();
       setError(null);
+    } else {
+      setError(null);
+      form.reset();
     }
   }, [modalOpen, form]);
 

@@ -129,6 +129,10 @@ export default {
       title: "لوحة التحكم",
       description: "لوحة التحكم الرئيسية",
     },
+    saisiehrm: {
+      title: "سجلات HRM",
+      description: "إدارة سجلات ساعات الماكينة الحقيقية",
+    },
   },
   apis: {
     common: {

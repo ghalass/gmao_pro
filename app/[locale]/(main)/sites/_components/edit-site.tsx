@@ -82,10 +82,14 @@ const EditSite = ({ site, open, onOpenChange }: EditSiteProps) => {
 
   useEffect(() => {
     if (open && site) {
-      form.reset();
-      form.setFieldValue("name", site.name);
-      form.setFieldValue("active", site.active);
+      form.reset({
+        name: site.name,
+        active: site.active,
+      });
       setError(null);
+    } else {
+      setError(null);
+      form.reset();
     }
   }, [open, site, form]);
 

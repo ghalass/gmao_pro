@@ -122,6 +122,9 @@ const NewPermission = () => {
       form.reset();
       setError(null);
       fetchResources();
+    } else {
+      setError(null);
+      form.reset();
     }
   }, [modalOpen, form, fetchResources]);
 

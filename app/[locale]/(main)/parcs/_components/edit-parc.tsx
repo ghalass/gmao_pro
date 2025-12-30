@@ -99,11 +99,15 @@ const EditParc = ({
 
   useEffect(() => {
     if (open && parc) {
-      form.reset();
-      form.setFieldValue("name", parc.name);
-      form.setFieldValue("typeparcId", parc.typeparcId);
-      form.setFieldValue("panneIds", parc.pannes?.map((p: any) => p.id) || []);
+      form.reset({
+        name: parc.name,
+        typeparcId: parc.typeparcId,
+        panneIds: parc.pannes?.map((p: any) => p.id) || [],
+      });
       setError(null);
+    } else {
+      setError(null);
+      form.reset();
     }
   }, [open, parc, form]);
 

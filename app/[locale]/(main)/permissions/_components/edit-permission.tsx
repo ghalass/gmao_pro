@@ -130,12 +130,16 @@ const EditPermission = ({
 
   useEffect(() => {
     if (open) {
-      form.reset();
-      form.setFieldValue("resource", permission.resource);
-      form.setFieldValue("action", permission.action);
-      form.setFieldValue("description", permission.description || "");
+      form.reset({
+        resource: permission.resource,
+        action: permission.action,
+        description: permission.description || "",
+      });
       setError(null);
       fetchResources();
+    } else {
+      setError(null);
+      form.reset();
     }
   }, [open, permission, form, fetchResources]);
 
