@@ -173,12 +173,6 @@ export function AppSidebar() {
       },
 
       {
-        title: "Type d'organe",
-        url: "/typeorganes",
-        icon: Puzzle,
-        description: "Gérer les types d'organes",
-      },
-      {
         title: "Objectifs",
         url: "/objectifs",
         icon: Target,
@@ -297,6 +291,12 @@ export function AppSidebar() {
         url: "/organes/rapports/heure-marche",
         icon: ClockCheck,
         description: "Rapport mensuel des heures de marche des organes",
+      },
+      {
+        title: "Type d'organe",
+        url: "/typeorganes",
+        icon: Puzzle,
+        description: "Gérer les types d'organes",
       },
     ],
   };

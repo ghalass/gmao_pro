@@ -42,6 +42,7 @@ interface ObjectifRowActionsProps {
   parcs: any[];
   sites: any[];
   typeparcs: any[];
+  onObjectifUpdated?: () => void;
 }
 
 const ObjectifRowActions = ({

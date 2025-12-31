@@ -313,18 +313,7 @@ const HrmList = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
-                  <div className="flex flex-col items-center justify-center gap-2">
-                    <Spinner />
-                    <span className="text-muted-foreground text-sm">
-                      Chargement des données...
-                    </span>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : saisiehrms.length === 0 ? (
+            {saisiehrms.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={7}

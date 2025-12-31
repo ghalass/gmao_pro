@@ -253,25 +253,6 @@ export default {
       table: {
         name: "اسم النوع",
         description: "الوصف",
-        associatedPannes: "الأعطال المرتبطة",
-        noTypes: "لا توجد أنواع أعطال مُكوّنة",
-        pannes: "أعطال",
-      },
-    },
-    typeparcs: {
-      title: "أنواع المتنزهات",
-      subtitle: "{count} نوع{plural} مُكوّن{plural}",
-      table: {
-        name: "اسم النوع",
-        associatedParcs: "المتنزهات المرتبطة",
-        noTypes: "لا توجد أنواع متنزهات مُكوّنة",
-        parcs: "متنزهات",
-      },
-    },
-    objectifs: {
-      title: "الأهداف",
-      subtitle: "{count} هدف{plural}",
-      table: {
         year: "السنة",
         parc: "المتنزه",
         site: "الموقع",

@@ -14,10 +14,10 @@ import NewTypeorgane from "./_components/new-typeorgane";
 import FormError from "@/components/form/FormError";
 import TypeorganeRowActions from "./_components/typeorgane-row-actions";
 import { getScopedI18n } from "@/locales/server";
+import fr from "@/locales/fr";
 
 const TypeorganesPage = async () => {
   const typeorganesResponse = await apiFetch(API.TYPEORGANES.ALL);
-  const t = await getScopedI18n("pages.typeorganes");
 
   if (!typeorganesResponse.ok) {
     return <FormError error={typeorganesResponse.data.message} />;
@@ -30,7 +30,7 @@ const TypeorganesPage = async () => {
     <div className="mx-auto p-4">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
+          <h1 className="text-2xl font-bold">{fr.pages.typeorganes.title}</h1>
           <p className="text-sm text-muted-foreground">
             {typeorganes.length} type{plural} configuré{plural}
           </p>
@@ -44,9 +44,13 @@ const TypeorganesPage = async () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t("table.name")}</TableHead>
-              <TableHead>{t("table.associatedParcs")}</TableHead>
-              <TableHead>{t("table.associatedOrganes")}</TableHead>
+              <TableHead>{fr.pages.typeorganes.table.name}</TableHead>
+              <TableHead>
+                {fr.pages.typeorganes.table.associatedParcs}
+              </TableHead>
+              <TableHead>
+                {fr.pages.typeorganes.table.associatedOrganes}
+              </TableHead>
               <TableHead className="w-0 text-right"></TableHead>
             </TableRow>
           </TableHeader>
@@ -57,12 +61,12 @@ const TypeorganesPage = async () => {
                   colSpan={4}
                   className="h-24 text-center text-muted-foreground italic"
                 >
-                  {t("table.noTypes")}
+                  {fr.pages.typeorganes.table.noTypes}
                 </TableCell>
               </TableRow>
             ) : (
               typeorganes.map((typeorgane: any) => {
-                const parcCount = typeorgane.parcs?.length || 0;
+                const parcCount = typeorgane.typeOrganeParcs?.length || 0;
                 const organeCount = typeorgane._count?.organes || 0;
                 const pluralParc = parcCount !== 1 ? "s" : "";
                 const pluralOrgane = organeCount !== 1 ? "s" : "";
@@ -79,8 +83,8 @@ const TypeorganesPage = async () => {
                         <Package className="h-4 w-4" />
                         <span>
                           {parcCount > 0
-                            ? `${parcCount} ${t("table.parcs")}`
-                            : t("table.noParc")}
+                            ? `${parcCount} ${fr.pages.typeorganes.table.parcs}`
+                            : fr.pages.typeorganes.table.noParc}
                         </span>
                       </div>
                     </TableCell>
@@ -89,8 +93,8 @@ const TypeorganesPage = async () => {
                         <Settings className="h-4 w-4" />
                         <span>
                           {organeCount > 0
-                            ? `${organeCount} ${t("table.organes")}`
-                            : t("table.noOrgane")}
+                            ? `${organeCount} ${fr.pages.typeorganes.table.organes}`
+                            : fr.pages.typeorganes.table.noOrgane}
                         </span>
                       </div>
                     </TableCell>

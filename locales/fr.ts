@@ -286,6 +286,21 @@ export default {
         noOrgane: "Aucun organe",
       },
     },
+    organes: {
+      title: "Gestion des Organes",
+      subtitle: "{count} organe{plural} répertorié{plural}",
+      table: {
+        name: "Nom de l'Organe",
+        type: "Type d'Organe",
+        marque: "Marque",
+        sn: "S/N",
+        status: "Statut",
+        creationDate: "Date de création",
+        noOrganes: "Aucun organe configuré",
+        active: "Actif",
+        inactive: "Inactif",
+      },
+    },
     objectifs: {
       title: "Objectifs",
       subtitle: "{count} objectif{plural}",

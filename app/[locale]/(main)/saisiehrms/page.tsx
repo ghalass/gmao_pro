@@ -4,15 +4,13 @@ import { getScopedI18n } from "@/locales/server";
 
 const SaisiehrmsPage = async () => {
   const t = await getScopedI18n("pages.saisiehrms");
-  
+
   return (
     <div className="mx-auto p-4 max-w-[1400px]">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
-          <p className="text-sm text-muted-foreground">
-            {t("subtitle")}
-          </p>
+          <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
         <div>
           <NewSaisiehrm />

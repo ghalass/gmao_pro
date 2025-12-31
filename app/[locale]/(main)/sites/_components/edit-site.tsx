@@ -30,9 +30,10 @@ interface EditSiteProps {
   site: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
-const EditSite = ({ site, open, onOpenChange }: EditSiteProps) => {
+const EditSite = ({ site, open, onOpenChange, onSuccess }: EditSiteProps) => {
   const router = useRouter();
   const locale = useCurrentLocale();
 
@@ -59,6 +60,15 @@ const EditSite = ({ site, open, onOpenChange }: EditSiteProps) => {
         setError(null);
         await siteSchema.validate(value, { abortEarly: false });
 
+        // Vérifier si des modifications ont été faites
+        const hasChanges =
+          value.name !== site?.name || value.active !== site?.active;
+
+        if (!hasChanges) {
+          onOpenChange?.(false);
+          return;
+        }
+
         const response = await apiFetch(API.SITES.SITE_UPDATE(site.id), {
           method: methods.PATCH,
           body: value,
@@ -68,6 +78,7 @@ const EditSite = ({ site, open, onOpenChange }: EditSiteProps) => {
           router.refresh();
           toast.success(`Site mis à jour`);
           onOpenChange(false);
+          onSuccess?.();
         } else {
           setError(response.data?.message || "Erreur lors de la mise à jour");
         }

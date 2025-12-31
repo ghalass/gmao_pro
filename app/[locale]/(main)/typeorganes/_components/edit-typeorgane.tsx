@@ -81,7 +81,7 @@ const EditTypeorgane = ({
   const form = useForm({
     defaultValues: {
       name: typeorgane?.name || "",
-      parcIds: typeorgane?.parcs?.map((parc: any) => parc.id) || [],
+      parcIds: typeorgane?.typeOrganeParcs?.map((tp: any) => tp.parc.id) || [],
     },
     onSubmit: async ({ value }) => {
       try {
@@ -128,7 +128,7 @@ const EditTypeorgane = ({
     if (open && typeorgane) {
       form.reset({
         name: typeorgane.name,
-        parcIds: typeorgane.parcs?.map((parc: any) => parc.id) || [],
+        parcIds: typeorgane.typeOrganeParcs?.map((tp: any) => tp.parc.id) || [],
       });
       setError(null);
       getAllParcs();

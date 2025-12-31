@@ -1,4 +1,3 @@
-// app/[locale]/(main)/objectifs/page.tsx
 import { API, apiFetch } from "@/lib/api";
 import {
   Table,
@@ -99,7 +98,7 @@ const ObjectifsPage = async () => {
               objectifs?.map((objectif: ObjectifWithRelations) => {
                 return (
                   <TableRow key={objectif.id}>
-                    <TableCell className="font-medium">
+                    <TableCell>
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                         {objectif.annee}
@@ -107,13 +106,15 @@ const ObjectifsPage = async () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Landmark className="h-4 w-4 text-primary" />
-                        <div className="flex flex-col">
-                          <span>{objectif.parc.name}</span>
+                        <Landmark className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <div className="font-medium">
+                            {objectif.parc.name}
+                          </div>
                           {objectif.parc.typeparc && (
-                            <Badge variant="outline" className="w-fit text-xs mt-1">
+                            <div className="text-xs text-muted-foreground">
                               {objectif.parc.typeparc.name}
-                            </Badge>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -124,45 +125,32 @@ const ObjectifsPage = async () => {
                         {objectif.site.name}
                       </div>
                     </TableCell>
+                    <TableCell>{objectif.dispo}</TableCell>
+                    <TableCell>{objectif.mtbf}</TableCell>
+                    <TableCell>{objectif.tdm}</TableCell>
                     <TableCell>
-                      {objectif.dispo !== null ? (
-                        <span className="font-medium">{objectif.dispo}%</span>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {objectif.mtbf !== null ? (
-                        <span className="font-medium">{objectif.mtbf}</span>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {objectif.tdm !== null ? (
-                        <span className="font-medium">{objectif.tdm}</span>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col gap-1 text-xs">
-                        {objectif.spe_huile !== null && (
-                          <div>
-                            <span className="text-muted-foreground">{t("table.oil")}: </span>
-                            <span className="font-medium">{objectif.spe_huile}</span>
-                          </div>
+                      <div className="space-y-1 text-xs">
+                        {objectif.spe_huile && (
+                          <div>Huile: {objectif.spe_huile}</div>
                         )}
                         {objectif.spe_go !== null && (
                           <div>
-                            <span className="text-muted-foreground">{t("table.go")}: </span>
-                            <span className="font-medium">{objectif.spe_go}</span>
+                            <span className="text-muted-foreground">
+                              {t("table.go")}:{" "}
+                            </span>
+                            <span className="font-medium">
+                              {objectif.spe_go}
+                            </span>
                           </div>
                         )}
                         {objectif.spe_graisse !== null && (
                           <div>
-                            <span className="text-muted-foreground">{t("table.grease")}: </span>
-                            <span className="font-medium">{objectif.spe_graisse}</span>
+                            <span className="text-muted-foreground">
+                              {t("table.grease")}:{" "}
+                            </span>
+                            <span className="font-medium">
+                              {objectif.spe_graisse}
+                            </span>
                           </div>
                         )}
                         {objectif.spe_huile === null &&
@@ -192,4 +180,3 @@ const ObjectifsPage = async () => {
 };
 
 export default ObjectifsPage;
-

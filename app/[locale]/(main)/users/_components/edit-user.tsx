@@ -167,6 +167,19 @@ const EditUser = ({
         setError(null);
         await editUserSchema.validate(value, { abortEarly: false });
 
+        // Vérifier si des modifications ont été faites
+        const hasChanges =
+          value.name !== user?.name ||
+          value.email !== user?.email ||
+          value.active !== user?.active ||
+          JSON.stringify(value.roles) !== JSON.stringify(user?.roles) ||
+          (value.changePassword && value.password);
+
+        if (!hasChanges) {
+          setModalOpen(false);
+          return;
+        }
+
         // Utiliser la fonction de modification
         const response = await editUserResponse(
           user.id,

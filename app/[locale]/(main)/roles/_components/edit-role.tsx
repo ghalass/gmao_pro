@@ -98,6 +98,18 @@ const EditRole = ({ role, open, onOpenChange }: EditRoleProps) => {
         setError(null);
         await roleSchema.validate(value, { abortEarly: false });
 
+        // Vérifier si des modifications ont été faites
+        const hasChanges =
+          value.name !== role?.name ||
+          value.description !== role?.description ||
+          JSON.stringify(value.permissions.sort()) !==
+            JSON.stringify(role.permissions.map((p: any) => p.id).sort());
+
+        if (!hasChanges) {
+          onOpenChange(false);
+          return;
+        }
+
         const response = await apiFetch(API.ROLES.ROLE_UPDATE(role.id), {
           method: methods.PATCH,
           body: value,

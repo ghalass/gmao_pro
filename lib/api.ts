@@ -129,6 +129,13 @@ export const API = {
     TYPEORGANE_UPDATE: (id: string) => `/api/typeorganes/${id}`,
     TYPEORGANE_DELETE: (id: string) => `/api/typeorganes/${id}`,
   },
+  ORGANES: {
+    ALL: "/api/organes",
+    ORGANE_CREATE: "/api/organes",
+    ORGANE_DETAILS: (id: string) => `/api/organes/${id}`,
+    ORGANE_UPDATE: (id: string) => `/api/organes/${id}`,
+    ORGANE_DELETE: (id: string) => `/api/organes/${id}`,
+  },
   SAISIELUBRIFIANTS: {
     ALL: "/api/saisielubrifiants",
     CREATE: "/api/saisielubrifiants",

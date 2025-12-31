@@ -14,9 +14,10 @@ import DeleteSite from "./delete-site";
 
 interface SiteRowActionsProps {
   site: any;
+  onSiteUpdated?: () => void;
 }
 
-const SiteRowActions = ({ site }: SiteRowActionsProps) => {
+const SiteRowActions = ({ site, onSiteUpdated }: SiteRowActionsProps) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -48,12 +49,14 @@ const SiteRowActions = ({ site }: SiteRowActionsProps) => {
         site={site}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
+        onSuccess={onSiteUpdated}
       />
 
       <DeleteSite
         site={site}
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
+        onSuccess={onSiteUpdated}
       />
     </>
   );

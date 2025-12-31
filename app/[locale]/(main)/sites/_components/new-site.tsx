@@ -27,7 +27,11 @@ import FormError from "@/components/form/FormError";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
-const NewSite = () => {
+interface NewSiteProps {
+  onSuccess?: () => void;
+}
+
+const NewSite = ({ onSuccess }: NewSiteProps) => {
   const [modalOpen, setModalOpen] = useState(false);
   const router = useRouter();
   const locale = useCurrentLocale();
@@ -55,6 +59,12 @@ const NewSite = () => {
         setError(null);
         await siteSchema.validate(value, { abortEarly: false });
 
+        // Vérifier si le nom n'est pas vide
+        if (!value.name || value.name.trim() === "") {
+          setError("Le nom du site est requis");
+          return;
+        }
+
         const response = await apiFetch(API.SITES.SITE_CREATE, {
           method: methods.POST,
           body: value,
@@ -65,6 +75,7 @@ const NewSite = () => {
           toast.success(`Site créé avec succès`);
           setModalOpen(false);
           form.reset();
+          onSuccess?.();
         } else {
           setError(response.data?.message || "Erreur lors de la création");
         }

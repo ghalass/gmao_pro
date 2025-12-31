@@ -34,6 +34,7 @@ export async function GET(
         typeparc: true,
         pannes: true,
         engins: true,
+        typeOrganes: true, // Inclure les types d'organes associés
       },
     });
 

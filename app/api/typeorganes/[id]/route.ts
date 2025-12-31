@@ -32,7 +32,11 @@ export async function GET(
         entrepriseId,
       },
       include: {
-        parcs: true, // Relation Many-to-Many avec Parc
+        typeOrganeParcs: {
+          include: {
+            parc: true,
+          },
+        },
         _count: {
           select: {
             organes: true, // Relation One-to-Many avec Organe
@@ -85,7 +89,11 @@ export async function PATCH(
         entrepriseId,
       },
       include: {
-        parcs: true,
+        typeOrganeParcs: {
+          include: {
+            parc: true,
+          },
+        },
       },
     });
 
@@ -156,18 +164,33 @@ export async function PATCH(
       updateData.name = name.trim();
     }
 
-    // Gérer la relation Many-to-Many avec Parc
+    // Gérer la relation Many-to-Many avec Parc via TypeOrganeParc
     if (parcIds !== undefined) {
-      updateData.parcs = {
-        set: parcIds.map((parcId: string) => ({ id: parcId })),
-      };
+      // Supprimer les anciennes associations
+      await prisma.typeOrganeParc.deleteMany({
+        where: { typeOrganeId: id },
+      });
+
+      // Créer les nouvelles associations si des parcIds sont fournis
+      if (parcIds.length > 0) {
+        await prisma.typeOrganeParc.createMany({
+          data: parcIds.map((parcId: string) => ({
+            typeOrganeId: id,
+            parcId,
+          })),
+        });
+      }
     }
 
     const updatedTypeorgane = await prisma.typeOrgane.update({
       where: { id },
       data: updateData,
       include: {
-        parcs: true,
+        typeOrganeParcs: {
+          include: {
+            parc: true,
+          },
+        },
         _count: {
           select: {
             organes: true,

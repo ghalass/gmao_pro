@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
       include: {
         typeparc: true,
         pannes: true,
+        typeOrganes: true, // Inclure les types d'organes associés
         _count: {
           select: { engins: true },
         },

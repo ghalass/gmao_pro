@@ -21,7 +21,11 @@ export async function GET(request: NextRequest) {
     const typeorganes = await prisma.typeOrgane.findMany({
       where: { entrepriseId },
       include: {
-        parcs: true, // Relation Many-to-Many avec Parc
+        typeOrganeParcs: {
+          include: {
+            parc: true,
+          },
+        },
         _count: {
           select: {
             organes: true, // Relation One-to-Many avec Organe
@@ -125,14 +129,21 @@ export async function POST(request: NextRequest) {
       data: {
         name: name.trim(),
         entrepriseId,
-        parcs: parcIds && parcIds.length > 0
-          ? {
-              connect: parcIds.map((id: string) => ({ id })),
-            }
-          : undefined,
+        typeOrganeParcs:
+          parcIds && parcIds.length > 0
+            ? {
+                create: parcIds.map((parcId: string) => ({
+                  parcId,
+                })),
+              }
+            : undefined,
       },
       include: {
-        parcs: true,
+        typeOrganeParcs: {
+          include: {
+            parc: true,
+          },
+        },
         _count: {
           select: {
             organes: true,
@@ -150,4 +161,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

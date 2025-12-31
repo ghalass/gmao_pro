@@ -247,10 +247,9 @@ const EditObjectif = ({
               : null;
         }
 
-        // Vérifier qu'au moins un champ a été modifié
+        // Si aucune modification, fermer simplement le dialog
         if (Object.keys(dataToSend).length === 0) {
-          setError("Aucune modification détectée");
-          toast.info("Aucune modification détectée");
+          onOpenChange?.(false);
           return;
         }
 
