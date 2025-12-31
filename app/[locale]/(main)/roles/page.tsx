@@ -15,6 +15,7 @@ import { Role, Permission, User } from "@/lib/generated/prisma/client";
 import NewRole from "./_components/new-role";
 import FormError from "@/components/form/FormError";
 import RoleRowActions from "./_components/role-row-actions";
+import { getScopedI18n } from "@/locales/server";
 
 type RoleWithDetails = Role & {
   permissions: Permission[];
@@ -23,21 +24,22 @@ type RoleWithDetails = Role & {
 
 const RolesPage = async () => {
   const rolesResponse = await apiFetch(API.ROLES.ALL);
+  const t = await getScopedI18n("pages.roles");
 
   if (!rolesResponse.ok) {
     return <FormError error={rolesResponse.data.message} />;
   }
 
   const roles = rolesResponse.data || [];
+  const plural = roles.length !== 1 ? "s" : "";
 
   return (
     <div className="mx-auto p-4">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Rôles et Permissions</h1>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
           <p className="text-sm text-muted-foreground">
-            {roles.length} rôle{roles.length !== 1 ? "s" : ""} configuré
-            {roles.length !== 1 ? "s" : ""}
+            {roles.length} rôle{plural} configuré{plural}
           </p>
         </div>
         <div>
@@ -49,10 +51,10 @@ const RolesPage = async () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Rôle</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Permissions</TableHead>
-              <TableHead>Utilisateurs</TableHead>
+              <TableHead>{t("table.role")}</TableHead>
+              <TableHead>{t("table.description")}</TableHead>
+              <TableHead>{t("table.permissions")}</TableHead>
+              <TableHead>{t("table.users")}</TableHead>
               <TableHead className="w-0 text-right"></TableHead>
             </TableRow>
           </TableHeader>
@@ -60,7 +62,7 @@ const RolesPage = async () => {
             {roles.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="h-24 text-center">
-                  Aucun rôle
+                  {t("table.noRoles")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -75,7 +77,7 @@ const RolesPage = async () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2 text-muted-foreground text-sm max-w-[300px] truncate">
-                        {currentRole.description || "Aucune description"}
+                        {currentRole.description || t("table.noDescription")}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -94,7 +96,7 @@ const RolesPage = async () => {
                             ))
                         ) : (
                           <span className="text-xs text-muted-foreground">
-                            Aucune permission
+                            {t("table.noPermissions")}
                           </span>
                         )}
                         {currentRole.permissions?.length > 3 && (

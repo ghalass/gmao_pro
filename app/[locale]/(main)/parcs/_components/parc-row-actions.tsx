@@ -38,7 +38,7 @@ const ParcRowActions = ({ parc, typeparcs, pannes }: ParcRowActionsProps) => {
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => setShowDeleteDialog(true)}
-            className="text-red-600 focus:text-red-600 focus:bg-red-50"
+            className="text-destructive focus:text-destructive focus:bg-destructive/10"
           >
             <Trash className="mr-2 h-4 w-4" />
             Supprimer

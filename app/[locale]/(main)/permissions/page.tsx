@@ -15,6 +15,7 @@ import { Permission, Role } from "@/lib/generated/prisma/client";
 import NewPermission from "./_components/new-permission";
 import FormError from "@/components/form/FormError";
 import PermissionRowActions from "./_components/permission-row-actions";
+import { getScopedI18n } from "@/locales/server";
 
 type PermissionWithDetails = Permission & {
   roles: Role[];
@@ -22,21 +23,22 @@ type PermissionWithDetails = Permission & {
 
 const PermissionsPage = async () => {
   const permissionsResponse = await apiFetch(API.PERMISSIONS.ALL);
+  const t = await getScopedI18n("pages.permissions");
 
   if (!permissionsResponse.ok) {
     return <FormError error={permissionsResponse.data.message} />;
   }
 
   const permissions = permissionsResponse.data || [];
+  const plural = permissions.length !== 1 ? "s" : "";
 
   return (
     <div className="mx-auto p-4">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Gestion des Permissions</h1>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
           <p className="text-sm text-muted-foreground">
-            {permissions.length} permission{permissions.length !== 1 ? "s" : ""}{" "}
-            définie{permissions.length !== 1 ? "s" : ""}
+            {permissions.length} permission{plural} définie{plural}
           </p>
         </div>
         <div>
@@ -48,11 +50,11 @@ const PermissionsPage = async () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Permission</TableHead>
-              <TableHead>Ressource</TableHead>
-              <TableHead>Action</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Rôles liés</TableHead>
+              <TableHead>{t("table.permission")}</TableHead>
+              <TableHead>{t("table.resource")}</TableHead>
+              <TableHead>{t("table.action")}</TableHead>
+              <TableHead>{t("table.description")}</TableHead>
+              <TableHead>{t("table.linkedRoles")}</TableHead>
               <TableHead className="w-0 text-right"></TableHead>
             </TableRow>
           </TableHeader>
@@ -60,7 +62,7 @@ const PermissionsPage = async () => {
             {permissions.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-24 text-center">
-                  Aucune permission
+                  {t("table.noPermissions")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -104,7 +106,7 @@ const PermissionsPage = async () => {
                           ))
                         ) : (
                           <span className="text-xs text-muted-foreground italic">
-                            Aucun rôle
+                            {t("table.noRole")}
                           </span>
                         )}
                         {permission.roles?.length > 2 && (

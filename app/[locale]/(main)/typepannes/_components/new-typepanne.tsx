@@ -127,7 +127,11 @@ const NewTypepanne = () => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setModalOpen(false)}
+              onClick={() => {
+                setError(null);
+                form.reset();
+                setModalOpen(false);
+              }}
               disabled={isSubmitting}
               size="sm"
             >

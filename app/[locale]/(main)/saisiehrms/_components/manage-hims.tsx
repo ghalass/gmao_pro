@@ -7,7 +7,15 @@ import {
   Panne,
   Engin,
 } from "@/lib/generated/prisma/client";
-import { Activity, Edit, Trash2, Plus, Clock, Hash } from "lucide-react";
+import {
+  Activity,
+  Edit,
+  Trash2,
+  Plus,
+  Clock,
+  Hash,
+  Droplet,
+} from "lucide-react";
 import React, { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
@@ -22,6 +30,7 @@ import { Spinner } from "@/components/ui/spinner";
 import EditSaisiehim from "./edit-saisiehim";
 import DeleteSaisiehim from "./delete-saisiehim";
 import AddSaisiehim from "./add-saisiehim";
+import AddSaisieLubrifiant from "./add-saisie-lubrifiant";
 
 interface ManageHimsProps {
   saisiehrm: Saisiehrm & { engin: Engin };
@@ -31,15 +40,27 @@ interface ManageHimsProps {
 
 const ManageHims = ({ saisiehrm, open, onOpenChange }: ManageHimsProps) => {
   const [hims, setHims] = useState<
-    (Saisiehim & { panne: Panne; saisiehrm: Saisiehrm })[]
+    (Saisiehim & {
+      panne: Panne;
+      saisiehrm: Saisiehrm;
+      engin: Engin;
+      saisielubrifiant?: any[];
+    })[]
   >([]);
   const [loading, setLoading] = useState(false);
   const [selectedHim, setSelectedHim] = useState<
-    (Saisiehim & { panne: Panne; saisiehrm: Saisiehrm }) | null
+    | (Saisiehim & {
+        panne: Panne;
+        saisiehrm: Saisiehrm;
+        engin: Engin;
+        saisielubrifiant?: any[];
+      })
+    | null
   >(null);
   const [showEdit, setShowEdit] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
+  const [showAddLubrifiant, setShowAddLubrifiant] = useState(false);
 
   const fetchHims = useCallback(async () => {
     try {
@@ -54,7 +75,14 @@ const ManageHims = ({ saisiehrm, open, onOpenChange }: ManageHimsProps) => {
       const response = await apiFetch(API.SAISIEHIMS.ALL);
       if (response.ok) {
         setHims(
-          response.data.filter((h: any) => h.saisiehrmId === saisiehrm.id)
+          response.data.filter(
+            (h: any) => h.saisiehrmId === saisiehrm.id
+          ) as (Saisiehim & {
+            panne: Panne;
+            saisiehrm: Saisiehrm;
+            engin: Engin;
+            saisielubrifiant?: any[];
+          })[]
         );
       }
     } catch (error) {
@@ -142,7 +170,7 @@ const ManageHims = ({ saisiehrm, open, onOpenChange }: ManageHimsProps) => {
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="h-7 w-7 hover:text-red-600 hover:bg-red-50"
+                          className="h-7 w-7 hover:text-destructive hover:bg-destructive/10"
                           onClick={() => {
                             setSelectedHim(him);
                             setShowDelete(true);
@@ -171,6 +199,66 @@ const ManageHims = ({ saisiehrm, open, onOpenChange }: ManageHimsProps) => {
                           </span>
                         </span>
                       </div>
+                    </div>
+
+                    {/* Consommations de lubrifiants */}
+                    <div className="mt-2 pt-2 border-t">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Droplet className="h-3 w-3" />
+                          <span>Consommations de lubrifiants</span>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 text-xs"
+                          onClick={() => {
+                            setSelectedHim(him as any);
+                            setShowAddLubrifiant(true);
+                          }}
+                        >
+                          <Plus className="h-3 w-3 mr-1" />
+                          Ajouter
+                        </Button>
+                      </div>
+                      {him.saisielubrifiant &&
+                      him.saisielubrifiant.length > 0 ? (
+                        <div className="space-y-1">
+                          {him.saisielubrifiant.map((sl: any) => (
+                            <div
+                              key={sl.id}
+                              className="text-xs p-2 bg-muted/50 rounded flex items-center justify-between"
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">
+                                  {sl.lubrifiant.name}
+                                </span>
+                                <Badge
+                                  variant="outline"
+                                  className="text-[10px] h-4"
+                                >
+                                  {sl.lubrifiant.typelubrifiant.name}
+                                </Badge>
+                                {sl.typeconsommationlub && (
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-[10px] h-4"
+                                  >
+                                    {sl.typeconsommationlub.name}
+                                  </Badge>
+                                )}
+                              </div>
+                              <span className="text-muted-foreground">
+                                {sl.qte} L
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-muted-foreground italic">
+                          Aucune consommation enregistrée
+                        </p>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -203,6 +291,15 @@ const ManageHims = ({ saisiehrm, open, onOpenChange }: ManageHimsProps) => {
         onOpenChange={setShowAdd}
         onSuccess={fetchHims}
       />
+
+      {selectedHim && (
+        <AddSaisieLubrifiant
+          saisiehim={selectedHim as any}
+          open={showAddLubrifiant}
+          onOpenChange={setShowAddLubrifiant}
+          onSuccess={fetchHims}
+        />
+      )}
     </>
   );
 };

@@ -14,24 +14,26 @@ import { MapPin, Truck } from "lucide-react";
 import NewSite from "./_components/new-site";
 import FormError from "@/components/form/FormError";
 import SiteRowActions from "./_components/site-row-actions";
+import { getScopedI18n } from "@/locales/server";
 
 const SitesPage = async () => {
   const sitesResponse = await apiFetch(API.SITES.ALL);
+  const t = await getScopedI18n("pages.sites");
 
   if (!sitesResponse.ok) {
     return <FormError error={sitesResponse.data.message} />;
   }
 
   const sites = sitesResponse.data || [];
+  const plural = sites.length !== 1 ? "s" : "";
 
   return (
     <div className="mx-auto p-4">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Gestion des Sites</h1>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
           <p className="text-sm text-muted-foreground">
-            {sites.length} site{sites.length !== 1 ? "s" : ""} configuré
-            {sites.length !== 1 ? "s" : ""}
+            {sites.length} site{plural} configuré{plural}
           </p>
         </div>
         <div>
@@ -43,9 +45,9 @@ const SitesPage = async () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nom du Site</TableHead>
-              <TableHead>Statut</TableHead>
-              <TableHead>Engins rattachés</TableHead>
+              <TableHead>{t("table.name")}</TableHead>
+              <TableHead>{t("table.status")}</TableHead>
+              <TableHead>{t("table.attachedEngins")}</TableHead>
               <TableHead className="w-0 text-right"></TableHead>
             </TableRow>
           </TableHeader>
@@ -56,7 +58,7 @@ const SitesPage = async () => {
                   colSpan={4}
                   className="h-24 text-center text-muted-foreground italic"
                 >
-                  Aucun site configuré
+                  {t("table.noSites")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -70,13 +72,15 @@ const SitesPage = async () => {
                   </TableCell>
                   <TableCell>
                     <Badge variant={site.active ? "success" : "secondary"}>
-                      {site.active ? "Actif" : "Inactif"}
+                      {site.active ? t("table.active") : t("table.inactive")}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1.5 text-muted-foreground">
                       <Truck className="h-4 w-4" />
-                      <span>{site._count?.engins || 0} engins</span>
+                      <span>
+                        {site._count?.engins || 0} {t("table.engins")}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell className="w-0 text-right">

@@ -13,11 +13,13 @@ import NewEngin from "./_components/new-engin";
 import FormError from "@/components/form/FormError";
 import EnginRowActions from "./_components/engin-row-actions";
 import { Badge } from "@/components/ui/badge";
+import { getScopedI18n } from "@/locales/server";
 
 const EnginsPage = async () => {
   const enginsResponse = await apiFetch(API.ENGINS.ALL);
   const parcsResponse = await apiFetch(API.PARCS.ALL);
   const sitesResponse = await apiFetch(API.SITES.ALL);
+  const t = await getScopedI18n("pages.engins");
 
   if (!enginsResponse.ok) {
     return <FormError error={enginsResponse.data?.message} />;
@@ -26,15 +28,15 @@ const EnginsPage = async () => {
   const engins = enginsResponse.data || [];
   const parcs = parcsResponse.ok ? parcsResponse.data : [];
   const sites = sitesResponse.ok ? sitesResponse.data : [];
+  const plural = engins.length !== 1 ? "s" : "";
 
   return (
     <div className="mx-auto p-4">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Gestion des Engins</h1>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
           <p className="text-sm text-muted-foreground">
-            {engins.length} engin{engins.length !== 1 ? "s" : ""} répertorié
-            {engins.length !== 1 ? "s" : ""}
+            {engins.length} engin{plural} répertorié{plural}
           </p>
         </div>
         <div>
@@ -46,11 +48,11 @@ const EnginsPage = async () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nom / Code</TableHead>
-              <TableHead>Parc</TableHead>
-              <TableHead>Site Actuel</TableHead>
-              <TableHead>Statut</TableHead>
-              <TableHead>Heures Initiales</TableHead>
+              <TableHead>{t("table.nameCode")}</TableHead>
+              <TableHead>{t("table.parc")}</TableHead>
+              <TableHead>{t("table.currentSite")}</TableHead>
+              <TableHead>{t("table.status")}</TableHead>
+              <TableHead>{t("table.initialHours")}</TableHead>
               <TableHead className="w-0 text-right"></TableHead>
             </TableRow>
           </TableHeader>
@@ -61,7 +63,7 @@ const EnginsPage = async () => {
                   colSpan={6}
                   className="h-24 text-center text-muted-foreground italic"
                 >
-                  Aucun engin configuré
+                  {t("table.noEngins")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -77,7 +79,7 @@ const EnginsPage = async () => {
                     <div className="flex items-center gap-1.5">
                       <Landmark className="h-3.5 w-3.5 text-muted-foreground" />
                       <span className="text-sm">
-                        {engin.parc?.name || "Sans parc"}
+                        {engin.parc?.name || t("table.noParc")}
                       </span>
                     </div>
                   </TableCell>
@@ -85,13 +87,13 @@ const EnginsPage = async () => {
                     <div className="flex items-center gap-1.5">
                       <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
                       <span className="text-sm">
-                        {engin.site?.name || "Sans site"}
+                        {engin.site?.name || t("table.noSite")}
                       </span>
                     </div>
                   </TableCell>
                   <TableCell>
                     <Badge variant={engin.active ? "success" : "secondary"}>
-                      {engin.active ? "Actif" : "Inactif"}
+                      {engin.active ? t("table.active") : t("table.inactive")}
                     </Badge>
                   </TableCell>
                   <TableCell>

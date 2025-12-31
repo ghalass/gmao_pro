@@ -13,11 +13,13 @@ import NewParc from "./_components/new-parc";
 import FormError from "@/components/form/FormError";
 import ParcRowActions from "./_components/parc-row-actions";
 import { Badge } from "@/components/ui/badge";
+import { getScopedI18n } from "@/locales/server";
 
 const ParcsPage = async () => {
   const parcsResponse = await apiFetch(API.PARCS.ALL);
   const typeparcsResponse = await apiFetch(API.TYPEPARCS.ALL);
   const pannesResponse = await apiFetch(API.PANNES.ALL);
+  const t = await getScopedI18n("pages.parcs");
 
   if (!parcsResponse.ok) {
     return <FormError error={parcsResponse.data?.message} />;
@@ -26,15 +28,15 @@ const ParcsPage = async () => {
   const parcs = parcsResponse.data || [];
   const typeparcs = typeparcsResponse.ok ? typeparcsResponse.data : [];
   const pannes = pannesResponse.ok ? pannesResponse.data : [];
+  const plural = parcs.length !== 1 ? "s" : "";
 
   return (
     <div className="mx-auto p-4">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Gestion des Parcs</h1>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
           <p className="text-sm text-muted-foreground">
-            {parcs.length} parc{parcs.length !== 1 ? "s" : ""} configuré
-            {parcs.length !== 1 ? "s" : ""}
+            {parcs.length} parc{plural} configuré{plural}
           </p>
         </div>
         <div>
@@ -46,10 +48,10 @@ const ParcsPage = async () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nom du Parc</TableHead>
-              <TableHead>Type de Parc</TableHead>
-              <TableHead>Pannes possibles</TableHead>
-              <TableHead>Engins rattachés</TableHead>
+              <TableHead>{t("table.name")}</TableHead>
+              <TableHead>{t("table.type")}</TableHead>
+              <TableHead>{t("table.possiblePannes")}</TableHead>
+              <TableHead>{t("table.attachedEngins")}</TableHead>
               <TableHead className="w-0 text-right"></TableHead>
             </TableRow>
           </TableHeader>
@@ -60,7 +62,7 @@ const ParcsPage = async () => {
                   colSpan={5}
                   className="h-24 text-center text-muted-foreground italic"
                 >
-                  Aucun parc configuré
+                  {t("table.noParcs")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -74,7 +76,7 @@ const ParcsPage = async () => {
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary">
-                      {parc.typeparc?.name || "Non défini"}
+                      {parc.typeparc?.name || t("table.notDefined")}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -91,7 +93,7 @@ const ParcsPage = async () => {
                         ))
                       ) : (
                         <span className="text-xs text-muted-foreground italic">
-                          Aucune panne
+                          {t("table.noPanne")}
                         </span>
                       )}
                     </div>
@@ -99,7 +101,7 @@ const ParcsPage = async () => {
                   <TableCell>
                     <div className="flex items-center gap-1.5 text-muted-foreground">
                       <Truck className="h-4 w-4" />
-                      <span>{parc._count?.engins || 0} engins</span>
+                      <span>{parc._count?.engins || 0} {t("table.engins")}</span>
                     </div>
                   </TableCell>
                   <TableCell className="w-0 text-right">

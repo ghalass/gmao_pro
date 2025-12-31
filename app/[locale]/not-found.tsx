@@ -1,56 +1,23 @@
-// app/[locale]/not-found.tsx (version animée)
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Home, ArrowLeft, Navigation } from "lucide-react";
+// app/[locale]/not-found.tsx
+import { NotFoundPage } from "@/components/NotFoundPage";
 import { getScopedI18n } from "@/locales/server";
+import { Navigation } from "lucide-react";
 
 export default async function NotFound() {
   const notFoundPage = await getScopedI18n("pages.notFoundPage");
+
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md border-0 shadow-lg">
-        <CardContent className="p-8 text-center">
-          {/* Animated Icon */}
-          <div className="flex justify-center mb-6">
-            <div className="relative">
-              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center animate-pulse">
-                <Navigation className="h-10 w-10 text-primary" />
-              </div>
-              <div className="absolute -top-2 -right-2">
-                <div className="bg-destructive text-destructive-foreground px-2 py-1 rounded-full text-xs font-medium animate-bounce">
-                  404
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Title & Description */}
-          <div className="space-y-3 mb-6">
-            <h1 className="text-2xl font-bold text-foreground">
-              {notFoundPage("title")}
-            </h1>
-            <p className="text-muted-foreground">{notFoundPage("message")}</p>
-          </div>
-
-          {/* Actions */}
-          <div className="flex flex-col gap-3">
-            <Button asChild className="gap-2">
-              <Link href="/">
-                <Home className="h-4 w-4" />
-                {notFoundPage("buttonText")}
-              </Link>
-            </Button>
-          </div>
-
-          {/* Footer */}
-          <div className="mt-6 pt-6 border-t">
-            <p className="text-xs text-muted-foreground">
-              {notFoundPage("info")}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <NotFoundPage
+      title={notFoundPage("title")}
+      message={notFoundPage("message")}
+      buttonText={notFoundPage("buttonText")}
+      buttonHref="/"
+      info={notFoundPage("info")}
+      icon={Navigation}
+      iconClassName="text-primary"
+      iconBgClassName="bg-primary/10"
+      className="min-h-screen p-4"
+      cardClassName="border-0"
+    />
   );
 }

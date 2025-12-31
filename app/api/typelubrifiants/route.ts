@@ -5,7 +5,7 @@ import { getSession } from "@/lib/auth";
 
 const the_resource = "typelubrifiant";
 
-// GET - Récupérer tous les types de lubrifiant
+// GET - Récupérer tous les typelubrifiants
 export async function GET(request: NextRequest) {
   try {
     const protectionError = await protectReadRoute(request, the_resource);
@@ -20,11 +20,11 @@ export async function GET(request: NextRequest) {
 
     const typelubrifiants = await prisma.typelubrifiant.findMany({
       where: { entrepriseId },
-      orderBy: { name: "asc" },
       include: {
-        _count: {
-          select: { lubrifiants: true },
-        },
+        lubrifiants: true, // Relation OneToMany avec Lubrifiant
+      },
+      orderBy: {
+        createdAt: "desc",
       },
     });
 
@@ -32,20 +32,17 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Erreur GET /api/typelubrifiants:", error);
     return NextResponse.json(
-      { error: "Erreur lors de la récupération des types de lubrifiant" },
+      { error: "Erreur lors de la récupération des types de lubrifiants" },
       { status: 500 }
     );
   }
 }
 
-// POST - Créer un nouveau type de lubrifiant
+// POST - Créer un typelubrifiant
 export async function POST(request: NextRequest) {
   try {
     const protectionError = await protectCreateRoute(request, the_resource);
     if (protectionError) return protectionError;
-
-    const body = await request.json();
-    const { name } = body;
 
     const session = await getSession();
     const entrepriseId = session?.entrepriseId;
@@ -54,32 +51,51 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
     }
 
-    if (!name) {
+    // Vérifier que l'entreprise existe
+    const entreprise = await prisma.entreprise.findUnique({
+      where: { id: entrepriseId },
+    });
+    if (!entreprise) {
+      return NextResponse.json(
+        { message: "Aucune entreprise associée à ce entrepriseID" },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    const { name } = body;
+
+    if (!name || !name.trim()) {
       return NextResponse.json(
         { message: "Le nom est requis" },
         { status: 400 }
       );
     }
 
-    // Vérifier l'unicité du nom pour cette entreprise
-    const existing = await prisma.typelubrifiant.findFirst({
+    // Vérifier l'unicité du nom
+    const existingTypelubrifiant = await prisma.typelubrifiant.findUnique({
       where: {
-        name: name.trim(),
-        entrepriseId: entrepriseId,
+        name_entrepriseId: {
+          name: name.trim(),
+          entrepriseId,
+        },
       },
     });
 
-    if (existing) {
+    if (existingTypelubrifiant) {
       return NextResponse.json(
-        { message: "Un type de lubrifiant avec ce nom existe déjà" },
-        { status: 409 }
+        { message: "Ce nom de type de lubrifiant est déjà utilisé" },
+        { status: 400 }
       );
     }
 
     const typelubrifiant = await prisma.typelubrifiant.create({
       data: {
         name: name.trim(),
-        entrepriseId: entrepriseId,
+        entrepriseId,
+      },
+      include: {
+        lubrifiants: true,
       },
     });
 
@@ -87,7 +103,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Erreur POST /api/typelubrifiants:", error);
     return NextResponse.json(
-      { message: "Erreur lors de la création du type de lubrifiant" },
+      { error: "Erreur lors de la création du type de lubrifiant" },
       { status: 500 }
     );
   }

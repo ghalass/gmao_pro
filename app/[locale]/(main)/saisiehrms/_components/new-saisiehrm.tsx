@@ -155,6 +155,16 @@ const NewSaisiehrm = () => {
     }
   }, [modalOpen, form, fetchRelations]);
 
+  // Réinitialiser l'erreur lors de la fermeture du dialog
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setError(null);
+    }
+    if (!isSubmitting) {
+      setModalOpen(open);
+    }
+  };
+
   // Options filtrées
   const filteredParcs = parcs.filter(
     (p) =>
@@ -176,7 +186,7 @@ const NewSaisiehrm = () => {
   });
 
   return (
-    <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+    <Dialog open={modalOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button size="sm">
           <Plus className="mr-2 h-4 w-4" />
@@ -317,7 +327,11 @@ const NewSaisiehrm = () => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setModalOpen(false)}
+              onClick={() => {
+                setError(null);
+                form.reset();
+                setModalOpen(false);
+              }}
               disabled={isSubmitting}
             >
               Annuler

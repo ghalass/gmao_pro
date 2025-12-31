@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { protectCreateRoute, protectReadRoute } from "@/lib/rbac/middleware";
 import { getSession } from "@/lib/auth";
+import { formatErrorMessage } from "@/lib/error-handler";
 
 const the_resource = "saisiehim";
 
@@ -28,6 +29,16 @@ export async function GET(request: NextRequest) {
         panne: true,
         saisiehrm: true,
         engin: true,
+        saisielubrifiant: {
+          include: {
+            lubrifiant: {
+              include: {
+                typelubrifiant: true,
+              },
+            },
+            typeconsommationlub: true,
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -35,10 +46,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(saisiehims);
   } catch (error) {
     console.error("Erreur GET /api/saisiehims:", error);
-    return NextResponse.json(
-      { error: "Erreur lors de la récupération des saisies HIM" },
-      { status: 500 }
+    const { message, status } = formatErrorMessage(
+      error,
+      "récupération des saisies HIM"
     );
+    return NextResponse.json({ message }, { status });
   }
 }
 
@@ -127,15 +139,26 @@ export async function POST(request: NextRequest) {
         panne: true,
         saisiehrm: true,
         engin: true,
+        saisielubrifiant: {
+          include: {
+            lubrifiant: {
+              include: {
+                typelubrifiant: true,
+              },
+            },
+            typeconsommationlub: true,
+          },
+        },
       },
     });
 
     return NextResponse.json(saisiehim, { status: 201 });
   } catch (error) {
     console.error("Erreur POST /api/saisiehims:", error);
-    return NextResponse.json(
-      { message: "Erreur lors de la création de la saisie HIM" },
-      { status: 500 }
+    const { message, status } = formatErrorMessage(
+      error,
+      "création de la saisie HIM"
     );
+    return NextResponse.json({ message }, { status });
   }
 }

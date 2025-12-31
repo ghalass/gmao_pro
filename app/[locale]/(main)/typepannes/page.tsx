@@ -12,24 +12,26 @@ import { ListOrdered, Wrench } from "lucide-react";
 import NewTypepanne from "./_components/new-typepanne";
 import FormError from "@/components/form/FormError";
 import TypepanneRowActions from "./_components/typepanne-row-actions";
+import { getScopedI18n } from "@/locales/server";
 
 const TypepannesPage = async () => {
   const typepannesResponse = await apiFetch(API.TYPEPANNES.ALL);
+  const t = await getScopedI18n("pages.typepannes");
 
   if (!typepannesResponse.ok) {
     return <FormError error={typepannesResponse.data.message} />;
   }
 
   const typepannes = typepannesResponse.data || [];
+  const plural = typepannes.length !== 1 ? "s" : "";
 
   return (
     <div className="mx-auto p-4">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Types de Panne</h1>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
           <p className="text-sm text-muted-foreground">
-            {typepannes.length} type{typepannes.length !== 1 ? "s" : ""}{" "}
-            configuré{typepannes.length !== 1 ? "s" : ""}
+            {typepannes.length} type{plural} configuré{plural}
           </p>
         </div>
         <div>
@@ -41,9 +43,9 @@ const TypepannesPage = async () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nom du Type</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Pannes associées</TableHead>
+              <TableHead>{t("table.name")}</TableHead>
+              <TableHead>{t("table.description")}</TableHead>
+              <TableHead>{t("table.associatedPannes")}</TableHead>
               <TableHead className="w-0 text-right"></TableHead>
             </TableRow>
           </TableHeader>
@@ -54,7 +56,7 @@ const TypepannesPage = async () => {
                   colSpan={4}
                   className="h-24 text-center text-muted-foreground italic"
                 >
-                  Aucun type de panne configuré
+                  {t("table.noTypes")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -72,7 +74,7 @@ const TypepannesPage = async () => {
                   <TableCell>
                     <div className="flex items-center gap-1.5 text-muted-foreground">
                       <Wrench className="h-4 w-4" />
-                      <span>{typepanne._count?.pannes || 0} pannes</span>
+                      <span>{typepanne._count?.pannes || 0} {t("table.pannes")}</span>
                     </div>
                   </TableCell>
                   <TableCell className="w-0 text-right">

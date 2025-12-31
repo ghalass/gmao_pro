@@ -1,0 +1,289 @@
+"use client";
+
+import { API, apiFetch, methods } from "@/lib/api";
+import { Plus, Save } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { FormField } from "@/components/form/FormField";
+import { useCurrentLocale } from "@/locales/client";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useForm } from "@tanstack/react-form";
+import * as yup from "yup";
+import { fr, ar } from "yup-locales";
+import { FieldGroup } from "@/components/ui/field";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import FormError from "@/components/form/FormError";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+
+const NewTypeorgane = () => {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [parcs, setParcs] = useState<any[]>([]);
+  const [isLoadingParcs, setIsLoadingParcs] = useState(false);
+  const router = useRouter();
+  const locale = useCurrentLocale();
+  const [error, setError] = React.useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const typeorganeSchema = React.useMemo(() => {
+    if (locale === "ar") yup.setLocale(ar);
+    else yup.setLocale(fr);
+    return yup.object({
+      name: yup.string().min(2).required().label("Nom du type d'organe"),
+      parcIds: yup.array().of(yup.string().required()).label("Parcs"),
+    });
+  }, [locale]);
+
+  // Fonction pour récupérer les parcs
+  const getAllParcs = useCallback(async () => {
+    try {
+      setIsLoadingParcs(true);
+      const response = await apiFetch(API.PARCS.ALL, {
+        method: methods.GET,
+      });
+
+      if (response.ok && response.data) {
+        setParcs(response.data);
+      } else {
+        console.error(
+          "Erreur lors de la récupération des parcs:",
+          response.data?.message
+        );
+        toast.error("Impossible de charger les parcs");
+      }
+    } catch (error) {
+      console.error("Erreur:", error);
+      toast.error("Erreur lors du chargement des parcs");
+    } finally {
+      setIsLoadingParcs(false);
+    }
+  }, []);
+
+  const form = useForm({
+    defaultValues: {
+      name: "",
+      parcIds: [] as string[],
+    },
+    onSubmit: async ({ value }) => {
+      try {
+        setIsSubmitting(true);
+        setError(null);
+        await typeorganeSchema.validate(value, { abortEarly: false });
+
+        const response = await apiFetch(API.TYPEORGANES.TYPEORGANE_CREATE, {
+          method: methods.POST,
+          body: {
+            name: value.name,
+            parcIds: value.parcIds,
+          },
+        });
+
+        if (response.ok) {
+          router.refresh();
+          toast.success(`Type d'organe créé avec succès`);
+          setModalOpen(false);
+          form.reset();
+        } else {
+          const errorData = response.data?.message;
+          setError(errorData || "Erreur lors de la création");
+          toast.error(errorData || "Erreur lors de la création");
+        }
+      } catch (err: any) {
+        console.error("Erreur de création:", err);
+        if (err.name === "ValidationError") {
+          setError(err.errors.join(", "));
+          toast.error(err.errors.join(", "));
+        } else {
+          setError(err.message || "Erreur lors de la création");
+          toast.error(err.message || "Erreur lors de la création");
+        }
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+  });
+
+  useEffect(() => {
+    if (modalOpen) {
+      form.reset();
+      setError(null);
+      getAllParcs();
+    } else {
+      setError(null);
+      form.reset();
+    }
+  }, [modalOpen, form, getAllParcs]);
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setError(null);
+    }
+
+    if (!isSubmitting) {
+      setModalOpen(open);
+    }
+  };
+
+  return (
+    <Dialog open={modalOpen} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        <Button size="sm">
+          <Plus className="mr-2 h-4 w-4" />
+          Nouveau type d'organe
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            form.handleSubmit();
+          }}
+        >
+          <DialogHeader>
+            <DialogTitle>Créer un nouveau type d'organe</DialogTitle>
+            <DialogDescription>
+              Définissez une catégorie d'organe et associez-la à des parcs.
+            </DialogDescription>
+          </DialogHeader>
+          <FieldGroup className="gap-4 py-4">
+            <FormError error={error} />
+            <FormField
+              form={form}
+              name="name"
+              label="Nom du type"
+              placeholder="ex: Moteur, Transmission, etc."
+              disabled={isSubmitting}
+            />
+
+            {/* Section des parcs */}
+            <div className="space-y-3">
+              <div className="text-sm font-medium">
+                Parcs associés (optionnel)
+              </div>
+
+              {isLoadingParcs ? (
+                <div className="flex items-center justify-center py-4">
+                  <Spinner className="h-5 w-5" />
+                  <span className="ml-2">Chargement des parcs...</span>
+                </div>
+              ) : parcs.length === 0 ? (
+                <div className="text-sm text-muted-foreground text-center py-4">
+                  Aucun parc disponible
+                </div>
+              ) : (
+                <form.Field
+                  name="parcIds"
+                  children={(field) => {
+                    const selectedParcs = field.state.value || [];
+
+                    // Fonction pour gérer la sélection/désélection d'un parc
+                    const handleParcToggle = (
+                      parcId: string,
+                      checked: boolean
+                    ) => {
+                      if (checked) {
+                        // Ajouter le parc
+                        field.handleChange([...selectedParcs, parcId]);
+                      } else {
+                        // Retirer le parc
+                        field.handleChange(
+                          selectedParcs.filter((id) => id !== parcId)
+                        );
+                      }
+                    };
+
+                    return (
+                      <>
+                        <div className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto p-1">
+                          {parcs
+                            .filter((parc) => !!parc.id)
+                            .map((parc) => (
+                              <div
+                                key={parc.id}
+                                className="flex items-center space-x-2"
+                              >
+                                <Checkbox
+                                  id={`parc-${parc.id}-new`}
+                                  checked={selectedParcs.includes(parc.id)}
+                                  onCheckedChange={(checked) =>
+                                    handleParcToggle(parc.id, checked === true)
+                                  }
+                                  disabled={isSubmitting}
+                                />
+                                <Label
+                                  htmlFor={`parc-${parc.id}-new`}
+                                  className="text-sm font-normal cursor-pointer flex-1"
+                                >
+                                  <div className="font-medium">{parc.name}</div>
+                                  {parc.typeparc && (
+                                    <div className="text-xs text-muted-foreground">
+                                      {parc.typeparc.name}
+                                    </div>
+                                  )}
+                                </Label>
+                              </div>
+                            ))}
+                        </div>
+
+                        {selectedParcs.length > 0 && (
+                          <div className="text-sm text-muted-foreground mt-2">
+                            {selectedParcs.length} parc(s) sélectionné(s)
+                          </div>
+                        )}
+                      </>
+                    );
+                  }}
+                />
+              )}
+            </div>
+          </FieldGroup>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setError(null);
+                form.reset();
+                setModalOpen(false);
+              }}
+              disabled={isSubmitting}
+              size="sm"
+            >
+              Annuler
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting || isLoadingParcs}
+              size="sm"
+            >
+              {isSubmitting ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Spinner className="h-4 w-4" />
+                  Création...
+                </span>
+              ) : (
+                <span className="flex items-center justify-center gap-2">
+                  <Save className="h-4 w-4" />
+                  Créer
+                </span>
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default NewTypeorgane;

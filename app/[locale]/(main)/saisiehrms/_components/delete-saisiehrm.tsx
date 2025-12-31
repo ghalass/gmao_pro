@@ -34,6 +34,15 @@ const DeleteSaisiehrm = ({
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!isDeleting) {
+      if (!newOpen) {
+        setError(null);
+      }
+      onOpenChange(newOpen);
+    }
+  };
+
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
@@ -60,10 +69,10 @@ const DeleteSaisiehrm = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-red-600 flex items-center gap-2">
+          <DialogTitle className="text-destructive flex items-center gap-2">
             <Trash className="h-5 w-5" />
             Supprimer la saisie HRM
           </DialogTitle>
@@ -74,11 +83,11 @@ const DeleteSaisiehrm = ({
         </DialogHeader>
 
         <div className="py-4">
-          <div className="bg-red-50 p-4 rounded-lg border border-red-100">
-            <p className="text-sm font-medium text-red-800">
+          <div className="bg-destructive/10 p-4 rounded-lg border border-destructive/20">
+            <p className="text-sm font-medium text-destructive">
               Détails de la saisie :
             </p>
-            <ul className="mt-2 text-sm text-red-700 space-y-1">
+            <ul className="mt-2 text-sm text-destructive/80 space-y-1">
               <li>
                 <strong>Date:</strong> {getJoinedDate(saisiehrm.du)}
               </li>
@@ -97,7 +106,7 @@ const DeleteSaisiehrm = ({
           <Button
             type="button"
             variant="outline"
-            onClick={() => onOpenChange(false)}
+            onClick={() => handleOpenChange(false)}
             disabled={isDeleting}
           >
             Annuler

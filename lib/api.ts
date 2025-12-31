@@ -101,6 +101,49 @@ export const API = {
     UPDATE: (id: string) => `/api/saisiehims/${id}`,
     DELETE: (id: string) => `/api/saisiehims/${id}`,
   },
+  TYPELUBRIFIANTS: {
+    ALL: "/api/typelubrifiants",
+    TYPELUBRIFIANT_CREATE: "/api/typelubrifiants",
+    TYPELUBRIFIANT_DETAILS: (id: string) => `/api/typelubrifiants/${id}`,
+    TYPELUBRIFIANT_UPDATE: (id: string) => `/api/typelubrifiants/${id}`,
+    TYPELUBRIFIANT_DELETE: (id: string) => `/api/typelubrifiants/${id}`,
+  },
+  LUBRIFIANTS: {
+    ALL: "/api/lubrifiants",
+    LUBRIFIANT_CREATE: "/api/lubrifiants",
+    LUBRIFIANT_DETAILS: (id: string) => `/api/lubrifiants/${id}`,
+    LUBRIFIANT_UPDATE: (id: string) => `/api/lubrifiants/${id}`,
+    LUBRIFIANT_DELETE: (id: string) => `/api/lubrifiants/${id}`,
+  },
+  OBJECTIFS: {
+    ALL: "/api/objectifs",
+    OBJECTIF_CREATE: "/api/objectifs",
+    OBJECTIF_DETAILS: (id: string) => `/api/objectifs/${id}`,
+    OBJECTIF_UPDATE: (id: string) => `/api/objectifs/${id}`,
+    OBJECTIF_DELETE: (id: string) => `/api/objectifs/${id}`,
+  },
+  TYPEORGANES: {
+    ALL: "/api/typeorganes",
+    TYPEORGANE_CREATE: "/api/typeorganes",
+    TYPEORGANE_DETAILS: (id: string) => `/api/typeorganes/${id}`,
+    TYPEORGANE_UPDATE: (id: string) => `/api/typeorganes/${id}`,
+    TYPEORGANE_DELETE: (id: string) => `/api/typeorganes/${id}`,
+  },
+  SAISIELUBRIFIANTS: {
+    ALL: "/api/saisielubrifiants",
+    CREATE: "/api/saisielubrifiants",
+    DETAILS: (id: string) => `/api/saisielubrifiants/${id}`,
+    UPDATE: (id: string) => `/api/saisielubrifiants/${id}`,
+    DELETE: (id: string) => `/api/saisielubrifiants/${id}`,
+  },
+  TYPECONSOMMATIONLUBS: {
+    ALL: "/api/typeconsommationlubs",
+    CREATE: "/api/typeconsommationlubs",
+    DETAILS: (id: string) => `/api/typeconsommationlubs/${id}`,
+    UPDATE: (id: string) => `/api/typeconsommationlubs/${id}`,
+    DELETE: (id: string) => `/api/typeconsommationlubs/${id}`,
+    BY_PARC: (parcId: string) => `/api/typeconsommationlubs?parcId=${parcId}`,
+  },
 };
 
 export enum methods {

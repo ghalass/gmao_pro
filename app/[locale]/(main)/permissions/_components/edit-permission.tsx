@@ -250,7 +250,11 @@ const EditPermission = ({
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => {
+                setError(null);
+                form.reset();
+                onOpenChange(false);
+              }}
               disabled={isSubmitting}
               size="sm"
             >

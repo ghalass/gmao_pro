@@ -58,7 +58,7 @@ const DeletePermission = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(o) => !isDeleting && onOpenChange(o)}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Supprimer la permission</DialogTitle>

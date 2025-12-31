@@ -188,6 +188,16 @@ const EditSaisiehrm = ({
     }
   }, [open, saisiehrm, form, fetchRelations]);
 
+  // Réinitialiser l'erreur lors de la fermeture du dialog
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      setError(null);
+    }
+    if (!isSubmitting) {
+      onOpenChange(newOpen);
+    }
+  };
+
   // Options filtrées
   const filteredParcs = parcs.filter(
     (p) =>
@@ -209,7 +219,7 @@ const EditSaisiehrm = ({
   });
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Modifier la saisie HRM</DialogTitle>
@@ -344,7 +354,11 @@ const EditSaisiehrm = ({
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => {
+                setError(null);
+                form.reset();
+                onOpenChange(false);
+              }}
               disabled={isSubmitting}
             >
               Annuler

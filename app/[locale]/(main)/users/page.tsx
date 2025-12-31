@@ -24,6 +24,7 @@ import { User, Role } from "@/lib/generated/prisma/client";
 import NewUser from "./_components/new-user";
 import FormError from "@/components/form/FormError";
 import UserRowActions from "./_components/user-row-actions";
+import { getScopedI18n } from "@/locales/server";
 
 type UserWithRole = User & {
   roles: Role[];
@@ -31,20 +32,22 @@ type UserWithRole = User & {
 
 const UsersPage = async () => {
   const usersResponse = await apiFetch(API.USERS.ALL);
+  const t = await getScopedI18n("pages.users");
 
   if (!usersResponse.ok) {
     return <FormError error={usersResponse.data.message} />;
   }
 
   const users = usersResponse.data || [];
+  const plural = users.length !== 1 ? "s" : "";
 
   return (
     <div className="mx-auto p-4">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Utilisateurs</h1>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
           <p className="text-sm text-muted-foreground">
-            {users.length} utilisateur{users.length !== 1 ? "s" : ""}
+            {users.length} utilisateur{plural}
           </p>
         </div>
         <div>
@@ -56,11 +59,11 @@ const UsersPage = async () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Utilisateur</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Rôle</TableHead>
-              <TableHead>Statut</TableHead>
-              <TableHead>Date création</TableHead>
+              <TableHead>{t("table.user")}</TableHead>
+              <TableHead>{t("table.email")}</TableHead>
+              <TableHead>{t("table.role")}</TableHead>
+              <TableHead>{t("table.status")}</TableHead>
+              <TableHead>{t("table.creationDate")}</TableHead>
               <TableHead className="w-0 text-right"></TableHead>
             </TableRow>
           </TableHeader>
@@ -68,7 +71,7 @@ const UsersPage = async () => {
             {users.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-24 text-center">
-                  Aucun utilisateur
+                  {t("table.noUsers")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -92,7 +95,7 @@ const UsersPage = async () => {
                           {currentUser.isSuperAdmin && (
                             <Badge variant="outline" className="w-fit">
                               <Shield className="mr-1 h-3 w-3" />
-                              Super Admin
+                              {t("table.superAdmin")}
                             </Badge>
                           )}
                         </div>
@@ -113,7 +116,7 @@ const UsersPage = async () => {
                       {(!currentUser.roles ||
                         currentUser.roles.length === 0) && (
                         <span className="text-sm text-muted-foreground">
-                          Aucun rôle
+                          {t("table.noRole")}
                         </span>
                       )}
                     </TableCell>
@@ -124,7 +127,9 @@ const UsersPage = async () => {
                         ) : (
                           <XCircle className="h-4 w-4 text-red-500" />
                         )}
-                        {currentUser.active ? "Actif" : "Inactif"}
+                        {currentUser.active
+                          ? t("table.active")
+                          : t("table.inactive")}
                       </div>
                     </TableCell>
                     <TableCell>

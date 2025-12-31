@@ -6,6 +6,7 @@ import {
   protectUpdateRoute,
 } from "@/lib/rbac/middleware";
 import { getSession } from "@/lib/auth";
+import { formatErrorMessage } from "@/lib/error-handler";
 
 const the_resource = "saisiehrm";
 
@@ -52,10 +53,11 @@ export async function GET(
     return NextResponse.json(saisiehrm);
   } catch (error) {
     console.error("Erreur GET /api/saisiehrms/[id]:", error);
-    return NextResponse.json(
-      { error: "Erreur lors de la récupération de la saisie HRM" },
-      { status: 500 }
+    const { message, status } = formatErrorMessage(
+      error,
+      "récupération de la saisie HRM"
     );
+    return NextResponse.json({ message }, { status });
   }
 }
 
@@ -159,10 +161,11 @@ export async function PATCH(
     return NextResponse.json(updated);
   } catch (error) {
     console.error("Erreur PATCH /api/saisiehrms/[id]:", error);
-    return NextResponse.json(
-      { message: "Erreur lors de la mise à jour de la saisie HRM" },
-      { status: 500 }
+    const { message, status } = formatErrorMessage(
+      error,
+      "mise à jour de la saisie HRM"
     );
+    return NextResponse.json({ message }, { status });
   }
 }
 
@@ -202,9 +205,10 @@ export async function DELETE(
     return NextResponse.json({ message: "Saisie HRM supprimée avec succès" });
   } catch (error) {
     console.error("Erreur DELETE /api/saisiehrms/[id]:", error);
-    return NextResponse.json(
-      { message: "Erreur lors de la suppression de la saisie HRM" },
-      { status: 500 }
+    const { message, status } = formatErrorMessage(
+      error,
+      "suppression de la saisie HRM"
     );
+    return NextResponse.json({ message }, { status });
   }
 }

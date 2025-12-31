@@ -6,6 +6,7 @@ import {
   protectUpdateRoute,
 } from "@/lib/rbac/middleware";
 import { getSession } from "@/lib/auth";
+import { formatErrorMessage } from "@/lib/error-handler";
 
 const the_resource = "saisiehim";
 
@@ -39,6 +40,16 @@ export async function GET(
         panne: true,
         saisiehrm: true,
         engin: true,
+        saisielubrifiant: {
+          include: {
+            lubrifiant: {
+              include: {
+                typelubrifiant: true,
+              },
+            },
+            typeconsommationlub: true,
+          },
+        },
       },
     });
 
@@ -52,10 +63,11 @@ export async function GET(
     return NextResponse.json(saisiehim);
   } catch (error) {
     console.error("Erreur GET /api/saisiehims/[id]:", error);
-    return NextResponse.json(
-      { error: "Erreur lors de la récupération de la saisie HIM" },
-      { status: 500 }
+    const { message, status } = formatErrorMessage(
+      error,
+      "récupération de la saisie HIM"
     );
+    return NextResponse.json({ message }, { status });
   }
 }
 
@@ -156,16 +168,27 @@ export async function PATCH(
         panne: true,
         saisiehrm: true,
         engin: true,
+        saisielubrifiant: {
+          include: {
+            lubrifiant: {
+              include: {
+                typelubrifiant: true,
+              },
+            },
+            typeconsommationlub: true,
+          },
+        },
       },
     });
 
     return NextResponse.json(updated);
   } catch (error) {
     console.error("Erreur PATCH /api/saisiehims/[id]:", error);
-    return NextResponse.json(
-      { message: "Erreur lors de la mise à jour de la saisie HIM" },
-      { status: 500 }
+    const { message, status } = formatErrorMessage(
+      error,
+      "mise à jour de la saisie HIM"
     );
+    return NextResponse.json({ message }, { status });
   }
 }
 
@@ -210,9 +233,10 @@ export async function DELETE(
     return NextResponse.json({ message: "Saisie HIM supprimée avec succès" });
   } catch (error) {
     console.error("Erreur DELETE /api/saisiehims/[id]:", error);
-    return NextResponse.json(
-      { message: "Erreur lors de la suppression de la saisie HIM" },
-      { status: 500 }
+    const { message, status } = formatErrorMessage(
+      error,
+      "suppression de la saisie HIM"
     );
+    return NextResponse.json({ message }, { status });
   }
 }

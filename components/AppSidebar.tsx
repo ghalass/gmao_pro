@@ -28,6 +28,9 @@ import {
   FormInput as FormInputIcon,
   Move,
   ClockCheck,
+  Droplet,
+  SoapDispenserDroplet,
+  Target,
 } from "lucide-react";
 
 import {
@@ -148,6 +151,38 @@ export function AppSidebar() {
         url: "/typepannes",
         icon: ListOrdered,
         description: "Gérer les type des pannes",
+      },
+
+      {
+        title: "Lubrifiants",
+        url: "/lubrifiants",
+        icon: SoapDispenserDroplet,
+        description: "Gérer les lubrifiants",
+      },
+      {
+        title: "Type de lubrifiant",
+        url: "/typelubrifiants",
+        icon: Droplet,
+        description: "Gérer les type des lubrifiant",
+      },
+      {
+        title: "Type de consommation de lubrifiant",
+        url: "/typeconsommationlubs",
+        icon: Droplet,
+        description: "Gérer les type des consommations de lubrifiant",
+      },
+
+      {
+        title: "Type d'organe",
+        url: "/typeorganes",
+        icon: Puzzle,
+        description: "Gérer les types d'organes",
+      },
+      {
+        title: "Objectifs",
+        url: "/objectifs",
+        icon: Target,
+        description: "Gérer les objectifs",
       },
     ],
   };

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { protectCreateRoute, protectReadRoute } from "@/lib/rbac/middleware";
 import { getSession } from "@/lib/auth";
+import { formatErrorMessage } from "@/lib/error-handler";
 
 const the_resource = "saisiehrm";
 
@@ -73,10 +74,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(saisiehrms);
   } catch (error) {
     console.error("Erreur GET /api/saisiehrms:", error);
-    return NextResponse.json(
-      { error: "Erreur lors de la récupération des saisies HRM" },
-      { status: 500 }
+    const { message, status } = formatErrorMessage(
+      error,
+      "récupération des saisies HRM"
     );
+    return NextResponse.json({ message }, { status });
   }
 }
 
@@ -141,9 +143,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(saisiehrm, { status: 201 });
   } catch (error) {
     console.error("Erreur POST /api/saisiehrms:", error);
-    return NextResponse.json(
-      { message: "Erreur lors de la création de la saisie HRM" },
-      { status: 500 }
+    const { message, status } = formatErrorMessage(
+      error,
+      "création de la saisie HRM"
     );
+    return NextResponse.json({ message }, { status });
   }
 }

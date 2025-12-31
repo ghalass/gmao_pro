@@ -12,6 +12,9 @@ type FormFieldProps = {
   disabled?: boolean;
   validationSchema?: ObjectSchema<any>;
   customValidator?: (value: any) => string | undefined;
+  min?: string | number;
+  max?: string | number;
+  step?: string | number;
 };
 
 export function FormField({
@@ -24,6 +27,9 @@ export function FormField({
   disabled = false,
   validationSchema,
   customValidator,
+  min,
+  max,
+  step,
 }: FormFieldProps) {
   const getValidators = () => {
     const validators: any = {};
@@ -92,6 +98,9 @@ export function FormField({
               className={showError ? "border-red-500" : ""}
               autoComplete={autoComplete}
               disabled={disabled}
+              min={min}
+              max={max}
+              step={step}
               aria-invalid={!!showError}
               aria-describedby={showError ? `${fieldName}-error` : undefined}
             />

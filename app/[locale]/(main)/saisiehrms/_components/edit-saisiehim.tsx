@@ -147,8 +147,16 @@ const EditSaisiehim = ({
     }
   }, [open, fetchPannes, saisiehim]);
 
+  // Réinitialiser l'erreur lors de la fermeture du dialog
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      setError(null);
+    }
+    onOpenChange(newOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Modifier la saisie HIM</DialogTitle>
@@ -209,7 +217,11 @@ const EditSaisiehim = ({
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => {
+                setError(null);
+                form.reset();
+                onOpenChange(false);
+              }}
               disabled={isSubmitting}
             >
               Annuler
