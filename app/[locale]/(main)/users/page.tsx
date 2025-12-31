@@ -1,3 +1,5 @@
+"use client";
+
 // app/utilisateurs/page.tsx
 import { API, apiFetch } from "@/lib/api";
 import {
@@ -24,46 +26,77 @@ import { User, Role } from "@/lib/generated/prisma/client";
 import NewUser from "./_components/new-user";
 import FormError from "@/components/form/FormError";
 import UserRowActions from "./_components/user-row-actions";
-import { getScopedI18n } from "@/locales/server";
+import { Spinner } from "@/components/ui/spinner";
+import React, { useState, useEffect } from "react";
 
 type UserWithRole = User & {
   roles: Role[];
 };
 
-const UsersPage = async () => {
-  const usersResponse = await apiFetch(API.USERS.ALL);
-  const t = await getScopedI18n("pages.users");
+const UsersPage = () => {
+  const [loading, setLoading] = useState(false);
+  const [users, setUsers] = React.useState<UserWithRole[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!usersResponse.ok) {
-    return <FormError error={usersResponse.data.message} />;
-  }
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  const users = usersResponse.data || [];
+      const usersResponse = await apiFetch(API.USERS.ALL);
+
+      if (!usersResponse.ok) {
+        setError(usersResponse.data?.message || "Erreur de chargement");
+        return;
+      }
+
+      setUsers(usersResponse.data || []);
+    } catch (err: any) {
+      setError(err.message || "Erreur de chargement");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const plural = users.length !== 1 ? "s" : "";
 
   return (
     <div className="mx-auto p-4">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold">Utilisateurs</h1>
+            {loading && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Spinner className="h-3 w-3" />
+                <span className="text-xs">Mise à jour...</span>
+              </div>
+            )}
+          </div>
           <p className="text-sm text-muted-foreground">
             {users.length} utilisateur{plural}
           </p>
         </div>
         <div>
-          <NewUser />
+          <NewUser onSuccess={fetchData} />
         </div>
       </div>
+
+      {error && <FormError error={error} />}
 
       <Card>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t("table.user")}</TableHead>
-              <TableHead>{t("table.email")}</TableHead>
-              <TableHead>{t("table.role")}</TableHead>
-              <TableHead>{t("table.status")}</TableHead>
-              <TableHead>{t("table.creationDate")}</TableHead>
+              <TableHead>Utilisateur</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Rôle</TableHead>
+              <TableHead>Statut</TableHead>
+              <TableHead>Date de création</TableHead>
               <TableHead className="w-0 text-right"></TableHead>
             </TableRow>
           </TableHeader>
@@ -71,7 +104,7 @@ const UsersPage = async () => {
             {users.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-24 text-center">
-                  {t("table.noUsers")}
+                  Aucun utilisateur
                 </TableCell>
               </TableRow>
             ) : (
@@ -95,7 +128,7 @@ const UsersPage = async () => {
                           {currentUser.isSuperAdmin && (
                             <Badge variant="outline" className="w-fit">
                               <Shield className="mr-1 h-3 w-3" />
-                              {t("table.superAdmin")}
+                              Super Admin
                             </Badge>
                           )}
                         </div>
@@ -116,7 +149,7 @@ const UsersPage = async () => {
                       {(!currentUser.roles ||
                         currentUser.roles.length === 0) && (
                         <span className="text-sm text-muted-foreground">
-                          {t("table.noRole")}
+                          Aucun rôle
                         </span>
                       )}
                     </TableCell>
@@ -127,9 +160,7 @@ const UsersPage = async () => {
                         ) : (
                           <XCircle className="h-4 w-4 text-red-500" />
                         )}
-                        {currentUser.active
-                          ? t("table.active")
-                          : t("table.inactive")}
+                        {currentUser.active ? "Actif" : "Inactif"}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -139,7 +170,10 @@ const UsersPage = async () => {
                       </div>
                     </TableCell>
                     <TableCell className="w-0 text-right">
-                      <UserRowActions user={currentUser} />
+                      <UserRowActions
+                        user={currentUser}
+                        onUserUpdated={fetchData}
+                      />
                     </TableCell>
                   </TableRow>
                 );

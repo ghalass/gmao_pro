@@ -39,6 +39,7 @@ interface EditEnginProps {
   sites: any[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 const EditEngin = ({
@@ -47,6 +48,7 @@ const EditEngin = ({
   sites,
   open,
   onOpenChange,
+  onSuccess,
 }: EditEnginProps) => {
   const router = useRouter();
   const locale = useCurrentLocale();
@@ -82,6 +84,20 @@ const EditEngin = ({
       try {
         setIsSubmitting(true);
         setError(null);
+
+        // Détection de changements
+        const hasChanges =
+          value.name !== engin?.name ||
+          value.active !== engin?.active ||
+          value.parcId !== engin?.parcId ||
+          value.siteId !== engin?.siteId ||
+          value.initialHeureChassis !== (engin?.initialHeureChassis || 0);
+
+        if (!hasChanges) {
+          onOpenChange?.(false);
+          return;
+        }
+
         await enginSchema.validate(value, { abortEarly: false });
 
         const response = await apiFetch(API.ENGINS.ENGIN_UPDATE(engin.id), {
@@ -93,6 +109,7 @@ const EditEngin = ({
           router.refresh();
           toast.success(`Engin mis à jour`);
           onOpenChange(false);
+          onSuccess?.();
         } else {
           setError(response.data?.message || "Erreur lors de la mise à jour");
         }

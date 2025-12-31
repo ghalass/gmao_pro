@@ -20,12 +20,14 @@ interface DeleteTypelubrifiantProps {
   typelubrifiant: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 const DeleteTypelubrifiant = ({
   typelubrifiant,
   open,
   onOpenChange,
+  onSuccess,
 }: DeleteTypelubrifiantProps) => {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = React.useState(false);
@@ -44,6 +46,7 @@ const DeleteTypelubrifiant = ({
         toast.success(`Type de lubrifiant supprimé avec succès`);
         onOpenChange(false);
         router.refresh();
+        onSuccess?.();
       } else {
         const errorData = response.data?.message;
         toast.error(errorData || "Erreur lors de la suppression");

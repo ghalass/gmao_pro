@@ -21,9 +21,10 @@ type UserWithRoles = User & {
 
 interface UserRowActionsProps {
   user: UserWithRoles;
+  onUserUpdated?: () => void;
 }
 
-const UserRowActions = ({ user }: UserRowActionsProps) => {
+const UserRowActions = ({ user, onUserUpdated }: UserRowActionsProps) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -55,12 +56,14 @@ const UserRowActions = ({ user }: UserRowActionsProps) => {
         user={user}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
+        onSuccess={onUserUpdated}
       />
 
       <DeleteUser
         user={user}
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
+        onSuccess={onUserUpdated}
       />
     </>
   );

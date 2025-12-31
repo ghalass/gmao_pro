@@ -20,12 +20,14 @@ interface DeleteTypeconsommationlubProps {
   typeconsommationlub: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 const DeleteTypeconsommationlub = ({
   typeconsommationlub,
   open,
   onOpenChange,
+  onSuccess,
 }: DeleteTypeconsommationlubProps) => {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = React.useState(false);
@@ -44,6 +46,7 @@ const DeleteTypeconsommationlub = ({
         toast.success(`Type de consommation supprimé avec succès`);
         onOpenChange(false);
         router.refresh();
+        onSuccess?.();
       } else {
         const errorData = response.data?.message;
         toast.error(errorData || "Erreur lors de la suppression");

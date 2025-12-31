@@ -38,6 +38,7 @@ interface EditLubrifiantProps {
   parcs: any[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 const EditLubrifiant = ({
@@ -46,6 +47,7 @@ const EditLubrifiant = ({
   parcs,
   open,
   onOpenChange,
+  onSuccess,
 }: EditLubrifiantProps) => {
   const router = useRouter();
   const locale = useCurrentLocale();
@@ -79,6 +81,21 @@ const EditLubrifiant = ({
       try {
         setIsSubmitting(true);
         setError(null);
+
+        // Détection de changements
+        const hasChanges =
+          value.name !== lubrifiant?.name ||
+          value.typelubrifiantId !== lubrifiant?.typelubrifiantId ||
+          JSON.stringify(value.parcIds?.sort()) !==
+            JSON.stringify(
+              lubrifiant?.lubrifiantParc?.map((lp: any) => lp.parc.id).sort()
+            );
+
+        if (!hasChanges) {
+          onOpenChange?.(false);
+          return;
+        }
+
         await lubrifiantSchema.validate(value, { abortEarly: false });
 
         const response = await apiFetch(
@@ -93,6 +110,7 @@ const EditLubrifiant = ({
           router.refresh();
           toast.success(`Lubrifiant mis à jour`);
           onOpenChange(false);
+          onSuccess?.();
         } else {
           const errorData = response.data?.message;
           setError(errorData || "Erreur lors de la mise à jour");
@@ -118,8 +136,7 @@ const EditLubrifiant = ({
       form.reset({
         name: lubrifiant.name,
         typelubrifiantId: lubrifiant.typelubrifiantId,
-        parcIds:
-          lubrifiant.lubrifiantParc?.map((lp: any) => lp.parc.id) || [],
+        parcIds: lubrifiant.lubrifiantParc?.map((lp: any) => lp.parc.id) || [],
       });
       setError(null);
     } else {
@@ -210,9 +227,7 @@ const EditLubrifiant = ({
                                 field.handleChange([...current, parc.id]);
                               } else {
                                 field.handleChange(
-                                  current.filter(
-                                    (id: string) => id !== parc.id
-                                  )
+                                  current.filter((id: string) => id !== parc.id)
                                 );
                               }
                             }}
@@ -275,4 +290,3 @@ const EditLubrifiant = ({
 };
 
 export default EditLubrifiant;
-

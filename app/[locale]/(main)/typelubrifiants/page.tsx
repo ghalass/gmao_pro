@@ -1,3 +1,5 @@
+"use client";
+
 // app/[locale]/(main)/typelubrifiants/page.tsx
 import { API, apiFetch } from "@/lib/api";
 import {
@@ -14,40 +16,73 @@ import NewTypelubrifiant from "./_components/new-typelubrifiant";
 import FormError from "@/components/form/FormError";
 import TypelubrifiantRowActions from "./_components/typelubrifiant-row-actions";
 import { getJoinedDate } from "@/lib/utils";
-import { getScopedI18n } from "@/locales/server";
+import { Spinner } from "@/components/ui/spinner";
+import React, { useState, useEffect } from "react";
 
-const TypelubrifiantsPage = async () => {
-  const typelubrifiantsResponse = await apiFetch(API.TYPELUBRIFIANTS.ALL);
-  const t = await getScopedI18n("pages.typelubrifiants");
+const TypelubrifiantsPage = () => {
+  const [loading, setLoading] = useState(false);
+  const [typelubrifiants, setTypelubrifiants] = React.useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!typelubrifiantsResponse.ok) {
-    return <FormError error={typelubrifiantsResponse.data.message} />;
-  }
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  const typelubrifiants = typelubrifiantsResponse.data || [];
+      const typelubrifiantsResponse = await apiFetch(API.TYPELUBRIFIANTS.ALL);
+
+      if (!typelubrifiantsResponse.ok) {
+        setError(
+          typelubrifiantsResponse.data?.message || "Erreur de chargement"
+        );
+        return;
+      }
+
+      setTypelubrifiants(typelubrifiantsResponse.data || []);
+    } catch (err: any) {
+      setError(err.message || "Erreur de chargement");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const plural = typelubrifiants.length !== 1 ? "s" : "";
 
   return (
     <div className="mx-auto p-4">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold">Types de Lubrifiants</h1>
+            {loading && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Spinner className="h-3 w-3" />
+                <span className="text-xs">Mise à jour...</span>
+              </div>
+            )}
+          </div>
           <p className="text-sm text-muted-foreground">
             {typelubrifiants.length} type{plural} configuré{plural}
           </p>
         </div>
         <div>
-          <NewTypelubrifiant />
+          <NewTypelubrifiant onSuccess={fetchData} />
         </div>
       </div>
+
+      {error && <FormError error={error} />}
 
       <Card>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t("table.name")}</TableHead>
-              <TableHead>{t("table.associatedLubrifiants")}</TableHead>
-              <TableHead>{t("table.creationDate")}</TableHead>
+              <TableHead>Nom</TableHead>
+              <TableHead>Lubrifiants associés</TableHead>
+              <TableHead>Date de création</TableHead>
               <TableHead className="w-0 text-right"></TableHead>
             </TableRow>
           </TableHeader>
@@ -58,7 +93,7 @@ const TypelubrifiantsPage = async () => {
                   colSpan={4}
                   className="h-24 text-center text-muted-foreground italic"
                 >
-                  {t("table.noTypes")}
+                  Aucun type de lubrifiant configuré
                 </TableCell>
               </TableRow>
             ) : (
@@ -88,7 +123,10 @@ const TypelubrifiantsPage = async () => {
                       </div>
                     </TableCell>
                     <TableCell className="w-0 text-right">
-                      <TypelubrifiantRowActions typelubrifiant={typelubrifiant} />
+                      <TypelubrifiantRowActions
+                        typelubrifiant={typelubrifiant}
+                        onTypelubrifiantUpdated={fetchData}
+                      />
                     </TableCell>
                   </TableRow>
                 );

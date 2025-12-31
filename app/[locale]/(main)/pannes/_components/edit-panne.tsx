@@ -40,6 +40,7 @@ interface EditPanneProps {
   parcs: any[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 const EditPanne = ({
@@ -48,6 +49,7 @@ const EditPanne = ({
   parcs,
   open,
   onOpenChange,
+  onSuccess,
 }: EditPanneProps) => {
   const router = useRouter();
   const locale = useCurrentLocale();
@@ -84,6 +86,19 @@ const EditPanne = ({
         setError(null);
         await panneSchema.validate(value, { abortEarly: false });
 
+        // Détection de changements
+        const hasChanges =
+          value.name !== panne?.name ||
+          value.description !== (panne?.description || "") ||
+          value.typepanneId !== panne?.typepanneId ||
+          JSON.stringify(value.parcIds?.sort()) !==
+            JSON.stringify(panne?.parcs?.map((p: any) => p.id).sort() || []);
+
+        if (!hasChanges) {
+          onOpenChange?.(false);
+          return;
+        }
+
         const response = await apiFetch(API.PANNES.PANNE_UPDATE(panne.id), {
           method: methods.PATCH,
           body: value,
@@ -93,6 +108,7 @@ const EditPanne = ({
           router.refresh();
           toast.success(`Panne mise à jour`);
           onOpenChange(false);
+          onSuccess?.();
         } else {
           setError(response.data?.message || "Erreur lors de la mise à jour");
         }

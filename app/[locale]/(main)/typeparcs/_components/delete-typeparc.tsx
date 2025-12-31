@@ -20,12 +20,14 @@ interface DeleteTypeparcProps {
   typeparc: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 const DeleteTypeparc = ({
   typeparc,
   open,
   onOpenChange,
+  onSuccess,
 }: DeleteTypeparcProps) => {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = React.useState(false);
@@ -44,6 +46,7 @@ const DeleteTypeparc = ({
         toast.success(`Type de parc supprimé avec succès`);
         onOpenChange(false);
         router.refresh();
+        onSuccess?.();
       } else {
         toast.error(response.data?.message || "Erreur lors de la suppression");
       }

@@ -20,9 +20,15 @@ interface DeleteParcProps {
   parc: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
-const DeleteParc = ({ parc, open, onOpenChange }: DeleteParcProps) => {
+const DeleteParc = ({
+  parc,
+  open,
+  onOpenChange,
+  onSuccess,
+}: DeleteParcProps) => {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = React.useState(false);
 
@@ -37,6 +43,7 @@ const DeleteParc = ({ parc, open, onOpenChange }: DeleteParcProps) => {
         toast.success(`Parc supprimé avec succès`);
         onOpenChange(false);
         router.refresh();
+        onSuccess?.();
       } else {
         toast.error(response.data?.message || "Erreur lors de la suppression");
       }

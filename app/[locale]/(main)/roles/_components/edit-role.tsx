@@ -34,9 +34,10 @@ interface EditRoleProps {
   role: RoleWithPermissions;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
-const EditRole = ({ role, open, onOpenChange }: EditRoleProps) => {
+const EditRole = ({ role, open, onOpenChange, onSuccess }: EditRoleProps) => {
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [isLoadingPermissions, setIsLoadingPermissions] = useState(false);
 
@@ -119,6 +120,7 @@ const EditRole = ({ role, open, onOpenChange }: EditRoleProps) => {
           router.refresh();
           toast.success(`Rôle mis à jour avec succès`);
           onOpenChange(false);
+          onSuccess?.();
         } else {
           const errorData = response.data?.message;
           setError(errorData || "Erreur lors de la mise à jour");

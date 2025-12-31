@@ -1,3 +1,5 @@
+"use client";
+
 // app/[locale]/(main)/lubrifiants/page.tsx
 import { API, apiFetch } from "@/lib/api";
 import {
@@ -15,47 +17,87 @@ import FormError from "@/components/form/FormError";
 import LubrifiantRowActions from "./_components/lubrifiant-row-actions";
 import { getJoinedDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { getScopedI18n } from "@/locales/server";
+import { Spinner } from "@/components/ui/spinner";
+import React, { useState, useEffect } from "react";
 
-const LubrifiantsPage = async () => {
-  const lubrifiantsResponse = await apiFetch(API.LUBRIFIANTS.ALL);
-  const typelubrifiantsResponse = await apiFetch(API.TYPELUBRIFIANTS.ALL);
-  const parcsResponse = await apiFetch(API.PARCS.ALL);
-  const t = await getScopedI18n("pages.lubrifiants");
+const LubrifiantsPage = () => {
+  const [loading, setLoading] = useState(false);
+  const [lubrifiants, setLubrifiants] = React.useState<any[]>([]);
+  const [typelubrifiants, setTypelubrifiants] = React.useState<any[]>([]);
+  const [parcs, setParcs] = React.useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!lubrifiantsResponse.ok) {
-    return <FormError error={lubrifiantsResponse.data.message} />;
-  }
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  const lubrifiants = lubrifiantsResponse.data || [];
-  const typelubrifiants = typelubrifiantsResponse.ok
-    ? typelubrifiantsResponse.data
-    : [];
-  const parcs = parcsResponse.ok ? parcsResponse.data : [];
+      const [lubrifiantsResponse, typelubrifiantsResponse, parcsResponse] =
+        await Promise.all([
+          apiFetch(API.LUBRIFIANTS.ALL),
+          apiFetch(API.TYPELUBRIFIANTS.ALL),
+          apiFetch(API.PARCS.ALL),
+        ]);
+
+      if (!lubrifiantsResponse.ok) {
+        setError(lubrifiantsResponse.data?.message || "Erreur de chargement");
+        return;
+      }
+
+      setLubrifiants(lubrifiantsResponse.data || []);
+      setTypelubrifiants(
+        typelubrifiantsResponse.ok ? typelubrifiantsResponse.data : []
+      );
+      setParcs(parcsResponse.ok ? parcsResponse.data : []);
+    } catch (err: any) {
+      setError(err.message || "Erreur de chargement");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const plural = lubrifiants.length !== 1 ? "s" : "";
 
   return (
     <div className="mx-auto p-4">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold">Lubrifiants</h1>
+            {loading && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Spinner className="h-3 w-3" />
+                <span className="text-xs">Mise à jour...</span>
+              </div>
+            )}
+          </div>
           <p className="text-sm text-muted-foreground">
             {lubrifiants.length} lubrifiant{plural} configuré{plural}
           </p>
         </div>
         <div>
-          <NewLubrifiant typelubrifiants={typelubrifiants} parcs={parcs} />
+          <NewLubrifiant
+            typelubrifiants={typelubrifiants}
+            parcs={parcs}
+            onSuccess={fetchData}
+          />
         </div>
       </div>
+
+      {error && <FormError error={error} />}
 
       <Card>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t("table.name")}</TableHead>
-              <TableHead>{t("table.type")}</TableHead>
-              <TableHead>{t("table.associatedParcs")}</TableHead>
-              <TableHead>{t("table.creationDate")}</TableHead>
+              <TableHead>Nom</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Parcs associés</TableHead>
+              <TableHead>Date de création</TableHead>
               <TableHead className="w-0 text-right"></TableHead>
             </TableRow>
           </TableHeader>
@@ -66,7 +108,7 @@ const LubrifiantsPage = async () => {
                   colSpan={5}
                   className="h-24 text-center text-muted-foreground italic"
                 >
-                  {t("table.noLubrifiants")}
+                  Aucun lubrifiant configuré
                 </TableCell>
               </TableRow>
             ) : (
@@ -80,11 +122,11 @@ const LubrifiantsPage = async () => {
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary">
-                      {lubrifiant.typelubrifiant?.name || t("table.notDefined")}
+                      {lubrifiant.typelubrifiant?.name || "Non défini"}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap gap-1 max-w-[200px]">
+                    <div className="flex flex-wrap gap-1 max-w-50">
                       {lubrifiant.lubrifiantParc?.length > 0 ? (
                         lubrifiant.lubrifiantParc.map((lp: any) => (
                           <Badge
@@ -98,7 +140,7 @@ const LubrifiantsPage = async () => {
                         ))
                       ) : (
                         <span className="text-xs text-muted-foreground italic">
-                          {t("table.noParc")}
+                          Aucun parc
                         </span>
                       )}
                     </div>
@@ -114,6 +156,7 @@ const LubrifiantsPage = async () => {
                       lubrifiant={lubrifiant}
                       typelubrifiants={typelubrifiants}
                       parcs={parcs}
+                      onLubrifiantUpdated={fetchData}
                     />
                   </TableCell>
                 </TableRow>

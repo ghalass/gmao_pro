@@ -24,7 +24,11 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import FormError from "@/components/form/FormError";
 
-const NewTypeparc = () => {
+interface NewTypeparcProps {
+  onSuccess?: () => void;
+}
+
+const NewTypeparc = ({ onSuccess }: NewTypeparcProps) => {
   const [modalOpen, setModalOpen] = useState(false);
   const router = useRouter();
   const locale = useCurrentLocale();
@@ -57,6 +61,7 @@ const NewTypeparc = () => {
           toast.success(`Type de parc créé avec succès`);
           setModalOpen(false);
           form.reset();
+          onSuccess?.();
         } else {
           setError(response.data?.message || "Erreur lors de la création");
         }

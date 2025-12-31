@@ -1,3 +1,5 @@
+"use client";
+
 // app/[locale]/(main)/typeorganes/page.tsx
 import { API, apiFetch } from "@/lib/api";
 import {
@@ -13,44 +15,71 @@ import { Settings, Calendar, Package } from "lucide-react";
 import NewTypeorgane from "./_components/new-typeorgane";
 import FormError from "@/components/form/FormError";
 import TypeorganeRowActions from "./_components/typeorgane-row-actions";
-import { getScopedI18n } from "@/locales/server";
-import fr from "@/locales/fr";
+import { Spinner } from "@/components/ui/spinner";
+import React, { useState, useEffect } from "react";
 
-const TypeorganesPage = async () => {
-  const typeorganesResponse = await apiFetch(API.TYPEORGANES.ALL);
+const TypeorganesPage = () => {
+  const [loading, setLoading] = useState(false);
+  const [typeorganes, setTypeorganes] = React.useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!typeorganesResponse.ok) {
-    return <FormError error={typeorganesResponse.data.message} />;
-  }
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  const typeorganes = typeorganesResponse.data || [];
+      const typeorganesResponse = await apiFetch(API.TYPEORGANES.ALL);
+
+      if (!typeorganesResponse.ok) {
+        setError(typeorganesResponse.data?.message || "Erreur de chargement");
+        return;
+      }
+
+      setTypeorganes(typeorganesResponse.data || []);
+    } catch (err: any) {
+      setError(err.message || "Erreur de chargement");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const plural = typeorganes.length !== 1 ? "s" : "";
 
   return (
     <div className="mx-auto p-4">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{fr.pages.typeorganes.title}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold">Types d'Organes</h1>
+            {loading && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Spinner className="h-3 w-3" />
+                <span className="text-xs">Mise à jour...</span>
+              </div>
+            )}
+          </div>
           <p className="text-sm text-muted-foreground">
             {typeorganes.length} type{plural} configuré{plural}
           </p>
         </div>
         <div>
-          <NewTypeorgane />
+          <NewTypeorgane onSuccess={fetchData} />
         </div>
       </div>
+
+      {error && <FormError error={error} />}
 
       <Card>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{fr.pages.typeorganes.table.name}</TableHead>
-              <TableHead>
-                {fr.pages.typeorganes.table.associatedParcs}
-              </TableHead>
-              <TableHead>
-                {fr.pages.typeorganes.table.associatedOrganes}
-              </TableHead>
+              <TableHead>Nom</TableHead>
+              <TableHead>Parcs associés</TableHead>
+              <TableHead>Organes associés</TableHead>
               <TableHead className="w-0 text-right"></TableHead>
             </TableRow>
           </TableHeader>
@@ -61,7 +90,7 @@ const TypeorganesPage = async () => {
                   colSpan={4}
                   className="h-24 text-center text-muted-foreground italic"
                 >
-                  {fr.pages.typeorganes.table.noTypes}
+                  Aucun type configuré
                 </TableCell>
               </TableRow>
             ) : (
@@ -82,9 +111,7 @@ const TypeorganesPage = async () => {
                       <div className="flex items-center gap-1.5 text-muted-foreground">
                         <Package className="h-4 w-4" />
                         <span>
-                          {parcCount > 0
-                            ? `${parcCount} ${fr.pages.typeorganes.table.parcs}`
-                            : fr.pages.typeorganes.table.noParc}
+                          {parcCount > 0 ? `${parcCount} parcs` : "Aucun parc"}
                         </span>
                       </div>
                     </TableCell>
@@ -93,13 +120,16 @@ const TypeorganesPage = async () => {
                         <Settings className="h-4 w-4" />
                         <span>
                           {organeCount > 0
-                            ? `${organeCount} ${fr.pages.typeorganes.table.organes}`
-                            : fr.pages.typeorganes.table.noOrgane}
+                            ? `${organeCount} organes`
+                            : "Aucun organe"}
                         </span>
                       </div>
                     </TableCell>
                     <TableCell className="w-0 text-right">
-                      <TypeorganeRowActions typeorgane={typeorgane} />
+                      <TypeorganeRowActions
+                        typeorgane={typeorgane}
+                        onTypeorganeUpdated={fetchData}
+                      />
                     </TableCell>
                   </TableRow>
                 );

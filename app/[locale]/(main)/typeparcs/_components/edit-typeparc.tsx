@@ -27,9 +27,15 @@ interface EditTypeparcProps {
   typeparc: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
-const EditTypeparc = ({ typeparc, open, onOpenChange }: EditTypeparcProps) => {
+const EditTypeparc = ({
+  typeparc,
+  open,
+  onOpenChange,
+  onSuccess,
+}: EditTypeparcProps) => {
   const router = useRouter();
   const locale = useCurrentLocale();
   const [error, setError] = React.useState<string | null>(null);
@@ -49,6 +55,15 @@ const EditTypeparc = ({ typeparc, open, onOpenChange }: EditTypeparcProps) => {
       try {
         setIsSubmitting(true);
         setError(null);
+
+        // Détection de changements
+        const hasChanges = value.name !== typeparc?.name;
+
+        if (!hasChanges) {
+          onOpenChange?.(false);
+          return;
+        }
+
         await typeparcSchema.validate(value, { abortEarly: false });
 
         const response = await apiFetch(
@@ -63,6 +78,7 @@ const EditTypeparc = ({ typeparc, open, onOpenChange }: EditTypeparcProps) => {
           router.refresh();
           toast.success(`Type de parc mis à jour`);
           onOpenChange(false);
+          onSuccess?.();
         } else {
           setError(response.data?.message || "Erreur lors de la mise à jour");
         }

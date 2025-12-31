@@ -31,10 +31,12 @@ type TypeconsommationlubWithRelations = Typeconsommationlub & {
 
 interface TypeconsommationlubRowActionsProps {
   typeconsommationlub: TypeconsommationlubWithRelations;
+  onTypeconsommationlubUpdated?: () => void;
 }
 
 const TypeconsommationlubRowActions = ({
   typeconsommationlub,
+  onTypeconsommationlubUpdated,
 }: TypeconsommationlubRowActionsProps) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -67,12 +69,14 @@ const TypeconsommationlubRowActions = ({
         typeconsommationlub={typeconsommationlub}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
+        onSuccess={onTypeconsommationlubUpdated}
       />
 
       <DeleteTypeconsommationlub
         typeconsommationlub={typeconsommationlub}
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
+        onSuccess={onTypeconsommationlubUpdated}
       />
     </>
   );

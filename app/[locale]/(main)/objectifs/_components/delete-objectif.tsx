@@ -33,12 +33,14 @@ interface DeleteObjectifProps {
   objectif: ObjectifWithRelations;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 const DeleteObjectif = ({
   objectif,
   open,
   onOpenChange,
+  onSuccess,
 }: DeleteObjectifProps) => {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = React.useState(false);
@@ -57,6 +59,7 @@ const DeleteObjectif = ({
         toast.success(`Objectif supprimé avec succès`);
         onOpenChange(false);
         router.refresh();
+        onSuccess?.();
       } else {
         const errorData = response.data?.message;
         toast.error(errorData || "Erreur lors de la suppression");

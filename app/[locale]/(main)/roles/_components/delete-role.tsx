@@ -21,9 +21,15 @@ interface DeleteRoleProps {
   role: Role;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
-const DeleteRole = ({ role, open, onOpenChange }: DeleteRoleProps) => {
+const DeleteRole = ({
+  role,
+  open,
+  onOpenChange,
+  onSuccess,
+}: DeleteRoleProps) => {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = React.useState(false);
 
@@ -38,6 +44,7 @@ const DeleteRole = ({ role, open, onOpenChange }: DeleteRoleProps) => {
         toast.success(`Rôle supprimé avec succès`);
         onOpenChange(false);
         router.refresh();
+        onSuccess?.();
       } else {
         const errorData = response.data?.message;
         toast.error(errorData || "Erreur lors de la suppression");

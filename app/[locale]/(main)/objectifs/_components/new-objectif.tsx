@@ -36,9 +36,15 @@ interface NewObjectifProps {
   parcs: any[];
   sites: any[];
   typeparcs: any[];
+  onSuccess?: () => void;
 }
 
-const NewObjectif = ({ parcs, sites, typeparcs }: NewObjectifProps) => {
+const NewObjectif = ({
+  parcs,
+  sites,
+  typeparcs,
+  onSuccess,
+}: NewObjectifProps) => {
   const [modalOpen, setModalOpen] = useState(false);
   const router = useRouter();
   const locale = useCurrentLocale();
@@ -187,6 +193,7 @@ const NewObjectif = ({ parcs, sites, typeparcs }: NewObjectifProps) => {
           toast.success(`Objectif créé avec succès`);
           setModalOpen(false);
           form.reset();
+          onSuccess?.();
         } else {
           const errorData = response.data?.message;
           setError(errorData);

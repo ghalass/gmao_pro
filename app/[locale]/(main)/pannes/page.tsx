@@ -1,3 +1,5 @@
+"use client";
+
 import { API, apiFetch } from "@/lib/api";
 import {
   Table,
@@ -13,46 +15,87 @@ import NewPanne from "./_components/new-panne";
 import FormError from "@/components/form/FormError";
 import PanneRowActions from "./_components/panne-row-actions";
 import { Badge } from "@/components/ui/badge";
+import { Spinner } from "@/components/ui/spinner";
+import React, { useState, useEffect } from "react";
 import { getScopedI18n } from "@/locales/server";
 
-const PannesPage = async () => {
-  const pannesResponse = await apiFetch(API.PANNES.ALL);
-  const typepannesResponse = await apiFetch(API.TYPEPANNES.ALL);
-  const parcsResponse = await apiFetch(API.PARCS.ALL);
-  const t = await getScopedI18n("pages.pannes");
+const PannesPage = () => {
+  const [loading, setLoading] = useState(false);
+  const [pannes, setPannes] = React.useState<any[]>([]);
+  const [typepannes, setTypepannes] = React.useState<any[]>([]);
+  const [parcs, setParcs] = React.useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!pannesResponse.ok) {
-    return <FormError error={pannesResponse.data?.message} />;
-  }
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  const pannes = pannesResponse.data || [];
-  const typepannes = typepannesResponse.ok ? typepannesResponse.data : [];
-  const parcs = parcsResponse.ok ? parcsResponse.data : [];
+      const [pannesResponse, typepannesResponse, parcsResponse] =
+        await Promise.all([
+          apiFetch(API.PANNES.ALL),
+          apiFetch(API.TYPEPANNES.ALL),
+          apiFetch(API.PARCS.ALL),
+        ]);
+
+      if (!pannesResponse.ok) {
+        setError(pannesResponse.data?.message || "Erreur de chargement");
+        return;
+      }
+
+      setPannes(pannesResponse.data || []);
+      setTypepannes(typepannesResponse.ok ? typepannesResponse.data : []);
+      setParcs(parcsResponse.ok ? parcsResponse.data : []);
+    } catch (err: any) {
+      setError(err.message || "Erreur de chargement");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const plural = pannes.length !== 1 ? "s" : "";
 
   return (
     <div className="mx-auto p-4">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold">Pannes</h1>
+            {loading && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Spinner className="h-3 w-3" />
+                <span className="text-xs">Mise à jour...</span>
+              </div>
+            )}
+          </div>
           <p className="text-sm text-muted-foreground">
-            {pannes.length} panne{plural} référencée{plural}
+            {pannes.length} panne{plural} déclarée{plural}
           </p>
         </div>
         <div>
-          <NewPanne typepannes={typepannes} parcs={parcs} />
+          <NewPanne
+            typepannes={typepannes}
+            parcs={parcs}
+            onSuccess={fetchData}
+          />
         </div>
       </div>
+
+      {error && <FormError error={error} />}
 
       <Card>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t("table.name")}</TableHead>
-              <TableHead>{t("table.type")}</TableHead>
-              <TableHead>{t("table.associatedParcs")}</TableHead>
-              <TableHead>{t("table.description")}</TableHead>
-              <TableHead>{t("table.linkedSaisies")}</TableHead>
+              <TableHead>Nom</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Parcs associés</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Saisies liées</TableHead>
               <TableHead className="w-0 text-right"></TableHead>
             </TableRow>
           </TableHeader>
@@ -63,7 +106,7 @@ const PannesPage = async () => {
                   colSpan={6}
                   className="h-24 text-center text-muted-foreground italic"
                 >
-                  {t("table.noPannes")}
+                  Aucune panne déclarée
                 </TableCell>
               </TableRow>
             ) : (
@@ -77,11 +120,11 @@ const PannesPage = async () => {
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">
-                      {panne.typepanne?.name || t("table.notDefined")}
+                      {panne.typepanne?.name || "Non défini"}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap gap-1 max-w-[200px]">
+                    <div className="flex flex-wrap gap-1 max-w-50">
                       {panne.parcs?.length > 0 ? (
                         panne.parcs.map((p: any) => (
                           <Badge
@@ -94,7 +137,7 @@ const PannesPage = async () => {
                         ))
                       ) : (
                         <span className="text-xs text-destructive italic">
-                          {t("table.noParcAssociated")}
+                          Aucun parc associé
                         </span>
                       )}
                     </div>
@@ -105,9 +148,7 @@ const PannesPage = async () => {
                   <TableCell>
                     <div className="flex items-center gap-1.5 text-muted-foreground">
                       <ListTree className="h-4 w-4" />
-                      <span>
-                        {panne._count?.saisiehim || 0} {t("table.saisies")}
-                      </span>
+                      <span>{panne._count?.saisiehim || 0} saisies</span>
                     </div>
                   </TableCell>
                   <TableCell className="w-0 text-right">
@@ -115,6 +156,7 @@ const PannesPage = async () => {
                       panne={panne}
                       typepannes={typepannes}
                       parcs={parcs}
+                      onPanneUpdated={fetchData}
                     />
                   </TableCell>
                 </TableRow>

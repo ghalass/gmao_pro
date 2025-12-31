@@ -63,6 +63,7 @@ interface EditObjectifProps {
   typeparcs: any[];
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 const EditObjectif = ({
@@ -72,6 +73,7 @@ const EditObjectif = ({
   typeparcs,
   open,
   onOpenChange,
+  onSuccess,
 }: EditObjectifProps) => {
   const [internalOpen, setInternalOpen] = useState(false);
 
@@ -282,6 +284,7 @@ const EditObjectif = ({
           router.refresh();
           toast.success(`Objectif modifié avec succès`);
           setModalOpen(false);
+          onSuccess?.();
         } else {
           const errorData = response.data?.message;
           setError(errorData);

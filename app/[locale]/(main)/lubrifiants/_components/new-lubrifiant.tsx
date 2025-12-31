@@ -36,9 +36,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 interface NewLubrifiantProps {
   typelubrifiants: any[];
   parcs: any[];
+  onSuccess?: () => void;
 }
 
-const NewLubrifiant = ({ typelubrifiants, parcs }: NewLubrifiantProps) => {
+const NewLubrifiant = ({
+  typelubrifiants,
+  parcs,
+  onSuccess,
+}: NewLubrifiantProps) => {
   const [modalOpen, setModalOpen] = useState(false);
   const router = useRouter();
   const locale = useCurrentLocale();
@@ -82,6 +87,7 @@ const NewLubrifiant = ({ typelubrifiants, parcs }: NewLubrifiantProps) => {
           toast.success(`Lubrifiant créé avec succès`);
           setModalOpen(false);
           form.reset();
+          onSuccess?.();
         } else {
           const errorData = response.data?.message;
           setError(errorData || "Erreur lors de la création");

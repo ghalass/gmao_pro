@@ -24,7 +24,11 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import FormError from "@/components/form/FormError";
 
-const NewTypelubrifiant = () => {
+interface NewTypelubrifiantProps {
+  onSuccess?: () => void;
+}
+
+const NewTypelubrifiant = ({ onSuccess }: NewTypelubrifiantProps) => {
   const [modalOpen, setModalOpen] = useState(false);
   const router = useRouter();
   const locale = useCurrentLocale();
@@ -60,6 +64,7 @@ const NewTypelubrifiant = () => {
           toast.success(`Type de lubrifiant créé avec succès`);
           setModalOpen(false);
           form.reset();
+          onSuccess?.();
         } else {
           const errorData = response.data?.message;
           setError(errorData || "Erreur lors de la création");

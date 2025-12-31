@@ -36,10 +36,12 @@ const EditUser = ({
   user,
   open,
   onOpenChange,
+  onSuccess,
 }: {
   user: UserWithRoles;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  onSuccess?: () => void;
 }) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -172,11 +174,12 @@ const EditUser = ({
           value.name !== user?.name ||
           value.email !== user?.email ||
           value.active !== user?.active ||
-          JSON.stringify(value.roles) !== JSON.stringify(user?.roles) ||
+          JSON.stringify(value.roles?.sort()) !==
+            JSON.stringify(user?.roles?.map((role) => role.id).sort()) ||
           (value.changePassword && value.password);
 
         if (!hasChanges) {
-          setModalOpen(false);
+          onOpenChange?.(false);
           return;
         }
 
@@ -193,6 +196,7 @@ const EditUser = ({
           router.refresh();
           toast.success(`Utilisateur modifié avec succès`);
           setModalOpen(false);
+          onSuccess?.();
         } else {
           const errorData = response.data?.message;
           setError(errorData);

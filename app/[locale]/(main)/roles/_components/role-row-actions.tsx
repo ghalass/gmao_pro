@@ -19,9 +19,10 @@ type RoleWithDetails = Role & {
 
 interface RoleRowActionsProps {
   role: RoleWithDetails;
+  onRoleUpdated?: () => void;
 }
 
-const RoleRowActions = ({ role }: RoleRowActionsProps) => {
+const RoleRowActions = ({ role, onRoleUpdated }: RoleRowActionsProps) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -53,12 +54,14 @@ const RoleRowActions = ({ role }: RoleRowActionsProps) => {
         role={role}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
+        onSuccess={onRoleUpdated}
       />
 
       <DeleteRole
         role={role}
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
+        onSuccess={onRoleUpdated}
       />
     </>
   );

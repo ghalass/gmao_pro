@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
     if (marque) createData.marque = marque.trim();
     if (sn) createData.sn = sn.trim();
     if (date_mes) createData.date_mes = new Date(date_mes);
-    if (origine) createData.origine = origine;
+    if (origine) createData.origine = origine || null;
     if (circuit) createData.circuit = circuit.trim();
     if (hrm_initial !== undefined) createData.hrm_initial = hrm_initial;
     if (obs) createData.obs = obs.trim();

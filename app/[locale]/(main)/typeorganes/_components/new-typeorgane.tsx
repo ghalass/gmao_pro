@@ -26,7 +26,11 @@ import FormError from "@/components/form/FormError";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
-const NewTypeorgane = () => {
+interface NewTypeorganeProps {
+  onSuccess?: () => void;
+}
+
+const NewTypeorgane = ({ onSuccess }: NewTypeorganeProps) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [parcs, setParcs] = useState<any[]>([]);
   const [isLoadingParcs, setIsLoadingParcs] = useState(false);
@@ -93,6 +97,7 @@ const NewTypeorgane = () => {
           toast.success(`Type d'organe créé avec succès`);
           setModalOpen(false);
           form.reset();
+          onSuccess?.();
         } else {
           const errorData = response.data?.message;
           setError(errorData || "Erreur lors de la création");

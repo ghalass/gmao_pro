@@ -20,12 +20,14 @@ interface DeleteTypepanneProps {
   typepanne: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 const DeleteTypepanne = ({
   typepanne,
   open,
   onOpenChange,
+  onSuccess,
 }: DeleteTypepanneProps) => {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = React.useState(false);
@@ -44,6 +46,7 @@ const DeleteTypepanne = ({
         toast.success(`Type de panne supprimé avec succès`);
         onOpenChange(false);
         router.refresh();
+        onSuccess?.();
       } else {
         toast.error(response.data?.message || "Erreur lors de la suppression");
       }

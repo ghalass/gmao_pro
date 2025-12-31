@@ -50,6 +50,7 @@ const ObjectifRowActions = ({
   parcs,
   sites,
   typeparcs,
+  onObjectifUpdated,
 }: ObjectifRowActionsProps) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -85,12 +86,14 @@ const ObjectifRowActions = ({
         typeparcs={typeparcs}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
+        onSuccess={onObjectifUpdated}
       />
 
       <DeleteObjectif
         objectif={objectif}
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
+        onSuccess={onObjectifUpdated}
       />
     </>
   );

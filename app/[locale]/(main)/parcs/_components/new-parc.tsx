@@ -32,14 +32,13 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import FormError from "@/components/form/FormError";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 
 interface NewParcProps {
   typeparcs: any[];
-  pannes: any[];
+  onSuccess?: () => void;
 }
 
-const NewParc = ({ typeparcs, pannes }: NewParcProps) => {
+const NewParc = ({ typeparcs, onSuccess }: NewParcProps) => {
   const [modalOpen, setModalOpen] = useState(false);
   const router = useRouter();
   const locale = useCurrentLocale();
@@ -53,7 +52,6 @@ const NewParc = ({ typeparcs, pannes }: NewParcProps) => {
     return yup.object({
       name: yup.string().min(2).required().label("Nom du parc"),
       typeparcId: yup.string().required().label("Type de parc"),
-      panneIds: yup.array().of(yup.string()).label("Pannes"),
     });
   }, [locale]);
 
@@ -61,7 +59,6 @@ const NewParc = ({ typeparcs, pannes }: NewParcProps) => {
     defaultValues: {
       name: "",
       typeparcId: "",
-      panneIds: [] as string[],
     },
     onSubmit: async ({ value }) => {
       try {
@@ -79,6 +76,7 @@ const NewParc = ({ typeparcs, pannes }: NewParcProps) => {
           toast.success(`Parc créé avec succès`);
           setModalOpen(false);
           form.reset();
+          onSuccess?.();
         } else {
           setError(response.data?.message || "Erreur lors de la création");
         }
@@ -160,48 +158,6 @@ const NewParc = ({ typeparcs, pannes }: NewParcProps) => {
                   </Select>
                 )}
               </form.Field>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Pannes possibles</Label>
-              <div className="grid grid-cols-2 gap-2 max-h-[150px] overflow-y-auto p-2 border rounded-md">
-                <form.Field name="panneIds">
-                  {(field) => (
-                    <>
-                      {pannes.map((panne) => (
-                        <div
-                          key={panne.id}
-                          className="flex items-center space-x-2"
-                        >
-                          <Checkbox
-                            id={`panne-${panne.id}`}
-                            checked={field.state.value?.includes(panne.id)}
-                            onCheckedChange={(checked) => {
-                              const current = field.state.value || [];
-                              if (checked) {
-                                field.handleChange([...current, panne.id]);
-                              } else {
-                                field.handleChange(
-                                  current.filter(
-                                    (id: string) => id !== panne.id
-                                  )
-                                );
-                              }
-                            }}
-                            disabled={isSubmitting}
-                          />
-                          <Label
-                            htmlFor={`panne-${panne.id}`}
-                            className="text-sm cursor-pointer truncate"
-                          >
-                            {panne.name}
-                          </Label>
-                        </div>
-                      ))}
-                    </>
-                  )}
-                </form.Field>
-              </div>
             </div>
           </FieldGroup>
 

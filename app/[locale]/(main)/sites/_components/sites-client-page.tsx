@@ -26,7 +26,6 @@ import {
   FileSpreadsheet,
   Upload,
   ArrowLeft,
-  RefreshCw,
   Search,
   Filter,
   Plus,
@@ -130,10 +129,7 @@ export default function SitesClientPage({
   };
 
   const refreshSites = () => {
-    setLoading(true);
     setRefreshKey((prev) => prev + 1);
-    // Simuler un minimum de temps pour voir le spinner
-    setTimeout(() => setLoading(false), 500);
   };
 
   const plural = sites.length !== 1 ? "s" : "";
@@ -160,15 +156,6 @@ export default function SitesClientPage({
               <p className="text-sm text-muted-foreground">
                 {translations.import.description}
               </p>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setRefreshKey((prev) => prev + 1)}
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                {translations.import.refreshButton}
-              </Button>
             </div>
           </div>
         </div>

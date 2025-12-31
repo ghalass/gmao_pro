@@ -1,3 +1,5 @@
+"use client";
+
 import { API, apiFetch } from "@/lib/api";
 import {
   Table,
@@ -13,7 +15,8 @@ import { Calendar, Target, Building2, Landmark } from "lucide-react";
 import NewObjectif from "./_components/new-objectif";
 import FormError from "@/components/form/FormError";
 import ObjectifRowActions from "./_components/objectif-row-actions";
-import { getScopedI18n } from "@/locales/server";
+import { Spinner } from "@/components/ui/spinner";
+import React, { useState, useEffect } from "react";
 
 type ObjectifWithRelations = {
   id: string;
@@ -42,48 +45,93 @@ type ObjectifWithRelations = {
   };
 };
 
-const ObjectifsPage = async () => {
-  const objectifsResponse = await apiFetch(API.OBJECTIFS.ALL);
-  const parcsResponse = await apiFetch(API.PARCS.ALL);
-  const sitesResponse = await apiFetch(API.SITES.ALL);
-  const typeparcsResponse = await apiFetch(API.TYPEPARCS.ALL);
-  const t = await getScopedI18n("pages.objectifs");
+const ObjectifsPage = () => {
+  const [loading, setLoading] = useState(false);
+  const [objectifs, setObjectifs] = React.useState<ObjectifWithRelations[]>([]);
+  const [parcs, setParcs] = React.useState<any[]>([]);
+  const [sites, setSites] = React.useState<any[]>([]);
+  const [typeparcs, setTypeparcs] = React.useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!objectifsResponse.ok) {
-    return <FormError error={objectifsResponse.data?.message} />;
-  }
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  const objectifs = objectifsResponse.data || [];
-  const parcs = parcsResponse.ok ? parcsResponse.data : [];
-  const sites = sitesResponse.ok ? sitesResponse.data : [];
-  const typeparcs = typeparcsResponse.ok ? typeparcsResponse.data : [];
+      const [
+        objectifsResponse,
+        parcsResponse,
+        sitesResponse,
+        typeparcsResponse,
+      ] = await Promise.all([
+        apiFetch(API.OBJECTIFS.ALL),
+        apiFetch(API.PARCS.ALL),
+        apiFetch(API.SITES.ALL),
+        apiFetch(API.TYPEPARCS.ALL),
+      ]);
+
+      if (!objectifsResponse.ok) {
+        setError(objectifsResponse.data?.message || "Erreur de chargement");
+        return;
+      }
+
+      setObjectifs(objectifsResponse.data || []);
+      setParcs(parcsResponse.ok ? parcsResponse.data : []);
+      setSites(sitesResponse.ok ? sitesResponse.data : []);
+      setTypeparcs(typeparcsResponse.ok ? typeparcsResponse.data : []);
+    } catch (err: any) {
+      setError(err.message || "Erreur de chargement");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const plural = objectifs.length !== 1 ? "s" : "";
 
   return (
     <div className="mx-auto p-4">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold">Objectifs</h1>
+            {loading && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Spinner className="h-3 w-3" />
+                <span className="text-xs">Mise à jour...</span>
+              </div>
+            )}
+          </div>
           <p className="text-sm text-muted-foreground">
-            {objectifs.length} objectif{plural}
+            {objectifs.length} objectif{plural} défini{plural}
           </p>
         </div>
         <div>
-          <NewObjectif parcs={parcs} sites={sites} typeparcs={typeparcs} />
+          <NewObjectif
+            parcs={parcs}
+            sites={sites}
+            typeparcs={typeparcs}
+            onSuccess={fetchData}
+          />
         </div>
       </div>
+
+      {error && <FormError error={error} />}
 
       <Card>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t("table.year")}</TableHead>
-              <TableHead>{t("table.parc")}</TableHead>
-              <TableHead>{t("table.site")}</TableHead>
-              <TableHead>{t("table.dispo")}</TableHead>
-              <TableHead>{t("table.mtbf")}</TableHead>
-              <TableHead>{t("table.tdm")}</TableHead>
-              <TableHead>{t("table.specifications")}</TableHead>
+              <TableHead>Année</TableHead>
+              <TableHead>Parc</TableHead>
+              <TableHead>Site</TableHead>
+              <TableHead>Dispo</TableHead>
+              <TableHead>MTBF</TableHead>
+              <TableHead>TDM</TableHead>
+              <TableHead>Spécifications</TableHead>
               <TableHead className="w-0 text-right"></TableHead>
             </TableRow>
           </TableHeader>
@@ -91,7 +139,7 @@ const ObjectifsPage = async () => {
             {objectifs.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="h-24 text-center">
-                  {t("table.noObjectifs")}
+                  Aucun objectif défini
                 </TableCell>
               </TableRow>
             ) : (
@@ -135,9 +183,7 @@ const ObjectifsPage = async () => {
                         )}
                         {objectif.spe_go !== null && (
                           <div>
-                            <span className="text-muted-foreground">
-                              {t("table.go")}:{" "}
-                            </span>
+                            <span className="text-muted-foreground">GO: </span>
                             <span className="font-medium">
                               {objectif.spe_go}
                             </span>
@@ -146,7 +192,7 @@ const ObjectifsPage = async () => {
                         {objectif.spe_graisse !== null && (
                           <div>
                             <span className="text-muted-foreground">
-                              {t("table.grease")}:{" "}
+                              Graisse:{" "}
                             </span>
                             <span className="font-medium">
                               {objectif.spe_graisse}

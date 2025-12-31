@@ -30,12 +30,14 @@ interface EditTypeorganeProps {
   typeorgane: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 const EditTypeorgane = ({
   typeorgane,
   open,
   onOpenChange,
+  onSuccess,
 }: EditTypeorganeProps) => {
   const router = useRouter();
   const locale = useCurrentLocale();
@@ -89,6 +91,19 @@ const EditTypeorgane = ({
         setError(null);
         await typeorganeSchema.validate(value, { abortEarly: false });
 
+        // Détection de changements
+        const originalParcIds =
+          typeorgane?.typeOrganeParcs?.map((tp: any) => tp.parc.id) || [];
+        const hasChanges =
+          value.name !== typeorgane?.name ||
+          JSON.stringify(value.parcIds?.sort()) !==
+            JSON.stringify(originalParcIds?.sort());
+
+        if (!hasChanges) {
+          onOpenChange?.(false);
+          return;
+        }
+
         const response = await apiFetch(
           API.TYPEORGANES.TYPEORGANE_UPDATE(typeorgane.id),
           {
@@ -104,6 +119,7 @@ const EditTypeorgane = ({
           router.refresh();
           toast.success(`Type d'organe mis à jour`);
           onOpenChange(false);
+          onSuccess?.();
         } else {
           const errorData = response.data?.message;
           setError(errorData || "Erreur lors de la mise à jour");

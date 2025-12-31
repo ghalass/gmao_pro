@@ -1,3 +1,5 @@
+"use client";
+
 // app/roles/page.tsx
 import { API, apiFetch } from "@/lib/api";
 import {
@@ -15,46 +17,77 @@ import { Role, Permission, User } from "@/lib/generated/prisma/client";
 import NewRole from "./_components/new-role";
 import FormError from "@/components/form/FormError";
 import RoleRowActions from "./_components/role-row-actions";
-import { getScopedI18n } from "@/locales/server";
+import { Spinner } from "@/components/ui/spinner";
+import React, { useState, useEffect } from "react";
 
 type RoleWithDetails = Role & {
   permissions: Permission[];
   user: User[];
 };
 
-const RolesPage = async () => {
-  const rolesResponse = await apiFetch(API.ROLES.ALL);
-  const t = await getScopedI18n("pages.roles");
+const RolesPage = () => {
+  const [loading, setLoading] = useState(false);
+  const [roles, setRoles] = React.useState<RoleWithDetails[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!rolesResponse.ok) {
-    return <FormError error={rolesResponse.data.message} />;
-  }
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  const roles = rolesResponse.data || [];
+      const rolesResponse = await apiFetch(API.ROLES.ALL);
+
+      if (!rolesResponse.ok) {
+        setError(rolesResponse.data?.message || "Erreur de chargement");
+        return;
+      }
+
+      setRoles(rolesResponse.data || []);
+    } catch (err: any) {
+      setError(err.message || "Erreur de chargement");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const plural = roles.length !== 1 ? "s" : "";
 
   return (
     <div className="mx-auto p-4">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold">Rôles</h1>
+            {loading && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Spinner className="h-3 w-3" />
+                <span className="text-xs">Mise à jour...</span>
+              </div>
+            )}
+          </div>
           <p className="text-sm text-muted-foreground">
             {roles.length} rôle{plural} configuré{plural}
           </p>
         </div>
         <div>
-          <NewRole />
+          <NewRole onSuccess={fetchData} />
         </div>
       </div>
+
+      {error && <FormError error={error} />}
 
       <Card>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t("table.role")}</TableHead>
-              <TableHead>{t("table.description")}</TableHead>
-              <TableHead>{t("table.permissions")}</TableHead>
-              <TableHead>{t("table.users")}</TableHead>
+              <TableHead>Rôle</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Permissions</TableHead>
+              <TableHead>Utilisateurs</TableHead>
               <TableHead className="w-0 text-right"></TableHead>
             </TableRow>
           </TableHeader>
@@ -62,7 +95,7 @@ const RolesPage = async () => {
             {roles.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="h-24 text-center">
-                  {t("table.noRoles")}
+                  Aucun rôle configuré
                 </TableCell>
               </TableRow>
             ) : (
@@ -76,8 +109,8 @@ const RolesPage = async () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2 text-muted-foreground text-sm max-w-[300px] truncate">
-                        {currentRole.description || t("table.noDescription")}
+                      <div className="flex items-center gap-2 text-muted-foreground text-sm max-w-75 truncate">
+                        {currentRole.description || "Aucune description"}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -96,7 +129,7 @@ const RolesPage = async () => {
                             ))
                         ) : (
                           <span className="text-xs text-muted-foreground">
-                            {t("table.noPermissions")}
+                            Aucune permission
                           </span>
                         )}
                         {currentRole.permissions?.length > 3 && (
@@ -116,7 +149,10 @@ const RolesPage = async () => {
                       </div>
                     </TableCell>
                     <TableCell className="w-0 text-right">
-                      <RoleRowActions role={currentRole} />
+                      <RoleRowActions
+                        role={currentRole}
+                        onRoleUpdated={fetchData}
+                      />
                     </TableCell>
                   </TableRow>
                 );

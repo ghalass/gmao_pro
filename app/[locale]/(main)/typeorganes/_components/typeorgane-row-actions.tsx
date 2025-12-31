@@ -14,9 +14,13 @@ import DeleteTypeorgane from "./delete-typeorgane";
 
 interface TypeorganeRowActionsProps {
   typeorgane: any;
+  onTypeorganeUpdated?: () => void;
 }
 
-const TypeorganeRowActions = ({ typeorgane }: TypeorganeRowActionsProps) => {
+const TypeorganeRowActions = ({
+  typeorgane,
+  onTypeorganeUpdated,
+}: TypeorganeRowActionsProps) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -48,12 +52,14 @@ const TypeorganeRowActions = ({ typeorgane }: TypeorganeRowActionsProps) => {
         typeorgane={typeorgane}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
+        onSuccess={onTypeorganeUpdated}
       />
 
       <DeleteTypeorgane
         typeorgane={typeorgane}
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
+        onSuccess={onTypeorganeUpdated}
       />
     </>
   );

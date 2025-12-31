@@ -30,12 +30,14 @@ interface EditTypeconsommationlubProps {
   typeconsommationlub: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 const EditTypeconsommationlub = ({
   typeconsommationlub,
   open,
   onOpenChange,
+  onSuccess,
 }: EditTypeconsommationlubProps) => {
   const router = useRouter();
   const locale = useCurrentLocale();
@@ -96,6 +98,20 @@ const EditTypeconsommationlub = ({
         setError(null);
         await typeconsommationlubSchema.validate(value, { abortEarly: false });
 
+        // Détection de changements
+        const originalParcIds =
+          typeconsommationlub?.parcs?.map((p: any) => p.parc?.id || p.parcId) ||
+          [];
+        const hasChanges =
+          value.name !== typeconsommationlub?.name ||
+          JSON.stringify(value.parcIds?.sort()) !==
+            JSON.stringify(originalParcIds?.sort());
+
+        if (!hasChanges) {
+          onOpenChange?.(false);
+          return;
+        }
+
         const response = await apiFetch(
           API.TYPECONSOMMATIONLUBS.UPDATE(typeconsommationlub.id),
           {
@@ -111,6 +127,7 @@ const EditTypeconsommationlub = ({
           router.refresh();
           toast.success(`Type de consommation mis à jour`);
           onOpenChange(false);
+          onSuccess?.();
         } else {
           const errorData = response.data?.message;
           setError(errorData || "Erreur lors de la mise à jour");

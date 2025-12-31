@@ -20,9 +20,15 @@ interface DeleteEnginProps {
   engin: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
-const DeleteEngin = ({ engin, open, onOpenChange }: DeleteEnginProps) => {
+const DeleteEngin = ({
+  engin,
+  open,
+  onOpenChange,
+  onSuccess,
+}: DeleteEnginProps) => {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = React.useState(false);
 
@@ -37,6 +43,7 @@ const DeleteEngin = ({ engin, open, onOpenChange }: DeleteEnginProps) => {
         toast.success(`Engin supprimé avec succès`);
         onOpenChange(false);
         router.refresh();
+        onSuccess?.();
       } else {
         toast.error(response.data?.message || "Erreur lors de la suppression");
       }

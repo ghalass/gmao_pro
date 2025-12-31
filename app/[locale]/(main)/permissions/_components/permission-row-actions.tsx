@@ -19,9 +19,13 @@ type PermissionWithRoles = Permission & {
 
 interface PermissionRowActionsProps {
   permission: PermissionWithRoles;
+  onPermissionUpdated?: () => void;
 }
 
-const PermissionRowActions = ({ permission }: PermissionRowActionsProps) => {
+const PermissionRowActions = ({
+  permission,
+  onPermissionUpdated,
+}: PermissionRowActionsProps) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -53,12 +57,14 @@ const PermissionRowActions = ({ permission }: PermissionRowActionsProps) => {
         permission={permission}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
+        onSuccess={onPermissionUpdated}
       />
 
       <DeletePermission
         permission={permission}
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
+        onSuccess={onPermissionUpdated}
       />
     </>
   );

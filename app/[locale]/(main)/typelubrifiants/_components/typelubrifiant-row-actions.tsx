@@ -14,10 +14,12 @@ import DeleteTypelubrifiant from "./delete-typelubrifiant";
 
 interface TypelubrifiantRowActionsProps {
   typelubrifiant: any;
+  onTypelubrifiantUpdated?: () => void;
 }
 
 const TypelubrifiantRowActions = ({
   typelubrifiant,
+  onTypelubrifiantUpdated,
 }: TypelubrifiantRowActionsProps) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -50,12 +52,14 @@ const TypelubrifiantRowActions = ({
         typelubrifiant={typelubrifiant}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
+        onSuccess={onTypelubrifiantUpdated}
       />
 
       <DeleteTypelubrifiant
         typelubrifiant={typelubrifiant}
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
+        onSuccess={onTypelubrifiantUpdated}
       />
     </>
   );

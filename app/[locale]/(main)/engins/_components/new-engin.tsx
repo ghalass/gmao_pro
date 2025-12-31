@@ -37,9 +37,10 @@ import { Label } from "@/components/ui/label";
 interface NewEnginProps {
   parcs: any[];
   sites: any[];
+  onSuccess?: () => void;
 }
 
-const NewEngin = ({ parcs, sites }: NewEnginProps) => {
+const NewEngin = ({ parcs, sites, onSuccess }: NewEnginProps) => {
   const [modalOpen, setModalOpen] = useState(false);
   const router = useRouter();
   const locale = useCurrentLocale();
@@ -87,6 +88,7 @@ const NewEngin = ({ parcs, sites }: NewEnginProps) => {
           toast.success(`Engin créé avec succès`);
           setModalOpen(false);
           form.reset();
+          onSuccess?.();
         } else {
           setError(response.data?.message || "Erreur lors de la création");
         }

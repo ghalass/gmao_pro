@@ -14,9 +14,13 @@ import DeleteTypepanne from "./delete-typepanne";
 
 interface TypepanneRowActionsProps {
   typepanne: any;
+  onTypepanneUpdated?: () => void;
 }
 
-const TypepanneRowActions = ({ typepanne }: TypepanneRowActionsProps) => {
+const TypepanneRowActions = ({
+  typepanne,
+  onTypepanneUpdated,
+}: TypepanneRowActionsProps) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -48,12 +52,14 @@ const TypepanneRowActions = ({ typepanne }: TypepanneRowActionsProps) => {
         typepanne={typepanne}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
+        onSuccess={onTypepanneUpdated}
       />
 
       <DeleteTypepanne
         typepanne={typepanne}
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
+        onSuccess={onTypepanneUpdated}
       />
     </>
   );

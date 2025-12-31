@@ -21,12 +21,14 @@ interface DeletePermissionProps {
   permission: Permission;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 const DeletePermission = ({
   permission,
   open,
   onOpenChange,
+  onSuccess,
 }: DeletePermissionProps) => {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = React.useState(false);
@@ -45,6 +47,7 @@ const DeletePermission = ({
         toast.success(`Permission supprimée avec succès`);
         onOpenChange(false);
         router.refresh();
+        onSuccess?.();
       } else {
         const errorData = response.data?.message;
         toast.error(errorData || "Erreur lors de la suppression");

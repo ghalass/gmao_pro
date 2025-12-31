@@ -1,6 +1,5 @@
 "use client";
-
-import { useState } from "react";
+import { Organe, TypeOrgane } from "@/lib/generated/prisma/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,21 +8,26 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, Pencil, Trash } from "lucide-react";
-import { Organe, TypeOrgane } from "@/lib/generated/prisma/client";
+import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
+import { useState } from "react";
 import EditOrgane from "./edit-organe";
 import DeleteOrgane from "./delete-organe";
 
+type OrganeWithType = Organe & {
+  type_organe: TypeOrgane;
+};
+
 interface OrganeRowActionsProps {
-  organe: Organe & {
-    type_organe: TypeOrgane;
-    hrm_initial?: number; // Accepter number pour la sérialisation
-  };
+  organe: OrganeWithType;
+  onOrganeUpdated?: () => void;
 }
 
-const OrganeRowActions = ({ organe }: OrganeRowActionsProps) => {
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+const OrganeRowActions = ({
+  organe,
+  onOrganeUpdated,
+}: OrganeRowActionsProps) => {
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   return (
     <>
@@ -31,20 +35,23 @@ const OrganeRowActions = ({ organe }: OrganeRowActionsProps) => {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
             <span className="sr-only">Ouvrir le menu</span>
-            <MoreVertical className="h-4 w-4" />
+            <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
-            <Pencil className="mr-2 h-4 w-4" />
+          <DropdownMenuItem
+            onClick={() => setEditModalOpen(true)}
+            className="cursor-pointer"
+          >
+            <Edit className="mr-2 h-4 w-4" />
             Modifier
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            onClick={() => setShowDeleteDialog(true)}
-            className="text-destructive focus:text-destructive focus:bg-destructive/10"
+            onClick={() => setDeleteModalOpen(true)}
+            className="cursor-pointer text-destructive focus:text-destructive"
           >
-            <Trash className="mr-2 h-4 w-4" />
+            <Trash2 className="mr-2 h-4 w-4" />
             Supprimer
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -52,14 +59,16 @@ const OrganeRowActions = ({ organe }: OrganeRowActionsProps) => {
 
       <EditOrgane
         organe={organe}
-        open={showEditDialog}
-        onOpenChange={setShowEditDialog}
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        onSuccess={onOrganeUpdated}
       />
 
       <DeleteOrgane
         organe={organe}
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
+        open={deleteModalOpen}
+        onOpenChange={setDeleteModalOpen}
+        onSuccess={onOrganeUpdated}
       />
     </>
   );

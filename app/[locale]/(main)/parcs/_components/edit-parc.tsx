@@ -31,22 +31,21 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import FormError from "@/components/form/FormError";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 
 interface EditParcProps {
   parc: any;
   typeparcs: any[];
-  pannes: any[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 const EditParc = ({
   parc,
   typeparcs,
-  pannes,
   open,
   onOpenChange,
+  onSuccess,
 }: EditParcProps) => {
   const router = useRouter();
   const locale = useCurrentLocale();
@@ -60,7 +59,6 @@ const EditParc = ({
     return yup.object({
       name: yup.string().min(2).required().label("Nom du parc"),
       typeparcId: yup.string().required().label("Type de parc"),
-      panneIds: yup.array().of(yup.string()).label("Pannes"),
     });
   }, [locale]);
 
@@ -68,12 +66,21 @@ const EditParc = ({
     defaultValues: {
       name: parc?.name || "",
       typeparcId: parc?.typeparcId || "",
-      panneIds: parc?.pannes?.map((p: any) => p.id) || ([] as string[]),
     },
     onSubmit: async ({ value }) => {
       try {
         setIsSubmitting(true);
         setError(null);
+
+        // Détection de changements
+        const hasChanges =
+          value.name !== parc?.name || value.typeparcId !== parc?.typeparcId;
+
+        if (!hasChanges) {
+          onOpenChange?.(false);
+          return;
+        }
+
         await parcSchema.validate(value, { abortEarly: false });
 
         const response = await apiFetch(API.PARCS.PARC_UPDATE(parc.id), {
@@ -85,6 +92,7 @@ const EditParc = ({
           router.refresh();
           toast.success(`Parc mis à jour`);
           onOpenChange(false);
+          onSuccess?.();
         } else {
           setError(response.data?.message || "Erreur lors de la mise à jour");
         }
@@ -102,7 +110,6 @@ const EditParc = ({
       form.reset({
         name: parc.name,
         typeparcId: parc.typeparcId,
-        panneIds: parc.pannes?.map((p: any) => p.id) || [],
       });
       setError(null);
     } else {
@@ -161,48 +168,6 @@ const EditParc = ({
                   </Select>
                 )}
               </form.Field>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Pannes possibles</Label>
-              <div className="grid grid-cols-2 gap-2 max-h-[150px] overflow-y-auto p-2 border rounded-md">
-                <form.Field name="panneIds">
-                  {(field) => (
-                    <>
-                      {pannes.map((panne) => (
-                        <div
-                          key={panne.id}
-                          className="flex items-center space-x-2"
-                        >
-                          <Checkbox
-                            id={`edit-panne-${panne.id}`}
-                            checked={field.state.value?.includes(panne.id)}
-                            onCheckedChange={(checked) => {
-                              const current = field.state.value || [];
-                              if (checked) {
-                                field.handleChange([...current, panne.id]);
-                              } else {
-                                field.handleChange(
-                                  current.filter(
-                                    (id: string) => id !== panne.id
-                                  )
-                                );
-                              }
-                            }}
-                            disabled={isSubmitting}
-                          />
-                          <Label
-                            htmlFor={`edit-panne-${panne.id}`}
-                            className="text-sm cursor-pointer truncate"
-                          >
-                            {panne.name}
-                          </Label>
-                        </div>
-                      ))}{" "}
-                    </>
-                  )}
-                </form.Field>
-              </div>
             </div>
           </FieldGroup>
 

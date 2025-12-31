@@ -24,7 +24,11 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import FormError from "@/components/form/FormError";
 
-const NewTypepanne = () => {
+interface NewTypepanneProps {
+  onSuccess?: () => void;
+}
+
+const NewTypepanne = ({ onSuccess }: NewTypepanneProps) => {
   const [modalOpen, setModalOpen] = useState(false);
   const router = useRouter();
   const locale = useCurrentLocale();
@@ -58,6 +62,7 @@ const NewTypepanne = () => {
           toast.success(`Type de panne créé avec succès`);
           setModalOpen(false);
           form.reset();
+          onSuccess?.();
         } else {
           setError(response.data?.message || "Erreur lors de la création");
         }

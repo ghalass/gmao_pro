@@ -15,10 +15,14 @@ import DeleteParc from "./delete-parc";
 interface ParcRowActionsProps {
   parc: any;
   typeparcs: any[];
-  pannes: any[];
+  onParcUpdated?: () => void;
 }
 
-const ParcRowActions = ({ parc, typeparcs, pannes }: ParcRowActionsProps) => {
+const ParcRowActions = ({
+  parc,
+  typeparcs,
+  onParcUpdated,
+}: ParcRowActionsProps) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -49,15 +53,16 @@ const ParcRowActions = ({ parc, typeparcs, pannes }: ParcRowActionsProps) => {
       <EditParc
         parc={parc}
         typeparcs={typeparcs}
-        pannes={pannes}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
+        onSuccess={onParcUpdated}
       />
 
       <DeleteParc
         parc={parc}
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
+        onSuccess={onParcUpdated}
       />
     </>
   );

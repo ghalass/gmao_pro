@@ -27,12 +27,14 @@ interface EditTypelubrifiantProps {
   typelubrifiant: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 const EditTypelubrifiant = ({
   typelubrifiant,
   open,
   onOpenChange,
+  onSuccess,
 }: EditTypelubrifiantProps) => {
   const router = useRouter();
   const locale = useCurrentLocale();
@@ -55,6 +57,14 @@ const EditTypelubrifiant = ({
         setError(null);
         await typelubrifiantSchema.validate(value, { abortEarly: false });
 
+        // Détection de changements
+        const hasChanges = value.name !== typelubrifiant?.name;
+
+        if (!hasChanges) {
+          onOpenChange?.(false);
+          return;
+        }
+
         const response = await apiFetch(
           API.TYPELUBRIFIANTS.TYPELUBRIFIANT_UPDATE(typelubrifiant.id),
           {
@@ -67,6 +77,7 @@ const EditTypelubrifiant = ({
           router.refresh();
           toast.success(`Type de lubrifiant mis à jour`);
           onOpenChange(false);
+          onSuccess?.();
         } else {
           const errorData = response.data?.message;
           setError(errorData || "Erreur lors de la mise à jour");

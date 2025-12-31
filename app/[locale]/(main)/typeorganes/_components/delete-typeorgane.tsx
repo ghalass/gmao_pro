@@ -20,12 +20,14 @@ interface DeleteTypeorganeProps {
   typeorgane: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 const DeleteTypeorgane = ({
   typeorgane,
   open,
   onOpenChange,
+  onSuccess,
 }: DeleteTypeorganeProps) => {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = React.useState(false);
@@ -44,6 +46,7 @@ const DeleteTypeorgane = ({
         toast.success(`Type d'organe supprimé avec succès`);
         onOpenChange(false);
         router.refresh();
+        onSuccess?.();
       } else {
         const errorData = response.data?.message;
         toast.error(errorData || "Erreur lors de la suppression");

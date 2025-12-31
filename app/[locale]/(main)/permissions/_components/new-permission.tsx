@@ -34,7 +34,11 @@ import {
 
 const actions = ["create", "read", "update", "delete"];
 
-const NewPermission = () => {
+interface NewPermissionProps {
+  onSuccess?: () => void;
+}
+
+const NewPermission = ({ onSuccess }: NewPermissionProps) => {
   const [modalOpen, setModalOpen] = useState(false);
   const router = useRouter();
   const locale = useCurrentLocale();
@@ -101,6 +105,7 @@ const NewPermission = () => {
           toast.success(`Permission créée avec succès`);
           setModalOpen(false);
           form.reset();
+          onSuccess?.();
         } else {
           const errorData = response.data?.message;
           setError(errorData || "Erreur lors de la création");

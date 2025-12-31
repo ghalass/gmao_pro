@@ -14,9 +14,13 @@ import DeleteTypeparc from "./delete-typeparc";
 
 interface TypeparcRowActionsProps {
   typeparc: any;
+  onTypeparcUpdated?: () => void;
 }
 
-const TypeparcRowActions = ({ typeparc }: TypeparcRowActionsProps) => {
+const TypeparcRowActions = ({
+  typeparc,
+  onTypeparcUpdated,
+}: TypeparcRowActionsProps) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -48,12 +52,14 @@ const TypeparcRowActions = ({ typeparc }: TypeparcRowActionsProps) => {
         typeparc={typeparc}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
+        onSuccess={onTypeparcUpdated}
       />
 
       <DeleteTypeparc
         typeparc={typeparc}
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
+        onSuccess={onTypeparcUpdated}
       />
     </>
   );

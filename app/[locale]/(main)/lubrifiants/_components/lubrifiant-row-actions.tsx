@@ -16,12 +16,14 @@ interface LubrifiantRowActionsProps {
   lubrifiant: any;
   typelubrifiants: any[];
   parcs: any[];
+  onLubrifiantUpdated?: () => void;
 }
 
 const LubrifiantRowActions = ({
   lubrifiant,
   typelubrifiants,
   parcs,
+  onLubrifiantUpdated,
 }: LubrifiantRowActionsProps) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -56,12 +58,14 @@ const LubrifiantRowActions = ({
         parcs={parcs}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
+        onSuccess={onLubrifiantUpdated}
       />
 
       <DeleteLubrifiant
         lubrifiant={lubrifiant}
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
+        onSuccess={onLubrifiantUpdated}
       />
     </>
   );

@@ -16,12 +16,14 @@ interface PanneRowActionsProps {
   panne: any;
   typepannes: any[];
   parcs: any[];
+  onPanneUpdated?: () => void;
 }
 
 const PanneRowActions = ({
   panne,
   typepannes,
   parcs,
+  onPanneUpdated,
 }: PanneRowActionsProps) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -56,12 +58,14 @@ const PanneRowActions = ({
         parcs={parcs}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
+        onSuccess={onPanneUpdated}
       />
 
       <DeletePanne
         panne={panne}
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
+        onSuccess={onPanneUpdated}
       />
     </>
   );

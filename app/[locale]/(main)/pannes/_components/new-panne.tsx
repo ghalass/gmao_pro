@@ -37,9 +37,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 interface NewPanneProps {
   typepannes: any[];
   parcs: any[];
+  onSuccess?: () => void;
 }
 
-const NewPanne = ({ typepannes, parcs }: NewPanneProps) => {
+const NewPanne = ({ typepannes, parcs, onSuccess }: NewPanneProps) => {
   const [modalOpen, setModalOpen] = useState(false);
   const router = useRouter();
   const locale = useCurrentLocale();
@@ -86,6 +87,7 @@ const NewPanne = ({ typepannes, parcs }: NewPanneProps) => {
           toast.success(`Panne créée avec succès`);
           setModalOpen(false);
           form.reset();
+          onSuccess?.();
         } else {
           setError(response.data?.message || "Erreur lors de la création");
         }

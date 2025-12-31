@@ -38,12 +38,14 @@ interface EditPermissionProps {
   permission: Permission;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 const EditPermission = ({
   permission,
   open,
   onOpenChange,
+  onSuccess,
 }: EditPermissionProps) => {
   const router = useRouter();
   const locale = useCurrentLocale();
@@ -100,6 +102,17 @@ const EditPermission = ({
         setError(null);
         await permissionSchema.validate(value, { abortEarly: false });
 
+        // Détection de changements
+        const hasChanges =
+          value.resource !== permission?.resource ||
+          value.action !== permission?.action ||
+          value.description !== (permission?.description || "");
+
+        if (!hasChanges) {
+          onOpenChange?.(false);
+          return;
+        }
+
         const response = await apiFetch(
           API.PERMISSIONS.PERMISSION_UPDATE(permission.id),
           {
@@ -112,6 +125,7 @@ const EditPermission = ({
           router.refresh();
           toast.success(`Permission mise à jour avec succès`);
           onOpenChange(false);
+          onSuccess?.();
         } else {
           const errorData = response.data?.message;
           setError(errorData || "Erreur lors de la mise à jour");

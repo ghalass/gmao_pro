@@ -16,9 +16,15 @@ interface EnginRowActionsProps {
   engin: any;
   parcs: any[];
   sites: any[];
+  onEnginUpdated?: () => void;
 }
 
-const EnginRowActions = ({ engin, parcs, sites }: EnginRowActionsProps) => {
+const EnginRowActions = ({
+  engin,
+  parcs,
+  sites,
+  onEnginUpdated,
+}: EnginRowActionsProps) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -52,12 +58,14 @@ const EnginRowActions = ({ engin, parcs, sites }: EnginRowActionsProps) => {
         sites={sites}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
+        onSuccess={onEnginUpdated}
       />
 
       <DeleteEngin
         engin={engin}
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
+        onSuccess={onEnginUpdated}
       />
     </>
   );

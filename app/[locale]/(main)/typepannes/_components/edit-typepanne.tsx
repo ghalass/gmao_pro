@@ -27,12 +27,14 @@ interface EditTypepanneProps {
   typepanne: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 const EditTypepanne = ({
   typepanne,
   open,
   onOpenChange,
+  onSuccess,
 }: EditTypepanneProps) => {
   const router = useRouter();
   const locale = useCurrentLocale();
@@ -59,6 +61,16 @@ const EditTypepanne = ({
         setError(null);
         await typepanneSchema.validate(value, { abortEarly: false });
 
+        // Détection de changements
+        const hasChanges =
+          value.name !== typepanne?.name ||
+          value.description !== (typepanne?.description || "");
+
+        if (!hasChanges) {
+          onOpenChange?.(false);
+          return;
+        }
+
         const response = await apiFetch(
           API.TYPEPANNES.TYPEPANNE_UPDATE(typepanne.id),
           {
@@ -71,6 +83,7 @@ const EditTypepanne = ({
           router.refresh();
           toast.success(`Type de panne mis à jour`);
           onOpenChange(false);
+          onSuccess?.();
         } else {
           setError(response.data?.message || "Erreur lors de la mise à jour");
         }

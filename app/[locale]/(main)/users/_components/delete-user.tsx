@@ -25,9 +25,15 @@ interface DeleteUserProps {
   user: UserWithRoles;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
-const DeleteUser = ({ user, open, onOpenChange }: DeleteUserProps) => {
+const DeleteUser = ({
+  user,
+  open,
+  onOpenChange,
+  onSuccess,
+}: DeleteUserProps) => {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = React.useState(false);
 
@@ -43,6 +49,7 @@ const DeleteUser = ({ user, open, onOpenChange }: DeleteUserProps) => {
         toast.success(`Utilisateur supprimé avec succès`);
         onOpenChange(false);
         router.refresh();
+        onSuccess?.();
       } else {
         const errorData = response.data?.message;
         toast.error(errorData || "Erreur lors de la suppression");
