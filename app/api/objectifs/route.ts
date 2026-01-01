@@ -19,13 +19,45 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
     }
 
+    // Extraire les paramètres de pagination et de recherche
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const search = searchParams.get("search") || "";
+
+    // Calculer l'offset
+    const offset = (page - 1) * limit;
+
+    // Construire le filtre de recherche
+    const searchYear = parseInt(search);
+    const whereClause: any = {
+      AND: [
+        { parc: { entrepriseId } },
+        { site: { entrepriseId } },
+        ...(search
+          ? [
+              {
+                OR: [
+                  { parc: { name: { contains: search, mode: "insensitive" } } },
+                  { site: { name: { contains: search, mode: "insensitive" } } },
+                  ...(isNaN(searchYear)
+                    ? []
+                    : [{ annee: { equals: searchYear } }]),
+                ],
+              },
+            ]
+          : []),
+      ],
+    };
+
+    // Récupérer le total des objectifs pour la pagination
+    const total = await prisma.objectif.count({
+      where: whereClause,
+    });
+
+    // Récupérer les objectifs paginés
     const objectifs = await prisma.objectif.findMany({
-      where: {
-        AND: [
-          { parc: { entrepriseId } },
-          { site: { entrepriseId } },
-        ],
-      },
+      where: whereClause,
       include: {
         parc: {
           select: {
@@ -51,9 +83,25 @@ export async function GET(request: NextRequest) {
         { parc: { name: "asc" } },
         { site: { name: "asc" } },
       ],
+      skip: offset,
+      take: limit,
     });
 
-    return NextResponse.json(objectifs);
+    // Calculer les informations de pagination
+    const totalPages = Math.ceil(total / limit);
+    const pagination = {
+      currentPage: page,
+      totalPages,
+      totalItems: total,
+      itemsPerPage: limit,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    };
+
+    return NextResponse.json({
+      data: objectifs,
+      pagination,
+    });
   } catch (error) {
     console.error("Erreur GET /api/objectifs:", error);
     return NextResponse.json(
@@ -166,53 +214,53 @@ export async function POST(request: NextRequest) {
       );
 
       // Vérifier que le parc appartient à l'entreprise
-    const parc = await prisma.parc.findFirst({
-      where: {
-        id: parcId,
-        entrepriseId,
-      },
-    });
-
-    if (!parc) {
-      return NextResponse.json(
-        { message: "Parc non trouvé ou n'appartient pas à votre entreprise" },
-        { status: 404 }
-      );
-    }
-
-    // Vérifier que le site appartient à l'entreprise
-    const site = await prisma.site.findFirst({
-      where: {
-        id: siteId,
-        entrepriseId,
-      },
-    });
-
-    if (!site) {
-      return NextResponse.json(
-        { message: "Site non trouvé ou n'appartient pas à votre entreprise" },
-        { status: 404 }
-      );
-    }
-
-    // Vérifier l'unicité (annee, parcId, siteId)
-    const existing = await prisma.objectif.findFirst({
-      where: {
-        annee: parseInt(annee),
-        parcId,
-        siteId,
-      },
-    });
-
-    if (existing) {
-      return NextResponse.json(
-        {
-          message:
-            "Un objectif existe déjà pour cette année, ce parc et ce site",
+      const parc = await prisma.parc.findFirst({
+        where: {
+          id: parcId,
+          entrepriseId,
         },
-        { status: 409 }
-      );
-    }
+      });
+
+      if (!parc) {
+        return NextResponse.json(
+          { message: "Parc non trouvé ou n'appartient pas à votre entreprise" },
+          { status: 404 }
+        );
+      }
+
+      // Vérifier que le site appartient à l'entreprise
+      const site = await prisma.site.findFirst({
+        where: {
+          id: siteId,
+          entrepriseId,
+        },
+      });
+
+      if (!site) {
+        return NextResponse.json(
+          { message: "Site non trouvé ou n'appartient pas à votre entreprise" },
+          { status: 404 }
+        );
+      }
+
+      // Vérifier l'unicité (annee, parcId, siteId)
+      const existing = await prisma.objectif.findFirst({
+        where: {
+          annee: parseInt(annee),
+          parcId,
+          siteId,
+        },
+      });
+
+      if (existing) {
+        return NextResponse.json(
+          {
+            message:
+              "Un objectif existe déjà pour cette année, ce parc et ce site",
+          },
+          { status: 409 }
+        );
+      }
 
       // Créer l'objectif
       const objectif = await prisma.objectif.create({
@@ -280,4 +328,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

@@ -22,6 +22,16 @@ export const API = {
     GET_ALL_ENTREPRISES: "/api/super-admin/entreprises",
     GET_ONE_ENTREPRISE: (entrepriseId: string) =>
       `/api/super-admin/entreprises/${entrepriseId}`,
+    CREATE_ENTREPRISE: "/api/super-admin/entreprises",
+    UPDATE_ENTREPRISE: (entrepriseId: string) =>
+      `/api/super-admin/entreprises/${entrepriseId}`,
+    DELETE_ENTREPRISE: (entrepriseId: string) =>
+      `/api/super-admin/entreprises/${entrepriseId}`,
+    DASHBOARD_STATS: "/api/super-admin/dashboard/stats",
+    GET_ALL_USERS: "/api/super-admin/users",
+    GET_USER_DETAILS: (userId: string) => `/api/super-admin/users/${userId}`,
+    UPDATE_USER: (userId: string) => `/api/super-admin/users/${userId}`,
+    RESET_USER_PASSWORD: (userId: string) => `/api/super-admin/users/${userId}`,
   },
   USERS: {
     ALL: "/api/users",
@@ -241,7 +251,37 @@ export async function apiFetch<T = any>(
       credentials: "include", // Important pour inclure les cookies
     });
 
-    const data = await response.json();
+    if (!response.ok) {
+      console.error(`API Error: ${response.status} ${response.statusText}`);
+      return {
+        ok: false,
+        status: response.status,
+        data: {
+          error: `HTTP ${response.status}`,
+          message: response.statusText || "Erreur HTTP",
+        },
+      };
+    }
+
+    let data;
+    const contentType = response.headers.get("content-type");
+
+    try {
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        console.error("Non-JSON response:", text.substring(0, 200));
+        throw new Error(`Response is not JSON: ${text.substring(0, 100)}`);
+      }
+    } catch (parseError) {
+      console.error("JSON Parse Error:", parseError);
+      throw new Error(
+        `Invalid JSON response: ${
+          parseError instanceof Error ? parseError.message : "Unknown error"
+        }`
+      );
+    }
 
     return {
       ok: response.ok,
