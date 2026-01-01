@@ -5,7 +5,7 @@ import { getSession } from "@/lib/auth";
 
 const the_resource = "site";
 
-// GET - Récupérer tous les sites de l'entreprise
+// GET - Récupérer tous les sites de l'entreprise avec pagination
 export async function GET(request: NextRequest) {
   try {
     const protectionError = await protectReadRoute(request, the_resource);
@@ -18,17 +18,59 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
     }
 
-    const sites = await prisma.site.findMany({
-      where: { entrepriseId },
-      include: {
-        _count: {
-          select: { engins: true },
-        },
-      },
-      orderBy: { name: "asc" },
-    });
+    // Récupérer les paramètres de pagination et de recherche
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const search = searchParams.get("search") || "";
 
-    return NextResponse.json(sites);
+    // Gérer le cas "Tout afficher"
+    const actualLimit = limit === -1 ? undefined : limit;
+    const actualOffset = limit === -1 ? 0 : (page - 1) * limit;
+
+    // Construire la clause where
+    const where = {
+      entrepriseId,
+      ...(search && {
+        name: {
+          contains: search,
+          mode: "insensitive" as const,
+        },
+      }),
+    };
+
+    // Récupérer les sites paginés et le total
+    const [sites, total] = await Promise.all([
+      prisma.site.findMany({
+        where,
+        include: {
+          _count: {
+            select: { engins: true },
+          },
+        },
+        orderBy: { name: "asc" },
+        skip: actualOffset,
+        take: actualLimit,
+      }),
+      prisma.site.count({ where }),
+    ]);
+
+    // Calculer les informations de pagination
+    const totalPages = limit === -1 ? 1 : Math.ceil(total / limit);
+    const hasNextPage = limit === -1 ? false : page < totalPages;
+    const hasPreviousPage = limit === -1 ? false : page > 1;
+
+    return NextResponse.json({
+      data: sites,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems: total,
+        itemsPerPage: limit,
+        hasNextPage,
+        hasPreviousPage,
+      },
+    });
   } catch (error) {
     console.error("Erreur GET /api/sites:", error);
     return NextResponse.json(
