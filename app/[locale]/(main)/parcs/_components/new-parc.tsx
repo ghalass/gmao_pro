@@ -149,11 +149,12 @@ const NewParc = ({ typeparcs, onSuccess }: NewParcProps) => {
                       <SelectValue placeholder="Choisir un type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {typeparcs.map((tp) => (
-                        <SelectItem key={tp.id} value={tp.id}>
-                          {tp.name}
-                        </SelectItem>
-                      ))}
+                      {Array.isArray(typeparcs) &&
+                        typeparcs.map((tp) => (
+                          <SelectItem key={tp.id} value={tp.id}>
+                            {tp.name}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 )}

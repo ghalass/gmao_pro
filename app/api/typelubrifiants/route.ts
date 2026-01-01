@@ -5,7 +5,7 @@ import { getSession } from "@/lib/auth";
 
 const the_resource = "typelubrifiant";
 
-// GET - Récupérer tous les typelubrifiants
+// GET - Récupérer tous les typelubrifiants avec pagination
 export async function GET(request: NextRequest) {
   try {
     const protectionError = await protectReadRoute(request, the_resource);
@@ -18,17 +18,59 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
     }
 
-    const typelubrifiants = await prisma.typelubrifiant.findMany({
-      where: { entrepriseId },
-      include: {
-        lubrifiants: true, // Relation OneToMany avec Lubrifiant
-      },
-      orderBy: {
-        createdAt: "desc",
+    // Récupérer les paramètres de pagination et de recherche
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const search = searchParams.get("search") || "";
+
+    // Gérer le cas "Tout afficher"
+    const actualLimit = limit === -1 ? undefined : limit;
+    const actualOffset = limit === -1 ? 0 : (page - 1) * limit;
+
+    // Construire la clause where
+    const where = {
+      entrepriseId,
+      ...(search && {
+        name: {
+          contains: search,
+          mode: "insensitive" as const,
+        },
+      }),
+    };
+
+    // Récupérer les typelubrifiants paginés et le total
+    const [typelubrifiants, total] = await Promise.all([
+      prisma.typelubrifiant.findMany({
+        where,
+        include: {
+          _count: {
+            select: { lubrifiants: true },
+          },
+        },
+        orderBy: { name: "asc" },
+        skip: actualOffset,
+        take: actualLimit,
+      }),
+      prisma.typelubrifiant.count({ where }),
+    ]);
+
+    // Calculer les informations de pagination
+    const totalPages = limit === -1 ? 1 : Math.ceil(total / limit);
+    const hasNextPage = limit === -1 ? false : page < totalPages;
+    const hasPreviousPage = limit === -1 ? false : page > 1;
+
+    return NextResponse.json({
+      data: typelubrifiants,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems: total,
+        itemsPerPage: limit,
+        hasNextPage,
+        hasPreviousPage,
       },
     });
-
-    return NextResponse.json(typelubrifiants);
   } catch (error) {
     console.error("Erreur GET /api/typelubrifiants:", error);
     return NextResponse.json(

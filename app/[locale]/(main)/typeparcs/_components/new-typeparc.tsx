@@ -1,11 +1,6 @@
 "use client";
 
-import { API, apiFetch, methods } from "@/lib/api";
-import { Plus, Save } from "lucide-react";
-import React, { useState, useEffect } from "react";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { FormField } from "@/components/form/FormField";
+import React, { useState } from "react";
 import { useCurrentLocale } from "@/locales/client";
 import {
   Dialog,
@@ -23,6 +18,10 @@ import { FieldGroup } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import FormError from "@/components/form/FormError";
+import { FormField } from "@/components/form/FormField";
+import { API, apiFetch } from "@/lib/api";
+import { toast } from "sonner";
+import { Plus, Save } from "lucide-react";
 
 interface NewTypeparcProps {
   onSuccess?: () => void;
@@ -30,59 +29,63 @@ interface NewTypeparcProps {
 
 const NewTypeparc = ({ onSuccess }: NewTypeparcProps) => {
   const [modalOpen, setModalOpen] = useState(false);
-  const router = useRouter();
   const locale = useCurrentLocale();
   const [error, setError] = React.useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const typeparcSchema = React.useMemo(() => {
-    if (locale === "ar") yup.setLocale(ar);
-    else yup.setLocale(fr);
-    return yup.object({
-      name: yup.string().min(2).required().label("Nom du type de parc"),
-    });
-  }, [locale]);
+  // Configuration de Yup pour la locale
+  yup.setLocale(locale === "ar" ? ar : fr);
 
   const form = useForm({
-    defaultValues: { name: "" },
+    defaultValues: {
+      name: "",
+    },
     onSubmit: async ({ value }) => {
-      try {
-        setIsSubmitting(true);
-        setError(null);
-        await typeparcSchema.validate(value, { abortEarly: false });
+      setIsSubmitting(true);
+      setError(null);
 
+      try {
         const response = await apiFetch(API.TYPEPARCS.TYPEPARC_CREATE, {
-          method: methods.POST,
-          body: value,
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(value),
         });
 
-        if (response.ok) {
-          router.refresh();
-          toast.success(`Type de parc créé avec succès`);
-          setModalOpen(false);
-          form.reset();
-          onSuccess?.();
-        } else {
-          setError(response.data?.message || "Erreur lors de la création");
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Erreur lors de la création");
         }
-      } catch (err: any) {
-        if (err.name === "ValidationError") setError(err.errors.join(", "));
-        else setError(err.message || "Erreur lors de la création");
+
+        toast.success("Type de parc créé avec succès");
+        setModalOpen(false);
+        form.reset();
+        onSuccess?.();
+      } catch (error: any) {
+        console.error("Erreur lors de la création:", error);
+        setError(error.message || "Erreur lors de la création du type de parc");
+        toast.error(
+          error.message || "Erreur lors de la création du type de parc"
+        );
       } finally {
         setIsSubmitting(false);
       }
     },
+    validators: {
+      onChange: yup.object({
+        name: yup
+          .string()
+          .required("Le nom du type de parc est obligatoire")
+          .min(2, "Le nom doit contenir au moins 2 caractères")
+          .max(100, "Le nom ne peut pas dépasser 100 caractères")
+          .matches(
+            /^[a-zA-Z0-9\s\-_À-ÿ]+$/,
+            "Le nom contient des caractères non valides"
+          ),
+      }),
+    },
   });
-
-  useEffect(() => {
-    if (modalOpen) {
-      form.reset();
-      setError(null);
-    } else {
-      setError(null);
-      form.reset();
-    }
-  }, [modalOpen, form]);
 
   return (
     <Dialog

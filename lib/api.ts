@@ -107,6 +107,8 @@ export const API = {
     TYPELUBRIFIANT_DETAILS: (id: string) => `/api/typelubrifiants/${id}`,
     TYPELUBRIFIANT_UPDATE: (id: string) => `/api/typelubrifiants/${id}`,
     TYPELUBRIFIANT_DELETE: (id: string) => `/api/typelubrifiants/${id}`,
+    IMPORT: "/api/typelubrifiants/import",
+    UPDATE_IMPORT: "/api/typelubrifiants/update-import",
   },
   LUBRIFIANTS: {
     ALL: "/api/lubrifiants",

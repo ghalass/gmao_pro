@@ -1,3 +1,5 @@
+set default language of our conversation to french
+
 # PROMPT BATCH_CREATEPAGE_WITH_EXCEL.md
 
 Exécute la création complète de pages de gestion pour une liste de ressources avec système d'importation Excel pour création et modification (identique à celui de la page sites).
@@ -157,6 +159,210 @@ model Engin {
 - Mise à jour sélective des champs fournis
 - Template pré-rempli avec données existantes
 
+### 5.5. ⚠️ CRITICAL : Génération des Templates Excel (GET endpoints)
+
+#### ❌ ERREUR COURANTE : Retourner du JSON pour les templates
+
+Ne JAMAIS faire :
+```typescript
+// ❌ INCORRECT - Retourne JSON, pas un fichier Excel
+export async function GET(request: NextRequest) {
+  const template = {
+    columns: [...],
+    exampleRows: [...]
+  };
+  return NextResponse.json(template); // ❌ Templates corrompus !
+}
+```
+
+#### ✅ CORRECT : Générer un fichier Excel binaire XLSX
+
+**Pour `/api/[resource_name]/import/route.ts` (GET)** :
+```typescript
+import * as XLSX from "xlsx";
+
+export async function GET(request: NextRequest) {
+  try {
+    const protectionError = await protectReadRoute(request, the_resource);
+    if (protectionError) return protectionError;
+
+    const session = await getSession();
+    const entrepriseId = session?.entrepriseId;
+
+    if (!entrepriseId) {
+      return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
+    }
+
+    // Récupérer les données de référence (listes déroulantes, etc.)
+    const relatedData = await prisma.[related_model].findMany({
+      where: { entrepriseId },
+      select: { name: true },
+    });
+
+    // Créer les données du template avec exemples réels
+    const templateData = [
+      {
+        "Colonne 1*": "Exemple 1",
+        "Colonne 2*": relatedData.length > 0 ? relatedData[0].name : "Exemple",
+      },
+      {
+        "Colonne 1*": "Exemple 2",
+        "Colonne 2*": relatedData.length > 0 ? relatedData[0].name : "Exemple",
+      },
+    ];
+
+    // Créer le workbook et la feuille
+    const worksheet = XLSX.utils.json_to_sheet(templateData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "SheetName");
+
+    // (Optionnel) Ajouter des commentaires sur les en-têtes
+    const range = XLSX.utils.decode_range(worksheet["!ref"] || "A1:Z1");
+    for (let col = range.s.c; col <= range.e.c; col++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+      if (!worksheet[cellAddress]) continue;
+
+      const header = worksheet[cellAddress].v;
+      let comment = "";
+
+      if (header.includes("Colonne 1")) {
+        comment = "Obligatoire. Description de la colonne 1.";
+      } else if (header.includes("Colonne 2")) {
+        comment = "Obligatoire. Valeurs disponibles: " + 
+          relatedData.map((r) => r.name).join(", ");
+      }
+
+      if (comment) {
+        worksheet[cellAddress].c = [
+          { t: comment, r: "<r><rPr><b/></rPr><t>" + comment + "</t></r>" },
+        ];
+      }
+    }
+
+    // ✅ Générer le fichier binaire XLSX
+    const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+
+    // ✅ Retourner en tant que fichier XLSX binaire avec les bons headers
+    return new NextResponse(buffer, {
+      headers: {
+        "Content-Type":
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "Content-Disposition": "attachment; filename=[resource_name]_template.xlsx",
+      },
+    });
+  } catch (error) {
+    console.error("Erreur GET /api/[resource_name]/import:", error);
+    return NextResponse.json(
+      { message: "Erreur lors de la génération du template" },
+      { status: 500 }
+    );
+  }
+}
+```
+
+**Pour `/api/[resource_name]/update-import/route.ts` (GET)** :
+```typescript
+export async function GET(request: NextRequest) {
+  try {
+    const protectionError = await protectReadRoute(request, the_resource);
+    if (protectionError) return protectionError;
+
+    const session = await getSession();
+    const entrepriseId = session?.entrepriseId;
+
+    if (!entrepriseId) {
+      return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
+    }
+
+    // Récupérer les ressources existantes
+    const existingResources = await prisma.[model].findMany({
+      where: { entrepriseId },
+      select: { name: true }, // Champ d'identification
+      take: 5,
+    });
+
+    const relatedData = await prisma.[related_model].findMany({
+      where: { entrepriseId },
+      select: { name: true },
+    });
+
+    // Créer le template avec données existantes
+    const templateData = [
+      {
+        "Identifiant*": existingResources.length > 0 ? existingResources[0].name : "Nom existant",
+        "Colonne optionnelle": relatedData.length > 0 ? relatedData[0].name : "",
+      },
+      ...(existingResources.length > 1
+        ? [
+            {
+              "Identifiant*": existingResources[1].name,
+              "Colonne optionnelle": "",
+            },
+          ]
+        : []),
+    ];
+
+    const worksheet = XLSX.utils.json_to_sheet(templateData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "SheetName");
+
+    // Ajouter les commentaires
+    const range = XLSX.utils.decode_range(worksheet["!ref"] || "A1:B1");
+    for (let col = range.s.c; col <= range.e.c; col++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+      if (!worksheet[cellAddress]) continue;
+
+      const header = worksheet[cellAddress].v;
+      let comment = "";
+
+      if (header.includes("Identifiant")) {
+        comment = "Obligatoire. Ressource existante à modifier. Disponibles: " +
+          existingResources.map((r) => r.name).join(", ");
+      } else if (header.includes("optionnelle")) {
+        comment = "Optionnel. Nouvelles valeurs (si vide, pas de modification). " +
+          "Disponibles: " + relatedData.map((r) => r.name).join(", ");
+      }
+
+      if (comment) {
+        worksheet[cellAddress].c = [
+          { t: comment, r: "<r><rPr><b/></rPr><t>" + comment + "</t></r>" },
+        ];
+      }
+    }
+
+    // ✅ Générer et retourner le fichier binaire
+    const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+
+    return new NextResponse(buffer, {
+      headers: {
+        "Content-Type":
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "Content-Disposition": "attachment; filename=[resource_name]_update_template.xlsx",
+      },
+    });
+  } catch (error) {
+    console.error("Erreur GET /api/[resource_name]/update-import:", error);
+    return NextResponse.json(
+      { message: "Erreur lors de la génération du template" },
+      { status: 500 }
+    );
+  }
+}
+```
+
+#### Checklist pour les endpoints GET :
+- ✅ Importer `XLSX` du package `xlsx`
+- ✅ Utiliser `XLSX.utils.json_to_sheet()` pour créer la feuille
+- ✅ Utiliser `XLSX.utils.book_new()` et `XLSX.utils.book_append_sheet()`
+- ✅ Utiliser `XLSX.write(workbook, { type: "buffer", bookType: "xlsx" })`
+- ✅ Retourner avec `new NextResponse(buffer, { headers: {...} })`
+- ✅ Headers MUST include :
+  - `Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+  - `Content-Disposition: attachment; filename=[resource]_template.xlsx`
+- ✅ Jamais retourner JSON pour les templates
+- ✅ Pré-remplir avec des données réelles de la BD
+- ✅ Ajouter des commentaires Excel sur les en-têtes avec instructions
+
 ### 6. Instructions spécifiques d'implémentation :
 
 #### Pour chaque ressource :
@@ -194,7 +400,7 @@ model Engin {
 ### Input :
 ```bash
 LISTE_RESSOURCES = [
-  "typeparcs",
+  "typelubrifiants",
 ]
 ```
 
@@ -213,6 +419,7 @@ Pour chaque ressource dans la liste :
    c. Créer les schémas de validation
    d. Créer les endpoints API
    e. Valider la cohérence globale
+   f; Vérifie s'il y a des erreurs, si oui les corriger
 3. Fournir un résumé complet de toutes les créations
 
 ---
