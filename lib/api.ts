@@ -151,6 +151,9 @@ export const API = {
     DELETE: (id: string) => `/api/typeconsommationlubs/${id}`,
     BY_PARC: (parcId: string) => `/api/typeconsommationlubs?parcId=${parcId}`,
   },
+  RAPPORTS_RJE: {
+    BASE: "/api/rapports/rje",
+  },
 };
 
 export enum methods {
@@ -227,7 +230,12 @@ export async function apiFetch<T = any>(
     const response = await fetch(fullUrl, {
       method: options?.method || methods.GET,
       headers,
-      body: options?.body ? JSON.stringify(options.body) : undefined,
+      body:
+        options?.body !== undefined && options?.body !== null
+          ? typeof options.body === "string"
+            ? options.body
+            : JSON.stringify(options.body)
+          : undefined,
       credentials: "include", // Important pour inclure les cookies
     });
 

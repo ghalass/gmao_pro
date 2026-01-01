@@ -88,8 +88,24 @@ export async function PATCH(
       return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { lubrifiantId, qte, obs, typeconsommationlubId } = body;
+    const rawBody = await request.text();
+    let body: any;
+    try {
+      body = rawBody ? JSON.parse(rawBody) : {};
+    } catch {
+      body = rawBody;
+    }
+
+    // Si le body est encore une string JSON (double-encodage), tenter un parse
+    if (typeof body === "string") {
+      try {
+        body = JSON.parse(body);
+      } catch {
+        // garder tel quel
+      }
+    }
+
+    const { lubrifiantId, qte, obs, typeconsommationlubId } = body ?? {};
 
     // Vérifier si la saisie existe et appartient à l'entreprise
     const existing = await prisma.saisielubrifiant.findFirst({
@@ -164,16 +180,19 @@ export async function PATCH(
       }
     }
 
+    const qteNumber =
+      qte !== undefined && qte !== null && qte !== "" ? Number(qte) : undefined;
+
     const updated = await prisma.saisielubrifiant.update({
       where: { id },
       data: {
-        lubrifiantId: lubrifiantId || undefined,
-        qte: qte !== undefined ? parseFloat(qte) : undefined,
+        lubrifiantId: lubrifiantId ?? undefined,
+        qte: qteNumber,
         obs: obs !== undefined ? obs : undefined,
         typeconsommationlubId:
-          typeconsommationlubId !== undefined
-            ? typeconsommationlubId || null
-            : undefined,
+          typeconsommationlubId === undefined
+            ? undefined
+            : typeconsommationlubId,
       },
       include: {
         lubrifiant: {

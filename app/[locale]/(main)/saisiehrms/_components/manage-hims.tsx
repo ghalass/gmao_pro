@@ -31,6 +31,8 @@ import EditSaisiehim from "./edit-saisiehim";
 import DeleteSaisiehim from "./delete-saisiehim";
 import AddSaisiehim from "./add-saisiehim";
 import AddSaisieLubrifiant from "./add-saisie-lubrifiant";
+import EditSaisieLubrifiant from "./edit-saisie-lubrifiant";
+import DeleteSaisieLubrifiant from "./delete-saisie-lubrifiant";
 
 interface ManageHimsProps {
   saisiehrm: Saisiehrm & { engin: Engin };
@@ -57,10 +59,13 @@ const ManageHims = ({ saisiehrm, open, onOpenChange }: ManageHimsProps) => {
       })
     | null
   >(null);
+  const [selectedLubrifiant, setSelectedLubrifiant] = useState<any>(null);
   const [showEdit, setShowEdit] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [showAddLubrifiant, setShowAddLubrifiant] = useState(false);
+  const [showEditLubrifiant, setShowEditLubrifiant] = useState(false);
+  const [showDeleteLubrifiant, setShowDeleteLubrifiant] = useState(false);
 
   const fetchHims = useCallback(async () => {
     try {
@@ -227,7 +232,7 @@ const ManageHims = ({ saisiehrm, open, onOpenChange }: ManageHimsProps) => {
                           {him.saisielubrifiant.map((sl: any) => (
                             <div
                               key={sl.id}
-                              className="text-xs p-2 bg-muted/50 rounded flex items-center justify-between"
+                              className="text-xs p-2 bg-muted/50 rounded flex items-center justify-between group"
                             >
                               <div className="flex items-center gap-2">
                                 <span className="font-medium">
@@ -248,9 +253,35 @@ const ManageHims = ({ saisiehrm, open, onOpenChange }: ManageHimsProps) => {
                                   </Badge>
                                 )}
                               </div>
-                              <span className="text-muted-foreground">
-                                {sl.qte} L
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-muted-foreground">
+                                  {sl.qte} L
+                                </span>
+                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-6 w-6"
+                                    onClick={() => {
+                                      setSelectedLubrifiant(sl);
+                                      setShowEditLubrifiant(true);
+                                    }}
+                                  >
+                                    <Edit className="h-3 w-3 text-muted-foreground" />
+                                  </Button>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-6 w-6 hover:text-destructive hover:bg-destructive/10"
+                                    onClick={() => {
+                                      setSelectedLubrifiant(sl);
+                                      setShowDeleteLubrifiant(true);
+                                    }}
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -299,6 +330,23 @@ const ManageHims = ({ saisiehrm, open, onOpenChange }: ManageHimsProps) => {
           onOpenChange={setShowAddLubrifiant}
           onSuccess={fetchHims}
         />
+      )}
+
+      {selectedLubrifiant && (
+        <>
+          <EditSaisieLubrifiant
+            saisieLubrifiant={selectedLubrifiant}
+            open={showEditLubrifiant}
+            onOpenChange={setShowEditLubrifiant}
+            onSuccess={fetchHims}
+          />
+          <DeleteSaisieLubrifiant
+            saisieLubrifiant={selectedLubrifiant}
+            open={showDeleteLubrifiant}
+            onOpenChange={setShowDeleteLubrifiant}
+            onSuccess={fetchHims}
+          />
+        </>
       )}
     </>
   );
