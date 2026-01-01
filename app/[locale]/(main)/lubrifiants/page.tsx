@@ -11,44 +11,144 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
-import { Droplet, Calendar, Landmark } from "lucide-react";
-import NewLubrifiant from "./_components/new-lubrifiant";
-import FormError from "@/components/form/FormError";
-import LubrifiantRowActions from "./_components/lubrifiant-row-actions";
-import { getJoinedDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import {
+  Droplet,
+  Calendar,
+  FileSpreadsheet,
+  Upload,
+  ArrowLeft,
+  Search,
+  Filter,
+  Plus,
+  Download,
+  X,
+} from "lucide-react";
+import NewLubrifiant from "./_components/new-lubrifiant";
+import LubrifiantRowActions from "./_components/lubrifiant-row-actions";
+import { LubrifiantImport } from "./_components/LubrifiantImport";
+import { LubrifiantUpdateImport } from "./_components/LubrifiantUpdateImport";
+import { ExportExcel } from "@/components/ui/export-excel";
+import { Pagination } from "@/components/ui/pagination";
+import { toast } from "sonner";
 import React, { useState, useEffect } from "react";
 
+interface Lubrifiant {
+  id: string;
+  name: string;
+  typelubrifiantId: string;
+  createdAt: string;
+  updatedAt: string;
+  typelubrifiant?: {
+    id: string;
+    name: string;
+  };
+  _count: {
+    saisielubrifiant: number;
+    lubrifiantParc: number;
+  };
+}
+
+interface PaginationInfo {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+interface LubrifiantsResponse {
+  data: Lubrifiant[];
+  pagination: PaginationInfo;
+}
+
+type ViewMode = "list" | "import" | "update-import";
+
 const LubrifiantsPage = () => {
+  const [lubrifiants, setLubrifiants] = useState<Lubrifiant[]>([]);
+  const [typelubrifiants, setTypelubrifiants] = useState<any[]>([]);
+  const [parcs, setParcs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [lubrifiants, setLubrifiants] = React.useState<any[]>([]);
-  const [typelubrifiants, setTypelubrifiants] = React.useState<any[]>([]);
-  const [parcs, setParcs] = React.useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [refreshKey, setRefreshKey] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState<PaginationInfo | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  const [searchInputValue, setSearchInputValue] = useState("");
+
+  // Charger les données de référence
+  const fetchReferenceData = async () => {
+    try {
+      const [typelubrifiantsResponse, parcsResponse] = await Promise.all([
+        apiFetch(API.TYPELUBRIFIANTS.ALL),
+        apiFetch(API.PARCS.ALL),
+      ]);
+
+      setTypelubrifiants(
+        typelubrifiantsResponse.ok ? typelubrifiantsResponse.data : []
+      );
+      setParcs(parcsResponse.ok ? parcsResponse.data : []);
+    } catch (err) {
+      console.error("Erreur lors du chargement des données de référence:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchReferenceData();
+  }, []);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (searchInputValue !== searchTerm) {
+        setSearchTerm(searchInputValue);
+        setCurrentPage(1); // Réinitialiser à la première page lors de la recherche
+      }
+    }, 300);
+
+    return () => clearTimeout(handler);
+  }, [searchInputValue, searchTerm]);
+
+  const handleSearchChange = (value: string) => {
+    setSearchInputValue(value);
+  };
+
+  const handleClearSearch = () => {
+    setSearchInputValue("");
+    setSearchTerm("");
+    setCurrentPage(1);
+  };
 
   const fetchData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const [lubrifiantsResponse, typelubrifiantsResponse, parcsResponse] =
-        await Promise.all([
-          apiFetch(API.LUBRIFIANTS.ALL),
-          apiFetch(API.TYPELUBRIFIANTS.ALL),
-          apiFetch(API.PARCS.ALL),
-        ]);
+      // Construire l'URL avec les paramètres de pagination et de recherche
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: itemsPerPage.toString(),
+        ...(searchTerm && { search: searchTerm }),
+      });
+
+      const lubrifiantsResponse = await apiFetch(
+        `${API.LUBRIFIANTS.ALL}?${params}`
+      );
 
       if (!lubrifiantsResponse.ok) {
         setError(lubrifiantsResponse.data?.message || "Erreur de chargement");
         return;
       }
 
-      setLubrifiants(lubrifiantsResponse.data || []);
-      setTypelubrifiants(
-        typelubrifiantsResponse.ok ? typelubrifiantsResponse.data : []
-      );
-      setParcs(parcsResponse.ok ? parcsResponse.data : []);
+      const response: LubrifiantsResponse = lubrifiantsResponse.data;
+      setLubrifiants(response.data || []);
+      setPagination(response.pagination || null);
     } catch (err: any) {
       setError(err.message || "Erreur de chargement");
     } finally {
@@ -58,16 +158,190 @@ const LubrifiantsPage = () => {
 
   useEffect(() => {
     fetchData();
+  }, [refreshKey, currentPage, searchTerm, itemsPerPage]);
+
+  useEffect(() => {
+    // Nettoyer le debounce lors du démontage
+    return () => {
+      const handler = setTimeout(() => {}, 300);
+      clearTimeout(handler);
+    };
   }, []);
 
-  const plural = lubrifiants.length !== 1 ? "s" : "";
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Réinitialiser à la première page
+  };
+
+  const handleExportFiltered = async () => {
+    try {
+      // Exporter les données actuellement affichées (filtrées) avec toutes les colonnes du tableau
+      return lubrifiants.map((lubrifiant) => ({
+        "Nom du lubrifiant": lubrifiant.name,
+        "Type de lubrifiant": lubrifiant.typelubrifiant?.name || "N/A",
+        "Nombre de parcs": lubrifiant._count?.lubrifiantParc || 0,
+        "Nombre d'utilisations": lubrifiant._count?.saisielubrifiant || 0,
+        "Date de création": new Date(lubrifiant.createdAt).toLocaleDateString(
+          "fr-FR"
+        ),
+        "Date de mise à jour": new Date(
+          lubrifiant.updatedAt
+        ).toLocaleDateString("fr-FR"),
+      }));
+    } catch (error) {
+      console.error("Erreur lors de l'export:", error);
+      throw error;
+    }
+  };
+
+  const handleExportAll = async () => {
+    try {
+      // Récupérer toutes les données sans pagination
+      const params = new URLSearchParams({
+        limit: "-1", // Tout afficher
+        ...(searchTerm && { search: searchTerm }),
+      });
+
+      const response = await apiFetch(`${API.LUBRIFIANTS.ALL}?${params}`);
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la récupération des données");
+      }
+
+      const allData = response.data?.data || [];
+      return allData;
+    } catch (error) {
+      console.error("Erreur lors de l'export:", error);
+      throw error;
+    }
+  };
+
+  const handleImportComplete = (result: any) => {
+    console.log("Importation terminée:", result);
+
+    if (result.success) {
+      toast.success(
+        `Importation réussie: ${
+          result.summary?.created || 0
+        } lubrifiants créés, ${result.summary?.updated || 0} mis à jour`
+      );
+      // Retour automatique à la liste après succès
+      setTimeout(() => {
+        setViewMode("list");
+        setRefreshKey((prev) => prev + 1);
+      }, 2000);
+    } else {
+      toast.error(
+        `Importation partielle: ${result.summary?.errors || 0} erreurs`
+      );
+    }
+  };
+
+  const handleUpdateImportComplete = (result: any) => {
+    console.log("Modification par importation terminée:", result);
+
+    if (result.success) {
+      toast.success(
+        `Modification réussie: ${
+          result.summary?.updated || 0
+        } lubrifiants mis à jour`
+      );
+      // Retour automatique à la liste après succès
+      setTimeout(() => {
+        setViewMode("list");
+        setRefreshKey((prev) => prev + 1);
+      }, 2000);
+    } else {
+      toast.error(
+        `Modification partielle: ${result.summary?.errors || 0} erreurs`
+      );
+    }
+  };
+
+  const refreshLubrifiants = () => {
+    setCurrentPage(1); // Réinitialiser à la première page
+    setRefreshKey((prev) => prev + 1);
+  };
+
+  const plural = pagination?.totalItems !== 1 ? "s" : "";
+
+  // Vue importation de modification
+  if (viewMode === "update-import") {
+    return (
+      <div className="mx-auto p-4">
+        {/* Header avec navigation */}
+        <div className="mb-6">
+          <Button
+            variant="outline"
+            onClick={() => setViewMode("list")}
+            className="mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Retour à la liste
+          </Button>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold mb-2">
+                Modification de Lubrifiants
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Modifiez des lubrifiants existants en masse depuis un fichier
+                Excel
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Composant d'importation de modification */}
+        <LubrifiantUpdateImport onImportComplete={handleUpdateImportComplete} />
+      </div>
+    );
+  }
+
+  // Vue importation
+  if (viewMode === "import") {
+    return (
+      <div className="mx-auto p-4">
+        {/* Header avec navigation */}
+        <div className="mb-6">
+          <Button
+            variant="outline"
+            onClick={() => setViewMode("list")}
+            className="mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Retour à la liste
+          </Button>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold mb-2">
+                Importation de Lubrifiants
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Importez des lubrifiants en masse depuis un fichier Excel
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Composant d'importation */}
+        <LubrifiantImport onImportComplete={handleImportComplete} />
+      </div>
+    );
+  }
+
+  // Vue liste (par défaut)
   return (
-    <div className="mx-auto p-4">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
+    <div className="mx-auto p-4 space-y-4">
+      {/* Header principal */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold">Lubrifiants</h1>
+            <h1 className="text-xl sm:text-2xl font-bold">Lubrifiants</h1>
             {loading && (
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Spinner className="h-3 w-3" />
@@ -76,28 +350,96 @@ const LubrifiantsPage = () => {
             )}
           </div>
           <p className="text-sm text-muted-foreground">
-            {lubrifiants.length} lubrifiant{plural} configuré{plural}
+            {pagination?.totalItems || 0} lubrifiant{plural} configuré{plural}
+            {lubrifiants.length > 0 && searchTerm && (
+              <span className="ml-2">
+                ({lubrifiants.length} résultat
+                {lubrifiants.length !== 1 ? "s" : ""} filtré
+                {lubrifiants.length !== 1 ? "s" : ""})
+              </span>
+            )}
           </p>
         </div>
-        <div>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setViewMode("import")}
+            className="flex items-center justify-center gap-2 w-full sm:w-auto"
+          >
+            <FileSpreadsheet className="h-4 w-4" />
+            <span className="hidden sm:inline">Importer Excel</span>
+            <span className="sm:hidden">Importer</span>
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setViewMode("update-import")}
+            className="flex items-center justify-center gap-2 w-full sm:w-auto"
+          >
+            <FileSpreadsheet className="h-4 w-4" />
+            <span className="hidden sm:inline">Modifier Excel</span>
+            <span className="sm:hidden">Modifier</span>
+          </Button>
+          <ExportExcel
+            filename="lubrifiants_filtres"
+            sheetName="Lubrifiants (filtrés)"
+            onExportData={handleExportFiltered}
+            className="flex items-center justify-center gap-2 w-full sm:w-auto"
+          />
           <NewLubrifiant
             typelubrifiants={typelubrifiants}
             parcs={parcs}
-            onSuccess={fetchData}
+            onSuccess={refreshLubrifiants}
           />
         </div>
       </div>
 
-      {error && <FormError error={error} />}
+      {error && (
+        <div className="mb-4 p-4 border border-red-200 bg-red-50 rounded-lg text-red-700">
+          {error}
+        </div>
+      )}
 
-      <Card>
+      {/* Barre de recherche et filtres */}
+      <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex-1">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Rechercher un lubrifiant..."
+              value={searchInputValue}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleClearSearch}
+          disabled={!searchInputValue}
+          className="flex items-center justify-center gap-2 w-full sm:w-auto"
+        >
+          <X className="h-4 w-4" />
+          <span className="hidden sm:inline">Effacer le filtre</span>
+          <span className="sm:hidden">Effacer</span>
+        </Button>
+      </div>
+
+      {/* Tableau des lubrifiants */}
+      <Card className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nom</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Parcs associés</TableHead>
-              <TableHead>Date de création</TableHead>
+              <TableHead className="min-w-36">Nom</TableHead>
+              <TableHead className="min-w-32 hidden sm:table-cell">
+                Type
+              </TableHead>
+              <TableHead className="min-w-28 hidden sm:table-cell">
+                Parcs associés
+              </TableHead>
+              <TableHead className="min-w-28 hidden sm:table-cell">
+                Utilisations
+              </TableHead>
               <TableHead className="w-0 text-right"></TableHead>
             </TableRow>
           </TableHeader>
@@ -108,7 +450,9 @@ const LubrifiantsPage = () => {
                   colSpan={5}
                   className="h-24 text-center text-muted-foreground italic"
                 >
-                  Aucun lubrifiant configuré
+                  {searchTerm
+                    ? "Aucun lubrifiant trouvé pour cette recherche"
+                    : "Aucun lubrifiant configuré"}
                 </TableCell>
               </TableRow>
             ) : (
@@ -116,47 +460,36 @@ const LubrifiantsPage = () => {
                 <TableRow key={lubrifiant.id}>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
-                      <Droplet className="h-4 w-4 text-primary" />
-                      {lubrifiant.name}
+                      <Droplet className="h-4 w-4 text-primary shrink-0" />
+                      <span className="truncate">{lubrifiant.name}</span>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <Badge variant="secondary">
-                      {lubrifiant.typelubrifiant?.name || "Non défini"}
+                      {lubrifiant.typelubrifiant?.name || "N/A"}
                     </Badge>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1 max-w-50">
-                      {lubrifiant.lubrifiantParc?.length > 0 ? (
-                        lubrifiant.lubrifiantParc.map((lp: any) => (
-                          <Badge
-                            key={lp.parc.id}
-                            variant="outline"
-                            className="text-[10px] px-1 py-0"
-                          >
-                            <Landmark className="h-3 w-3 mr-1" />
-                            {lp.parc.name}
-                          </Badge>
-                        ))
-                      ) : (
-                        <span className="text-xs text-muted-foreground italic">
-                          Aucun parc
-                        </span>
-                      )}
+                  <TableCell className="hidden sm:table-cell">
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <span>
+                        {lubrifiant._count?.lubrifiantParc || 0} parcs
+                      </span>
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      {getJoinedDate(lubrifiant.createdAt)}
-                    </div>
+                  <TableCell className="hidden sm:table-cell">
+                    <Badge variant="outline">
+                      {lubrifiant._count?.saisielubrifiant || 0} utilisation
+                      {(lubrifiant._count?.saisielubrifiant || 0) !== 1
+                        ? "s"
+                        : ""}
+                    </Badge>
                   </TableCell>
                   <TableCell className="w-0 text-right">
                     <LubrifiantRowActions
                       lubrifiant={lubrifiant}
                       typelubrifiants={typelubrifiants}
                       parcs={parcs}
-                      onLubrifiantUpdated={fetchData}
+                      onLubrifiantUpdated={refreshLubrifiants}
                     />
                   </TableCell>
                 </TableRow>
@@ -165,6 +498,21 @@ const LubrifiantsPage = () => {
           </TableBody>
         </Table>
       </Card>
+
+      {/* Pagination */}
+      {pagination && (
+        <div className="mt-4">
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            onPageChange={handlePageChange}
+            itemsPerPage={itemsPerPage}
+            onItemsPerPageChange={handleItemsPerPageChange}
+            totalItems={pagination.totalItems}
+            className="flex-col sm:flex-row items-center justify-between gap-4"
+          />
+        </div>
+      )}
     </div>
   );
 };

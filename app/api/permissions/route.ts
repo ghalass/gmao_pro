@@ -21,10 +21,37 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Récupérer les paramètres de pagination et de recherche
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const itemsPerPage = parseInt(searchParams.get("itemsPerPage") || "10");
+    const search = searchParams.get("search") || "";
+
+    // Calculer l'offset
+    const offset = (page - 1) * itemsPerPage;
+
+    // Construire le filtre de recherche
+    const whereCondition: any = {
+      entrepriseId,
+    };
+
+    if (search) {
+      whereCondition.OR = [
+        { name: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+        { resource: { contains: search, mode: "insensitive" } },
+        // Recherche partielle impossible sur enum 'action'
+      ];
+    }
+
+    // Récupérer le nombre total d'éléments
+    const totalItems = await prisma.permission.count({
+      where: whereCondition,
+    });
+
+    // Récupérer les permissions avec pagination
     const permissions = await prisma.permission.findMany({
-      where: {
-        entrepriseId,
-      },
+      where: whereCondition,
       include: {
         roles: {
           select: {
@@ -34,9 +61,22 @@ export async function GET(request: NextRequest) {
         },
       },
       orderBy: [{ resource: "asc" }, { action: "asc" }],
+      skip: offset,
+      take: itemsPerPage,
     });
 
-    return NextResponse.json(permissions);
+    // Calculer les informations de pagination
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    return NextResponse.json({
+      data: permissions,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems,
+        itemsPerPage,
+      },
+    });
   } catch (error) {
     console.error("Erreur GET /api/permissions:", error);
     return NextResponse.json(

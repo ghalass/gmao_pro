@@ -18,10 +18,41 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
     }
 
+    // Récupérer les paramètres de pagination et de recherche
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const search = searchParams.get("search") || "";
+
+    const skip = (page - 1) * limit;
+
+    // Construire le where clause pour la recherche
+    const where = {
+      entrepriseId,
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: "insensitive" as const } },
+          {
+            parc: { name: { contains: search, mode: "insensitive" as const } },
+          },
+          {
+            site: { name: { contains: search, mode: "insensitive" as const } },
+          },
+        ],
+      }),
+    };
+
+    // Récupérer le total des items
+    const totalItems = await prisma.engin.count({ where });
+
     const engins = await prisma.engin.findMany({
-      where: { entrepriseId },
+      where,
       include: {
-        parc: true,
+        parc: {
+          include: {
+            typeparc: true,
+          },
+        },
         site: true,
         _count: {
           select: {
@@ -32,9 +63,26 @@ export async function GET(request: NextRequest) {
         },
       },
       orderBy: { name: "asc" },
+      skip,
+      take: limit,
     });
 
-    return NextResponse.json(engins);
+    // Calculer les informations de pagination
+    const totalPages = Math.ceil(totalItems / limit);
+
+    const pagination = {
+      currentPage: page,
+      totalPages,
+      totalItems,
+      itemsPerPage: limit,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    };
+
+    return NextResponse.json({
+      data: engins,
+      pagination,
+    });
   } catch (error) {
     console.error("Erreur GET /api/engins:", error);
     return NextResponse.json(

@@ -1,8 +1,38 @@
+### 🔴 Règle supplémentaire pour la génération des filtres de recherche
+
+**Lors de la génération des endpoints API (GET) pour la pagination/recherche :**
+
+- Pour chaque champ du modèle, si le champ est de type enum (ex : `action`), NE PAS utiliser `contains` ou `mode` dans le filtre Prisma.
+- Pour les enums, n’autoriser que la recherche exacte (`equals`) ou par liste (`in`), jamais de recherche partielle.
+- Pour les champs String, utiliser `contains` et `mode: "insensitive"` pour la recherche partielle.
+
+**Exemple de filtre correct :**
+```ts
+// Pour un champ String
+{ name: { contains: search, mode: "insensitive" } }
+// Pour un champ enum
+{ action: { equals: search } } // ou { action: { in: [search1, search2] } }
+```
+
+**Ne jamais générer de code du type :**
+```ts
+// ❌ INCORRECT pour un enum
+{ action: { contains: search } }
+```
 set default language of our conversation to french
 
 # PROMPT BATCH_CREATEPAGE_WITH_EXCEL.md
 
 Exécute la création complète de pages de gestion pour une liste de ressources avec système d'importation Excel pour création et modification (identique à celui de la page sites).
+
+### Input :
+```bash
+LISTE_RESSOURCES = [
+  "users",
+  "roles",
+  "permissions",
+]
+```
 
 ## Instructions d'exécution :
 
@@ -15,7 +45,7 @@ Pour chaque `[RESOURCE_NAME]` fourni dans la liste :
 - Identifier les relations avec d'autres modèles
 - Déterminer les champs obligatoires vs optionnels
 
-### 2. Pour chaque ressource dans la liste, créer ou modifier les fichiers suivants pour respecter le modèle de la page sites :
+### 2. Pour chaque ressource dans la liste LISTE_RESSOURCES (ci-dessous), créer ou modifier les fichiers suivants pour respecter le modèle de la page sites :
 
 #### Page principale
 - `app/[locale]/(main)/[resource_name]/page.tsx`
@@ -397,12 +427,7 @@ export async function GET(request: NextRequest) {
 
 ## Format d'exécution :
 
-### Input :
-```bash
-LISTE_RESSOURCES = [
-  "typelubrifiants",
-]
-```
+
 
 ### Output attendu :
 Pour chaque ressource dans la liste :

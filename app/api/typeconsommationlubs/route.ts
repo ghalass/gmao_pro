@@ -20,11 +20,28 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const search = searchParams.get("search") || "";
     const parcId = searchParams.get("parcId");
+
+    const skip = (page - 1) * limit;
 
     let where: any = {
       entrepriseId,
+      ...(search && {
+        name: { contains: search, mode: "insensitive" as const },
+      }),
     };
+
+    // Si un parcId est fourni, filtrer les types de consommation associés à ce parc
+    if (parcId) {
+      where.parcs = {
+        some: {
+          parcId,
+        },
+      };
+    }
 
     let include: any = {
       parcs: {
@@ -43,14 +60,8 @@ export async function GET(request: NextRequest) {
       },
     };
 
-    // Si un parcId est fourni, filtrer les types de consommation associés à ce parc
-    if (parcId) {
-      where.parcs = {
-        some: {
-          parcId,
-        },
-      };
-    }
+    // Récupérer le total des items
+    const totalItems = await prisma.typeconsommationlub.count({ where });
 
     const typeconsommationlubs = await prisma.typeconsommationlub.findMany({
       where,
@@ -58,9 +69,26 @@ export async function GET(request: NextRequest) {
       orderBy: {
         name: "asc",
       },
+      skip,
+      take: limit,
     });
 
-    return NextResponse.json(typeconsommationlubs);
+    // Calculer les informations de pagination
+    const totalPages = Math.ceil(totalItems / limit);
+
+    const pagination = {
+      currentPage: page,
+      totalPages,
+      totalItems,
+      itemsPerPage: limit,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    };
+
+    return NextResponse.json({
+      data: typeconsommationlubs,
+      pagination,
+    });
   } catch (error) {
     console.error("Erreur GET /api/typeconsommationlubs:", error);
     return NextResponse.json(

@@ -173,11 +173,23 @@ export async function POST(request: NextRequest) {
     await logImportOperation({
       userId: session.userId,
       entrepriseId,
-      resourceType: the_resource,
-      operation: "update-import",
       fileName: file.name,
-      summary: result.summary!,
-      errors: result.errors!,
+      fileType: file.type,
+      totalRecords: rows.length,
+      createdRecords: 0,
+      updatedRecords: result.summary?.updated || 0,
+      errorRecords: result.summary?.errors || 0,
+      warningRecords: result.summary?.warnings || 0,
+      status: result.success
+        ? "SUCCESS"
+        : result.summary?.errors
+        ? "PARTIAL"
+        : "FAILED",
+      errorMessage: result.success ? undefined : result.message,
+      details: {
+        errors: result.errors,
+        summary: result.summary,
+      },
     });
 
     return NextResponse.json(result);
@@ -210,20 +222,46 @@ export async function GET(request: NextRequest) {
     });
 
     // Créer un workbook avec les données existantes
+    // Données avec en-tête au format JSON
+    const templateData = typeparcs.map((typeparc) => ({
+      "Nom du type de parc*": typeparc.name,
+    }));
+
+    // Si aucune donnée existante, créer un exemple
+    if (templateData.length === 0) {
+      templateData.push({
+        "Nom du type de parc*": "Type existant",
+      });
+    }
+
+    const worksheet = XLSX.utils.json_to_sheet(templateData);
     const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Types de parc");
 
-    // Données avec en-tête
-    const templateData = [
-      ["Nom du type de parc*"],
-      ...typeparcs.map((typeparc) => [typeparc.name]),
-    ];
+    // Ajouter des commentaires d'instructions
+    const range = XLSX.utils.decode_range(worksheet["!ref"] || "A1:A1");
+    for (let col = range.s.c; col <= range.e.c; col++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+      if (!worksheet[cellAddress]) continue;
 
-    const worksheet = XLSX.utils.aoa_to_sheet(templateData);
+      const header = worksheet[cellAddress].v;
+      let comment = "";
+
+      if (header.includes("Nom du type de parc")) {
+        comment =
+          "Obligatoire. Type de parc existant à modifier. Disponibles: " +
+          typeparcs.map((t) => t.name).join(", ");
+      }
+
+      if (comment) {
+        worksheet[cellAddress].c = [
+          { t: comment, r: "<r><rPr><b/></rPr><t>" + comment + "</t></r>" },
+        ];
+      }
+    }
 
     // Définir la largeur des colonnes
     worksheet["!cols"] = [{ wch: 30 }];
-
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Types de parc");
 
     // Générer le buffer
     const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });

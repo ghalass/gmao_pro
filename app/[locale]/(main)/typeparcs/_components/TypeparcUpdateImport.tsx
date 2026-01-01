@@ -5,13 +5,11 @@ import { TypeparcUpdateImportResult } from "@/lib/validation/typeparc-update-imp
 
 interface TypeparcUpdateImportProps {
   onImportComplete?: (result: TypeparcUpdateImportResult) => void;
-  onCancel?: () => void;
   className?: string;
 }
 
 export function TypeparcUpdateImport({
   onImportComplete,
-  onCancel,
   className,
 }: TypeparcUpdateImportProps) {
   const typeparcUpdateColumns = [
@@ -30,7 +28,6 @@ export function TypeparcUpdateImport({
       resourceDescription="Modifiez des types de parc existants à partir d'un fichier Excel"
       templateColumns={typeparcUpdateColumns}
       onImportComplete={onImportComplete}
-      onCancel={onCancel}
       className={className}
     />
   );

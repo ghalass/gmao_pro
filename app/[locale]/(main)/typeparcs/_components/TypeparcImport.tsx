@@ -5,18 +5,16 @@ import { TypeparcImportResult } from "@/lib/validation/typeparc-import.schema";
 
 interface TypeparcImportProps {
   onImportComplete?: (result: TypeparcImportResult) => void;
-  onCancel?: () => void;
   className?: string;
 }
 
 export function TypeparcImport({
   onImportComplete,
-  onCancel,
   className,
 }: TypeparcImportProps) {
   const typeparcColumns = [
     {
-      name: "Nom du type de parc",
+      name: "Nom du type de parc*",
       required: true,
       description: "Nom unique du type de parc (obligatoire)",
     },
@@ -30,7 +28,6 @@ export function TypeparcImport({
       resourceDescription="Importez des types de parc en masse à partir d'un fichier Excel"
       templateColumns={typeparcColumns}
       onImportComplete={onImportComplete}
-      onCancel={onCancel}
       className={className}
     />
   );

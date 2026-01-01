@@ -75,7 +75,7 @@ const EditRole = ({ role, open, onOpenChange, onSuccess }: EditRoleProps) => {
       });
 
       if (response.ok && response.data) {
-        setPermissions(response.data);
+        setPermissions(response.data.data || []);
       } else {
         toast.error("Impossible de charger les permissions");
       }

@@ -275,33 +275,29 @@ export async function DELETE(
       );
     }
 
-    if (
-      existingUser.roles.some(
-        (role) =>
-          role.name.toLowerCase() === "admin" ||
-          role.name.toLowerCase() === "super-admin"
-      ) ||
-      !currentSession?.isSuperAdmin
-    ) {
+    // Seul un super-admin peut supprimer un utilisateur avec rôle admin ou super-admin
+    const hasAdminRole = existingUser.roles.some(
+      (role) =>
+        role.name.toLowerCase() === "admin" ||
+        role.name.toLowerCase() === "super-admin"
+    );
+
+    if (hasAdminRole && !currentSession?.isSuperAdmin) {
       return NextResponse.json(
         {
           message:
-            "Impossible de supprimer un utilisateur avec le rôle admin ou super-admin.",
+            "Seul un super-admin peut supprimer un utilisateur avec le rôle admin ou super-admin.",
         },
         { status: 403 }
       );
     }
 
     // Vérifier si l'utilisateur tente de se supprimer lui-même
-    const authHeader = request.headers.get("authorization");
-
-    // session is already declared above as currentSession (renamed for clarity or just use currentSession)
     const connectedUser = currentSession?.userId;
-    const connectedUser_is_SuperAdmin = await isSuperAdmin(connectedUser);
     const toDelete_SuperAdmin = await isSuperAdmin(userId);
     const toDelete_Admin = await isAdmin(userId);
 
-    // interdire de supprimer votre propre compte
+    // Interdire de supprimer votre propre compte
     if (connectedUser === userId) {
       return NextResponse.json(
         { message: "Vous ne pouvez pas supprimer votre propre compte." },
@@ -309,16 +305,16 @@ export async function DELETE(
       );
     }
 
-    // interdire aux utilisateurs non super-admin de supprimer un super-admin
-    if (toDelete_SuperAdmin && !connectedUser_is_SuperAdmin) {
+    // Interdire aux utilisateurs non super-admin de supprimer un super-admin
+    if (toDelete_SuperAdmin && !currentSession?.isSuperAdmin) {
       return NextResponse.json(
         { message: "Vous ne pouvez pas supprimer un compte d'un super admin." },
         { status: 400 }
       );
     }
 
-    // seul super-admin peut suprimer un admin
-    if (toDelete_Admin && !connectedUser_is_SuperAdmin) {
+    // Seul super-admin peut supprimer un admin
+    if (toDelete_Admin && !currentSession?.isSuperAdmin) {
       return NextResponse.json(
         {
           message:
@@ -326,26 +322,6 @@ export async function DELETE(
         },
         { status: 400 }
       );
-    }
-
-    if (authHeader) {
-      try {
-        const token = authHeader.replace("Bearer ", "");
-        // Ici vous devriez décoder le JWT pour obtenir l'ID de l'utilisateur connecté
-        // Pour l'instant, c'est un exemple - à adapter à votre système d'authentification
-        if (existingUser.email.includes("admin")) {
-          return NextResponse.json(
-            {
-              message:
-                "Impossible de supprimer un compte administrateur via cette interface",
-            },
-            { status: 400 }
-          );
-        }
-      } catch (error) {
-        // Ne pas bloquer la suppression si erreur de décodage
-        console.warn("Erreur lors de la vérification du token:", error);
-      }
     }
 
     // Supprimer l'utilisateur (les rôles seront automatiquement déconnectés)

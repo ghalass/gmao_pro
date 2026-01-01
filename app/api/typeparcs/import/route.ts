@@ -173,11 +173,23 @@ export async function POST(request: NextRequest) {
     await logImportOperation({
       userId: session.userId,
       entrepriseId,
-      resourceType: the_resource,
-      operation: "import",
       fileName: file.name,
-      summary: result.summary!,
-      errors: result.errors!,
+      fileType: file.type,
+      totalRecords: rows.length,
+      createdRecords: result.summary?.created || 0,
+      updatedRecords: result.summary?.updated || 0,
+      errorRecords: result.summary?.errors || 0,
+      warningRecords: result.summary?.warnings || 0,
+      status: result.success
+        ? "SUCCESS"
+        : result.summary?.errors
+        ? "PARTIAL"
+        : "FAILED",
+      errorMessage: result.success ? undefined : result.message,
+      details: {
+        errors: result.errors,
+        summary: result.summary,
+      },
     });
 
     return NextResponse.json(result);
@@ -196,23 +208,42 @@ export async function GET(request: NextRequest) {
     const protectionError = await protectReadRoute(request, the_resource);
     if (protectionError) return protectionError;
 
-    // Créer un workbook avec les colonnes attendues
-    const workbook = XLSX.utils.book_new();
-
-    // Données d'exemple
+    // Données d'exemple avec format JSON
     const templateData = [
-      ["Nom du type de parc"],
-      ["Type A"],
-      ["Type B"],
-      ["Type C"],
+      {
+        "Nom du type de parc*": "Type A",
+      },
+      {
+        "Nom du type de parc*": "Type B",
+      },
     ];
 
-    const worksheet = XLSX.utils.aoa_to_sheet(templateData);
+    const worksheet = XLSX.utils.json_to_sheet(templateData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Types de parc");
+
+    // Ajouter des commentaires d'instructions
+    const range = XLSX.utils.decode_range(worksheet["!ref"] || "A1:A1");
+    for (let col = range.s.c; col <= range.e.c; col++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+      if (!worksheet[cellAddress]) continue;
+
+      const header = worksheet[cellAddress].v;
+      let comment = "";
+
+      if (header.includes("Nom du type de parc")) {
+        comment = "Obligatoire. Nom unique du type de parc.";
+      }
+
+      if (comment) {
+        worksheet[cellAddress].c = [
+          { t: comment, r: "<r><rPr><b/></rPr><t>" + comment + "</t></r>" },
+        ];
+      }
+    }
 
     // Définir la largeur des colonnes
     worksheet["!cols"] = [{ wch: 30 }];
-
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Types de parc");
 
     // Générer le buffer
     const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });

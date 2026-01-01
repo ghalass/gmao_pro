@@ -15,10 +15,35 @@ export async function GET(request: NextRequest) {
     const session = await getSession();
     const entrepriseId = session?.entrepriseId;
 
+    // Récupérer les paramètres de pagination et de recherche
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const itemsPerPage = parseInt(searchParams.get("itemsPerPage") || "10");
+    const search = searchParams.get("search") || "";
+
+    // Calculer l'offset
+    const offset = (page - 1) * itemsPerPage;
+
+    // Construire le filtre de recherche
+    const whereCondition: any = {
+      entrepriseId,
+    };
+
+    if (search) {
+      whereCondition.OR = [
+        { name: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    // Récupérer le nombre total d'éléments
+    const totalItems = await prisma.role.count({
+      where: whereCondition,
+    });
+
+    // Récupérer les rôles avec pagination
     const roles = await prisma.role.findMany({
-      where: {
-        entrepriseId,
-      },
+      where: whereCondition,
       include: {
         permissions: true,
         user: {
@@ -29,9 +54,22 @@ export async function GET(request: NextRequest) {
       orderBy: {
         name: "asc",
       },
+      skip: offset,
+      take: itemsPerPage,
     });
 
-    return NextResponse.json(roles);
+    // Calculer les informations de pagination
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    return NextResponse.json({
+      data: roles,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems,
+        itemsPerPage,
+      },
+    });
   } catch (error) {
     console.error("Erreur GET /api/roles:", error);
     return NextResponse.json(

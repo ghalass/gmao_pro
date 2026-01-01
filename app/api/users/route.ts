@@ -15,18 +15,57 @@ export async function GET(request: NextRequest) {
 
     const session = await getSession();
 
+    // Récupérer les paramètres de pagination et de recherche
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const search = searchParams.get("search") || "";
+
+    const skip = (page - 1) * limit;
+
+    // Construire le where clause pour la recherche
+    const where = {
+      ...(session.entrepriseId && { entrepriseId: session.entrepriseId }),
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: "insensitive" as const } },
+          { email: { contains: search, mode: "insensitive" as const } },
+        ],
+      }),
+    };
+
+    // Récupérer le total des items
+    const totalItems = await prisma.user.count({ where });
+
     const users = await prisma.user.findMany({
-      where: { entrepriseId: session.entrepriseId },
+      where,
       include: {
         roles: true, // Relation directe avec Role
       },
       orderBy: {
         createdAt: "desc",
       },
+      skip,
+      take: limit,
       omit: { password: true },
     });
 
-    return NextResponse.json(users);
+    // Calculer les informations de pagination
+    const totalPages = Math.ceil(totalItems / limit);
+
+    const pagination = {
+      currentPage: page,
+      totalPages,
+      totalItems,
+      itemsPerPage: limit,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    };
+
+    return NextResponse.json({
+      data: users,
+      pagination,
+    });
   } catch (error) {
     console.error("Erreur GET /api/users:", error);
     return NextResponse.json(

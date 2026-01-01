@@ -100,7 +100,7 @@ const EditUser = ({
       });
 
       if (response.ok && response.data) {
-        setRoles(response.data);
+        setRoles(response.data.data || []);
       } else {
         console.error(
           "Erreur lors de la récupération des rôles:",

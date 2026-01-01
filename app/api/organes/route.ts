@@ -14,17 +14,62 @@ export async function GET(request: NextRequest) {
 
     const session = await getSession();
 
+    // Récupérer les paramètres de pagination et de recherche
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const search = searchParams.get("search") || "";
+
+    const skip = (page - 1) * limit;
+
+    // Construire le where clause pour la recherche
+    const where = {
+      entrepriseId: session.entrepriseId,
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: "insensitive" as const } },
+          { marque: { contains: search, mode: "insensitive" as const } },
+          { sn: { contains: search, mode: "insensitive" as const } },
+          {
+            type_organe: {
+              name: { contains: search, mode: "insensitive" as const },
+            },
+          },
+        ],
+      }),
+    };
+
+    // Récupérer le total des items
+    const totalItems = await prisma.organe.count({ where });
+
     const organes = await prisma.organe.findMany({
-      where: { entrepriseId: session.entrepriseId },
+      where,
       include: {
         type_organe: true, // Relation directe avec TypeOrgane
       },
       orderBy: {
         id: "desc",
       },
+      skip,
+      take: limit,
     });
 
-    return NextResponse.json(organes);
+    // Calculer les informations de pagination
+    const totalPages = Math.ceil(totalItems / limit);
+
+    const pagination = {
+      currentPage: page,
+      totalPages,
+      totalItems,
+      itemsPerPage: limit,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    };
+
+    return NextResponse.json({
+      data: organes,
+      pagination,
+    });
   } catch (error) {
     console.error("Erreur GET /api/organes:", error);
     return NextResponse.json(

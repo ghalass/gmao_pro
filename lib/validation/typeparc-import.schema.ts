@@ -173,10 +173,10 @@ export const validateTypeparcUpdateImportData = async (
 export const generateTypeparcExcelTemplate = () => {
   const template = [
     {
-      "Nom du type de parc": "Type A",
+      "Nom du type de parc*": "Type A",
     },
     {
-      "Nom du type de parc": "Type B",
+      "Nom du type de parc*": "Type B",
     },
   ];
 

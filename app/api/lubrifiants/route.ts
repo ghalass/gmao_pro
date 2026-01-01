@@ -18,8 +18,34 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
     }
 
+    // Récupérer les paramètres de pagination et de recherche
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const search = searchParams.get("search") || "";
+
+    const skip = (page - 1) * limit;
+
+    // Construire le where clause pour la recherche
+    const where = {
+      entrepriseId,
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: "insensitive" as const } },
+          {
+            typelubrifiant: {
+              name: { contains: search, mode: "insensitive" as const },
+            },
+          },
+        ],
+      }),
+    };
+
+    // Récupérer le total des items
+    const totalItems = await prisma.lubrifiant.count({ where });
+
     const lubrifiants = await prisma.lubrifiant.findMany({
-      where: { entrepriseId },
+      where,
       include: {
         typelubrifiant: true, // Relation ManyToOne avec Typelubrifiant
         lubrifiantParc: {
@@ -36,9 +62,26 @@ export async function GET(request: NextRequest) {
       orderBy: {
         createdAt: "desc",
       },
+      skip,
+      take: limit,
     });
 
-    return NextResponse.json(lubrifiants);
+    // Calculer les informations de pagination
+    const totalPages = Math.ceil(totalItems / limit);
+
+    const pagination = {
+      currentPage: page,
+      totalPages,
+      totalItems,
+      itemsPerPage: limit,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    };
+
+    return NextResponse.json({
+      data: lubrifiants,
+      pagination,
+    });
   } catch (error) {
     console.error("Erreur GET /api/lubrifiants:", error);
     return NextResponse.json(
@@ -161,9 +204,10 @@ export async function POST(request: NextRequest) {
         typelubrifiantId,
         entrepriseId,
         lubrifiantParc: {
-          create: parcIds?.map((parcId: string) => ({
-            parcId,
-          })) || [],
+          create:
+            parcIds?.map((parcId: string) => ({
+              parcId,
+            })) || [],
         },
       },
       include: {
@@ -185,4 +229,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

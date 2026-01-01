@@ -13,13 +13,14 @@ import {
 } from "@/components/ui/dialog";
 import { useForm } from "@tanstack/react-form";
 import * as yup from "yup";
+import { apiFetch, methods } from "@/lib/api";
 import { fr, ar } from "yup-locales";
 import { FieldGroup } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import FormError from "@/components/form/FormError";
 import { FormField } from "@/components/form/FormField";
-import { API, apiFetch } from "@/lib/api";
+import { API } from "@/lib/api";
 import { toast } from "sonner";
 import { Plus, Save } from "lucide-react";
 
@@ -46,7 +47,7 @@ const NewTypeparc = ({ onSuccess }: NewTypeparcProps) => {
 
       try {
         const response = await apiFetch(API.TYPEPARCS.TYPEPARC_CREATE, {
-          method: "POST",
+          method: methods.POST,
           headers: {
             "Content-Type": "application/json",
           },
@@ -54,7 +55,7 @@ const NewTypeparc = ({ onSuccess }: NewTypeparcProps) => {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
+          const errorData = (await response.data) as { message: string };
           throw new Error(errorData.message || "Erreur lors de la création");
         }
 
