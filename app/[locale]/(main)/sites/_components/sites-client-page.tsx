@@ -108,8 +108,6 @@ export default function SitesClientPage({
   );
 
   const handleImportComplete = (result: any) => {
-    console.log("Importation terminée:", result);
-
     if (result.success) {
       toast.success(
         `Importation réussie: ${result.summary?.created || 0} sites créés, ${

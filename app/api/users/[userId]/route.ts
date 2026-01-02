@@ -142,7 +142,6 @@ export async function PATCH(
 
     // Gestion des rôles
     if (roles !== undefined) {
-      console.log("roles", roles);
       // Vérifier que roles est un tableau
       if (!Array.isArray(roles)) {
         return NextResponse.json(
@@ -224,8 +223,6 @@ export async function PATCH(
       },
       omit: { password: true },
     });
-
-    console.log("user", user);
 
     return NextResponse.json(user);
   } catch (error) {

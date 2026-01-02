@@ -206,7 +206,6 @@ export async function apiFetch<T = any>(
   const shouldDelay = !options?.skipDelay && DELAY_ENABLED;
 
   if (shouldDelay && GLOBAL_API_DELAY > 0) {
-    // console.log(`⏱️ API delay: ${GLOBAL_API_DELAY}ms for ${fullUrl}`);
     await new Promise((resolve) => setTimeout(resolve, GLOBAL_API_DELAY));
   }
 
@@ -243,7 +242,6 @@ export async function apiFetch<T = any>(
         .join("; ");
 
       headers["Cookie"] = cookieString;
-      // console.log("Cookies envoyés:", Object.keys(cookiesToSend));
     }
 
     const response = await fetch(fullUrl, {

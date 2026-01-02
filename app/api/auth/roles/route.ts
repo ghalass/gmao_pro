@@ -24,8 +24,6 @@ export async function GET() {
 
     const isAdminOrSuperAdmin = isAdmin || isSuperAdmin;
 
-    console.log("isAdminOrSuperAdmin:", isAdminOrSuperAdmin);
-
     // ✅ CORRECTION : Toujours retourner une réponse JSON
     return NextResponse.json(isSuperAdmin);
   } catch (error) {

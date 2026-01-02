@@ -153,30 +153,7 @@ const PermissionsPage = () => {
     }
   };
 
-  const handleExportAll = async () => {
-    try {
-      const params = new URLSearchParams({
-        limit: "-1",
-        ...(searchTerm && { search: searchTerm }),
-      });
-
-      const response = await apiFetch(`${API.PERMISSIONS.ALL}?${params}`);
-
-      if (!response.ok) {
-        throw new Error("Erreur lors de la récupération des données");
-      }
-
-      const allData = response.data?.data || [];
-      return allData;
-    } catch (error) {
-      console.error("Erreur lors de l'export:", error);
-      throw error;
-    }
-  };
-
   const handleImportComplete = (result: any) => {
-    console.log("Importation terminée:", result);
-
     if (result.success) {
       toast.success(
         `Importation réussie: ${
@@ -195,8 +172,6 @@ const PermissionsPage = () => {
   };
 
   const handleUpdateImportComplete = (result: any) => {
-    console.log("Modification par importation terminée:", result);
-
     if (result.success) {
       toast.success(
         `Modification réussie: ${

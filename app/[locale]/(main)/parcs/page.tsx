@@ -167,40 +167,7 @@ const ParcsPage = () => {
     }
   };
 
-  const handleExportAll = async () => {
-    try {
-      const params = new URLSearchParams({
-        limit: "-1",
-        ...(searchTerm && { search: searchTerm }),
-      });
-
-      const response = await apiFetch(`${API.PARCS.ALL}?${params}`);
-
-      if (!response.ok) {
-        throw new Error("Erreur lors de la récupération des données");
-      }
-
-      const allData = response.data?.data || [];
-      return allData.map((parc: any) => ({
-        "Nom du parc": parc.name,
-        "Type de parc": parc.typeparc?.name || "Non défini",
-        "Engins associés": parc._count?.engins || 0,
-        "Date de création": new Date(parc.createdAt).toLocaleDateString(
-          "fr-FR"
-        ),
-        "Date de mise à jour": new Date(parc.updatedAt).toLocaleDateString(
-          "fr-FR"
-        ),
-      }));
-    } catch (error) {
-      console.error("Erreur lors de l'export:", error);
-      throw error;
-    }
-  };
-
   const handleImportComplete = (result: any) => {
-    console.log("Importation terminée:", result);
-
     if (result.success) {
       toast.success(
         `Importation réussie: ${
@@ -219,8 +186,6 @@ const ParcsPage = () => {
   };
 
   const handleUpdateImportComplete = (result: any) => {
-    console.log("Modification par importation terminée:", result);
-
     if (result.success) {
       toast.success(
         `Modification réussie: ${

@@ -18,12 +18,6 @@ interface ImportLogData {
 // Version temporaire sans dépendance Prisma pour éviter les erreurs de migration
 export async function logImportOperation(data: ImportLogData) {
   try {
-    // Logger en console pour le moment
-    console.log("Import Operation Log:", {
-      ...data,
-      timestamp: new Date().toISOString(),
-    });
-
     // TODO: Activer quand la migration sera appliquée
     // const log = await prisma.importLog.create({
     //   data: {
@@ -56,7 +50,6 @@ export async function getImportHistory(
 ) {
   try {
     // Version temporaire sans Prisma
-    console.log("Getting import history for:", { resourceType });
 
     return NextResponse.json({
       logs: [],
@@ -79,7 +72,6 @@ export async function getImportHistory(
 export async function getImportDetails(request: NextRequest, logId: string) {
   try {
     // Version temporaire sans Prisma
-    console.log("Getting import details for:", logId);
 
     return NextResponse.json(
       {

@@ -56,7 +56,7 @@ export default async function RootPage({
                     {homePage("ifConnected.welcome")}
                   </p>
                   <p className="text-xl font-semibold text-foreground">
-                    {session?.name}
+                    {session?.name} - {session.entrepriseName}
                   </p>
                 </div>
 

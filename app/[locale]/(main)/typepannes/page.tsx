@@ -171,31 +171,7 @@ const TypepannesPage = () => {
     }
   };
 
-  const handleExportAll = async () => {
-    try {
-      // Récupérer toutes les données sans pagination
-      const params = new URLSearchParams({
-        limit: "-1", // Tout afficher
-        ...(searchTerm && { search: searchTerm }),
-      });
-
-      const response = await apiFetch(`${API.TYPEPANNES.ALL}?${params}`);
-
-      if (!response.ok) {
-        throw new Error("Erreur lors de la récupération des données");
-      }
-
-      const allData = response.data?.data || [];
-      return allData;
-    } catch (error) {
-      console.error("Erreur lors de l'export:", error);
-      throw error;
-    }
-  };
-
   const handleImportComplete = (result: any) => {
-    console.log("Importation terminée:", result);
-
     if (result.success) {
       toast.success(
         `Importation réussie: ${result.summary?.created || 0} types créés, ${
@@ -215,8 +191,6 @@ const TypepannesPage = () => {
   };
 
   const handleUpdateImportComplete = (result: any) => {
-    console.log("Modification par importation terminée:", result);
-
     if (result.success) {
       toast.success(
         `Modification réussie: ${result.summary?.updated || 0} types mis à jour`

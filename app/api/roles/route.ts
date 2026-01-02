@@ -109,7 +109,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     const { name, description, permissions } = body;
-    console.log(body);
 
     // Vérifier si le nom existe déjà
     const existingRole = await prisma.role.findUnique({

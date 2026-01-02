@@ -163,8 +163,6 @@ const TypeparcsPage = () => {
   };
 
   const handleImportComplete = (result: any) => {
-    console.log("Importation terminée:", result);
-
     if (result.success) {
       toast.success(
         `Importation réussie: ${
@@ -184,8 +182,6 @@ const TypeparcsPage = () => {
   };
 
   const handleUpdateImportComplete = (result: any) => {
-    console.log("Modification par importation terminée:", result);
-
     if (result.success) {
       toast.success(
         `Modification réussie: ${

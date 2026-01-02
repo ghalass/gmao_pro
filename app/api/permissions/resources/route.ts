@@ -19,8 +19,6 @@ export async function GET(request: NextRequest) {
       ORDER BY table_name ASC
     `;
 
-    console.log("Raw tables found:", tables);
-
     // Map to array of strings, handle potential property name casing
     const resources = tables.map(
       (t) => t.table_name || t.TABLE_NAME || t.TableName

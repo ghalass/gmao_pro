@@ -6,26 +6,14 @@ import { getSession } from "@/lib/auth";
 // GET - Test endpoint without RBAC protection
 export async function GET(request: NextRequest) {
   try {
-    console.log("🔍 API Test: Starting test endpoint");
-
     // Test session only
     const session = await getSession();
-    console.log(
-      "🔍 API Test: Session retrieved:",
-      session?.name,
-      "Company:",
-      session?.entrepriseName
-    );
 
     if (!session.isLoggedIn) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
     // Test database query without RBAC
-    console.log(
-      "🔍 API Test: Querying organes for company:",
-      session.entrepriseId
-    );
     const startTime = Date.now();
 
     const organes = await prisma.organe.findMany({
@@ -39,11 +27,6 @@ export async function GET(request: NextRequest) {
     });
 
     const endTime = Date.now();
-    console.log(
-      `🔍 API Test: Query completed in ${endTime - startTime}ms, found ${
-        organes.length
-      } organes`
-    );
 
     return NextResponse.json({
       success: true,
