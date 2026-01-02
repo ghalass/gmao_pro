@@ -166,6 +166,9 @@ export const API = {
   RAPPORTS_RJE: {
     BASE: "/api/rapports/rje",
   },
+  ENTREPRISES: {
+    ALL: "/api/entreprises",
+  },
 };
 
 export enum methods {

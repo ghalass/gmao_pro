@@ -1,3 +1,4 @@
+import DisplayData from "@/components/DisplayData";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import LogoutButton from "@/components/LogoutButton";
 import ModeToggle from "@/components/ModeToggle";
@@ -79,6 +80,18 @@ export default async function RootPage({
           </div>
         </>
       )}
+
+      {/* SUPER ADMIN CHECK */}
+      {session?.isSuperAdmin && (
+        <Link href={ROUTE.SUPER_ADMIN.MAIN}>
+          <Button size={"sm"} className="w-min">
+            <Play />
+            {"Gestion des entreprises"}
+          </Button>
+        </Link>
+      )}
+
+      <DisplayData data={session} />
     </div>
   );
 }

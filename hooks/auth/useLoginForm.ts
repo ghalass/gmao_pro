@@ -13,7 +13,7 @@ import { useUser } from "@/context/UserContext";
 export function useLoginForm() {
   const router = useRouter();
   const locale = useCurrentLocale();
-  const { refreshUser } = useUser();
+  const { refreshUser, user } = useUser();
 
   // Utiliser useScopedI18n pour les namespaces
   const loginT = useScopedI18n("pages.login");
@@ -77,7 +77,11 @@ export function useLoginForm() {
         if (response.ok) {
           await refreshUser();
           toast.success("Connecté avec succès");
-          router.push(ROUTE.DASHBOARD);
+          const userData = response?.data?.user;
+          // if user is super admin redirect him to main page, otherwise redirect to dashboard
+          userData?.roleNames.includes("super admin")
+            ? router.push(ROUTE.MAIN)
+            : router.push(ROUTE.DASHBOARD);
         } else {
           const errorData = response.data?.message;
           console.error(errorData);

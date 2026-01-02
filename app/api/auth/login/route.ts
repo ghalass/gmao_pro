@@ -29,8 +29,27 @@ export async function POST(request: NextRequest) {
         { status: 404 }
       );
 
+    // final user
+    let user = null;
+
+    // find super-admin user
+    const super_admin = await prisma.user.findUnique({
+      where: {
+        email,
+        isSuperAdmin: true,
+      },
+      include: {
+        roles: {
+          include: {
+            permissions: true,
+          },
+        },
+        entreprise: true,
+      },
+    });
+
     // find user with entreprise
-    const user = await prisma.user.findUnique({
+    const other_user = await prisma.user.findUnique({
       where: {
         email,
         entrepriseId: entrepiseExist.id,
@@ -44,6 +63,9 @@ export async function POST(request: NextRequest) {
         entreprise: true,
       },
     });
+
+    // if user is super
+    user = super_admin || other_user;
 
     if (!user) {
       return NextResponse.json(
@@ -94,6 +116,7 @@ export async function POST(request: NextRequest) {
     session.isLoggedIn = true;
     session.entrepriseId = entrepiseExist.id;
     session.entrepriseName = entrepiseExist.name;
+    session.isSuperAdmin = !!super_admin; // if user is super admin
     await session.save();
 
     // Supprimer le mot de passe avant de renvoyer l'utilisateur
