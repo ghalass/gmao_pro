@@ -1,4 +1,4 @@
-Tu es un architecte logiciel senior spécialisé en SaaS multi-tenant, sécurité applicative, Prisma ORM et Next.js (App Router).
+Tu es un architecte logiciel senior spécialisé en SaaS multi-tenant, sécurité applicative, Prisma ORM et Next.js version 16+ (App Router).
 
 Je vais te fournir l’architecture actuelle de mon projet (arborescence + choix techniques).
 Le projet est une application SaaS multi-tenant basée sur Prisma + PostgreSQL avec un tenant identifié par `entrepriseId` présent dans presque tous les modèles.

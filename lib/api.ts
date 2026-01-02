@@ -253,13 +253,30 @@ export async function apiFetch<T = any>(
 
     if (!response.ok) {
       console.error(`API Error: ${response.status} ${response.statusText}`);
+
+      // Essayer de parser le JSON de la réponse pour obtenir le message du serveur
+      let errorData = {
+        error: `HTTP ${response.status}`,
+        message: response.statusText || "Erreur HTTP",
+      };
+
+      try {
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const serverErrorData = await response.json();
+          errorData = {
+            ...errorData,
+            ...serverErrorData,
+          };
+        }
+      } catch (parseError) {
+        console.error("Impossible de parser l'erreur JSON:", parseError);
+      }
+
       return {
         ok: false,
         status: response.status,
-        data: {
-          error: `HTTP ${response.status}`,
-          message: response.statusText || "Erreur HTTP",
-        },
+        data: errorData,
       };
     }
 

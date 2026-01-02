@@ -21,13 +21,14 @@ export async function protectRoute(
 
     if (!session.isLoggedIn)
       return NextResponse.json(
-        { error: "Unauthorized", message: "Utilisateur non authentifié" },
+        { message: "Utilisateur non authentifié" },
         { status: 401 }
       );
 
     const userId = session?.userId;
-    const is_Admin = await isAdmin(userId);
-    const is_SuperAdmin = await isSuperAdmin(userId);
+
+    const is_Admin = await isAdmin();
+    const is_SuperAdmin = await isSuperAdmin();
     const isAdminOrSuperAdmin = is_Admin || is_SuperAdmin;
 
     // Accès automatique pour les administrateurs et super-administrateurs
@@ -38,7 +39,7 @@ export async function protectRoute(
     // Vérifier l'authentification de l'utilisateur, si ce n'est pas un admin ou super-admin
     if (!userId) {
       return NextResponse.json(
-        { error: "Unauthorized", message: "Utilisateur non authentifié" },
+        { message: "Utilisateur non authentifié" },
         { status: 401 }
       );
     }
@@ -49,7 +50,7 @@ export async function protectRoute(
     if (!hasAccess) {
       return NextResponse.json(
         { message: `Opération non autorisée ${action}-${resource}` },
-        { status: 403 }
+        { status: 401 }
       );
     }
 

@@ -19,7 +19,7 @@ export async function GET() {
 
     const [isAdmin, isSuperAdmin] = await Promise.all([
       hasRole(userId, "admin"),
-      hasRole(userId, "super-admin"),
+      hasRole(userId, "super admin"),
     ]);
 
     const isAdminOrSuperAdmin = isAdmin || isSuperAdmin;
@@ -27,11 +27,7 @@ export async function GET() {
     console.log("isAdminOrSuperAdmin:", isAdminOrSuperAdmin);
 
     // ✅ CORRECTION : Toujours retourner une réponse JSON
-    return NextResponse.json({
-      isAdmin,
-      isSuperAdmin,
-      isAdminOrSuperAdmin,
-    });
+    return NextResponse.json(isSuperAdmin);
   } catch (error) {
     console.error("Error fetching user roles:", error);
     return NextResponse.json(

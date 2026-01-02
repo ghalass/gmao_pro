@@ -294,8 +294,8 @@ export async function DELETE(
 
     // Vérifier si l'utilisateur tente de se supprimer lui-même
     const connectedUser = currentSession?.userId;
-    const toDelete_SuperAdmin = await isSuperAdmin(userId);
-    const toDelete_Admin = await isAdmin(userId);
+    const toDelete_SuperAdmin = await isSuperAdmin();
+    const toDelete_Admin = await isAdmin();
 
     // Interdire de supprimer votre propre compte
     if (connectedUser === userId) {

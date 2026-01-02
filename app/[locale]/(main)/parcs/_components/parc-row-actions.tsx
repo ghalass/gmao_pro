@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import EditParc from "./edit-parc";
 import DeleteParc from "./delete-parc";
+import { useParcPermissions } from "@/hooks/usePermissions";
 
 interface ParcRowActionsProps {
   parc: any;
@@ -26,44 +27,55 @@ const ParcRowActions = ({
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
+  const permissions = useParcPermissions();
+
   return (
     <>
-      <DropdownMenu modal={false}>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Menu</span>
-            <MoreVertical className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
-            <Pencil className="mr-2 h-4 w-4" />
-            Modifier
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => setShowDeleteDialog(true)}
-            className="text-destructive focus:text-destructive focus:bg-destructive/10"
-          >
-            <Trash className="mr-2 h-4 w-4" />
-            Supprimer
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {(permissions.update || permissions.delete) && (
+        <>
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Menu</span>
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {permissions.update && (
+                <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Modifier
+                </DropdownMenuItem>
+              )}
 
-      <EditParc
-        parc={parc}
-        typeparcs={typeparcs}
-        open={showEditDialog}
-        onOpenChange={setShowEditDialog}
-        onSuccess={onParcUpdated}
-      />
+              {permissions.delete && (
+                <DropdownMenuItem
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                >
+                  <Trash className="mr-2 h-4 w-4" />
+                  Supprimer
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-      <DeleteParc
-        parc={parc}
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        onSuccess={onParcUpdated}
-      />
+          <EditParc
+            parc={parc}
+            typeparcs={typeparcs}
+            open={showEditDialog}
+            onOpenChange={setShowEditDialog}
+            onSuccess={onParcUpdated}
+          />
+
+          <DeleteParc
+            parc={parc}
+            open={showDeleteDialog}
+            onOpenChange={setShowDeleteDialog}
+            onSuccess={onParcUpdated}
+          />
+        </>
+      )}
     </>
   );
 };

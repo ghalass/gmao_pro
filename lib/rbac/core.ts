@@ -1,5 +1,6 @@
 // lib/rbac/core.ts (version corrigée)
 import { prisma } from "@/lib/prisma";
+import { getSession } from "../auth";
 
 // Types pour les permissions
 export interface PermissionCheck {
@@ -209,10 +210,12 @@ export async function getUserRoles(userId: string): Promise<string[]> {
   return user?.roles.map((role) => role.name) ?? [];
 }
 
-export async function isAdmin(userId: string): Promise<boolean> {
-  return await hasRole(userId, "admin");
+export async function isAdmin(): Promise<boolean> {
+  const currentSession = await getSession();
+  return await hasRole(currentSession?.userId, "admin");
 }
 
-export async function isSuperAdmin(userId: string): Promise<boolean> {
-  return await hasRole(userId, "super admin");
+export async function isSuperAdmin(): Promise<boolean> {
+  const currentSession = await getSession();
+  return await hasRole(currentSession?.userId, "super admin");
 }

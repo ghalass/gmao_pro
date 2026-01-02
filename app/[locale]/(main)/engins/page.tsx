@@ -35,6 +35,8 @@ import { ExportExcel } from "@/components/ui/export-excel";
 import { Pagination } from "@/components/ui/pagination";
 import { toast } from "sonner";
 import React, { useState, useEffect } from "react";
+import FormError from "@/components/form/FormError";
+import { useEnginPermissions } from "@/hooks/usePermissions";
 
 interface Engin {
   id: string;
@@ -88,6 +90,8 @@ const EnginsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchInputValue, setSearchInputValue] = useState("");
+
+  const permissions = useEnginPermissions();
 
   // Charger les données de référence
   const fetchReferenceData = async () => {
@@ -350,39 +354,43 @@ const EnginsPage = () => {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setViewMode("import")}
-            className="flex items-center justify-center gap-2 w-full sm:w-auto"
-          >
-            <FileSpreadsheet className="h-4 w-4" />
-            <span className="hidden sm:inline">Importer Excel</span>
-            <span className="sm:hidden">Importer</span>
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => setViewMode("update-import")}
-            className="flex items-center justify-center gap-2 w-full sm:w-auto"
-          >
-            <FileSpreadsheet className="h-4 w-4" />
-            <span className="hidden sm:inline">Modifier Excel</span>
-            <span className="sm:hidden">Modifier</span>
-          </Button>
-          <ExportExcel
-            filename="engins_filtres"
-            sheetName="Engins (filtrés)"
-            onExportData={handleExportFiltered}
-            className="flex items-center justify-center gap-2 w-full sm:w-auto"
-          />
-          <NewEngin parcs={parcs} sites={sites} onSuccess={refreshEngins} />
+          {permissions.create && (
+            <Button
+              variant="outline"
+              onClick={() => setViewMode("import")}
+              className="flex items-center justify-center gap-2 w-full sm:w-auto"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              <span className="hidden sm:inline">Importer Excel</span>
+              <span className="sm:hidden">Importer</span>
+            </Button>
+          )}
+          {permissions.update && (
+            <Button
+              variant="outline"
+              onClick={() => setViewMode("update-import")}
+              className="flex items-center justify-center gap-2 w-full sm:w-auto"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              <span className="hidden sm:inline">Modifier Excel</span>
+              <span className="sm:hidden">Modifier</span>
+            </Button>
+          )}
+          {permissions.read && (
+            <ExportExcel
+              filename="engins_filtres"
+              sheetName="Engins (filtrés)"
+              onExportData={handleExportFiltered}
+              className="flex items-center justify-center gap-2 w-full sm:w-auto"
+            />
+          )}
+          {permissions.create && (
+            <NewEngin parcs={parcs} sites={sites} onSuccess={refreshEngins} />
+          )}
         </div>
       </div>
 
-      {error && (
-        <div className="mb-4 p-4 border border-red-200 bg-red-50 rounded-lg text-red-700">
-          {error}
-        </div>
-      )}
+      <FormError error={error} />
 
       <div className="flex flex-col sm:flex-row gap-2">
         <div className="flex-1">
@@ -436,9 +444,13 @@ const EnginsPage = () => {
                   colSpan={6}
                   className="h-24 text-center text-muted-foreground italic"
                 >
-                  {searchTerm
-                    ? "Aucun engin trouvé pour cette recherche"
-                    : "Aucun engin répertorié"}
+                  {!permissions.read ? (
+                    <FormError error={error} />
+                  ) : searchTerm ? (
+                    "Aucun engin trouvé pour cette recherche"
+                  ) : (
+                    "Aucun engin répertorié"
+                  )}
                 </TableCell>
               </TableRow>
             ) : (

@@ -33,6 +33,8 @@ import { ExportExcel } from "@/components/ui/export-excel";
 import { Pagination } from "@/components/ui/pagination";
 import { toast } from "sonner";
 import React, { useState, useEffect } from "react";
+import FormError from "@/components/form/FormError";
+import { useTypeparcPermissions } from "@/hooks/usePermissions";
 
 interface Typeparc {
   id: string;
@@ -73,6 +75,8 @@ const TypeparcsPage = () => {
 
   // Debounce pour la recherche - attend 300ms après la fin de la saisie
   const [searchInputValue, setSearchInputValue] = useState("");
+
+  const permissions = useTypeparcPermissions();
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -299,39 +303,39 @@ const TypeparcsPage = () => {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setViewMode("import")}
-            className="flex items-center justify-center gap-2 w-full sm:w-auto"
-          >
-            <FileSpreadsheet className="h-4 w-4" />
-            <span className="hidden sm:inline">Importer Excel</span>
-            <span className="sm:hidden">Importer</span>
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => setViewMode("update-import")}
-            className="flex items-center justify-center gap-2 w-full sm:w-auto"
-          >
-            <FileSpreadsheet className="h-4 w-4" />
-            <span className="hidden sm:inline">Modifier Excel</span>
-            <span className="sm:hidden">Modifier</span>
-          </Button>
+          {permissions.create && (
+            <Button
+              variant="outline"
+              onClick={() => setViewMode("import")}
+              className="flex items-center justify-center gap-2 w-full sm:w-auto"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              <span className="hidden sm:inline">Importer Excel</span>
+              <span className="sm:hidden">Importer</span>
+            </Button>
+          )}
+          {permissions.update && (
+            <Button
+              variant="outline"
+              onClick={() => setViewMode("update-import")}
+              className="flex items-center justify-center gap-2 w-full sm:w-auto"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              <span className="hidden sm:inline">Modifier Excel</span>
+              <span className="sm:hidden">Modifier</span>
+            </Button>
+          )}
           <ExportExcel
             filename="typeparcs_filtres"
             sheetName="Types de Parc (filtrés)"
             onExportData={handleExportFiltered}
             className="flex items-center justify-center gap-2 w-full sm:w-auto"
           />
-          <NewTypeparc onSuccess={refreshTypeparcs} />
+          {permissions.create && <NewTypeparc onSuccess={refreshTypeparcs} />}
         </div>
       </div>
 
-      {error && (
-        <div className="mb-4 p-4 border border-red-200 bg-red-50 rounded-lg text-red-700">
-          {error}
-        </div>
-      )}
+      <FormError error={error} />
 
       {/* Barre de recherche et filtres */}
       <div className="flex flex-col sm:flex-row gap-2">
@@ -381,9 +385,13 @@ const TypeparcsPage = () => {
                   colSpan={4}
                   className="h-24 text-center text-muted-foreground italic"
                 >
-                  {searchTerm
-                    ? "Aucun type de parc trouvé pour cette recherche"
-                    : "Aucun type de parc configuré"}
+                  {!permissions.read ? (
+                    <FormError error={error} />
+                  ) : searchTerm ? (
+                    "Aucun type de parc trouvé pour cette recherche"
+                  ) : (
+                    "Aucun type de parc configuré"
+                  )}
                 </TableCell>
               </TableRow>
             ) : (

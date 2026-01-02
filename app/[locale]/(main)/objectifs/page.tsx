@@ -36,6 +36,7 @@ import { ExportExcel } from "@/components/ui/export-excel";
 import { Pagination } from "@/components/ui/pagination";
 import { toast } from "sonner";
 import React, { useState, useEffect } from "react";
+import FormError from "@/components/form/FormError";
 
 type ObjectifWithRelations = {
   id: string;
@@ -406,11 +407,7 @@ const ObjectifsPage = () => {
         </div>
       </div>
 
-      {error && (
-        <div className="mb-4 p-4 border border-red-200 bg-red-50 rounded-lg text-red-700">
-          {error}
-        </div>
-      )}
+      <FormError error={error} />
 
       <div className="flex flex-col sm:flex-row gap-2">
         <div className="flex-1">

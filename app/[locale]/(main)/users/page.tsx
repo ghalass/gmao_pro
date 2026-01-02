@@ -41,6 +41,8 @@ import { ExportExcel } from "@/components/ui/export-excel";
 import { Pagination } from "@/components/ui/pagination";
 import { toast } from "sonner";
 import React, { useState, useEffect } from "react";
+import FormError from "@/components/form/FormError";
+import { useUserPermissions } from "@/hooks/usePermissions";
 
 interface UserWithRole extends User {
   roles: Role[];
@@ -112,7 +114,6 @@ const UsersPage = () => {
       });
 
       const usersResponse = await apiFetch(`${API.USERS.ALL}?${params}`);
-
       if (!usersResponse.ok) {
         setError(usersResponse.data?.message || "Erreur de chargement");
         return;
@@ -122,6 +123,8 @@ const UsersPage = () => {
       setUsers(response.data || []);
       setPagination(response.pagination || null);
     } catch (err: any) {
+      console.error(err);
+
       setError(err.message || "Erreur de chargement");
     } finally {
       setLoading(false);
@@ -346,11 +349,7 @@ const UsersPage = () => {
         </div>
       </div>
 
-      {error && (
-        <div className="mb-4 p-4 border border-red-200 bg-red-50 rounded-lg text-red-700">
-          {error}
-        </div>
-      )}
+      <FormError error={error} />
 
       <div className="flex flex-col sm:flex-row gap-2">
         <div className="flex-1">
