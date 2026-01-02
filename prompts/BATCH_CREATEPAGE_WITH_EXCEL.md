@@ -6,9 +6,7 @@ Création complète de pages de gestion avec système d'importation Excel pour u
 ## Input
 ```bash
 LISTE_RESSOURCES = [
-  "users",
-  "roles", 
-  "permissions",
+  "entreprises",
 ]
 ```
 

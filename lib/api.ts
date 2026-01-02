@@ -168,6 +168,10 @@ export const API = {
   },
   ENTREPRISES: {
     ALL: "/api/entreprises",
+    ENTREPRISE_CREATE: "/api/entreprises",
+    ENTREPRISE_DETAILS: (id: string) => `/api/entreprises/${id}`,
+    ENTREPRISE_UPDATE: (id: string) => `/api/entreprises/${id}`,
+    ENTREPRISE_DELETE: (id: string) => `/api/entreprises/${id}`,
   },
 };
 

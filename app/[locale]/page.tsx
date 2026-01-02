@@ -40,58 +40,116 @@ export default async function RootPage({
 
       {session?.isLoggedIn ? (
         <>
-          <div className="text-center space-y-2">
-            <p>
-              {homePage("ifConnected.welcome")}, {session?.name}
-            </p>
-            <p>{session?.roles}</p>
-            <Link href={ROUTE.DASHBOARD}>
-              <Button size={"sm"} className="w-min">
-                <Play />
-                {homePage("ifConnected.buttonTitle")}
-              </Button>
-            </Link>
-            <div className="flex justify-center mt-2 border rounded-full shadow-sm py-1">
-              <LogoutButton />
+          <div className="max-w-md mx-auto space-y-6">
+            <div className="bg-card border rounded-lg p-6 shadow-sm">
+              <div className="flex items-center justify-center mb-4">
+                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                  <span className="text-2xl font-bold text-primary">
+                    {session?.name?.charAt(0)?.toUpperCase() || "U"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="text-center space-y-3">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">
+                    {homePage("ifConnected.welcome")}
+                  </p>
+                  <p className="text-xl font-semibold text-foreground">
+                    {session?.name}
+                  </p>
+                </div>
+
+                <div className="pt-2 border-t border-border/50">
+                  <p className="text-xs text-muted-foreground mb-2">Rôles</p>
+                  <div className="flex flex-wrap gap-1 justify-center">
+                    {session?.roles?.map((role, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary"
+                      >
+                        {role}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <Link href={ROUTE.DASHBOARD}>
+                <Button size="lg" className="w-full">
+                  <Play className="mr-2 h-4 w-4" />
+                  {homePage("ifConnected.buttonTitle")}
+                </Button>
+              </Link>
+
+              <div className="flex justify-center">
+                <LogoutButton />
+              </div>
             </div>
           </div>
         </>
       ) : (
         <>
-          <div className="text-center space-y-2">
-            <p>{homePage("question1.title")}</p>
-            <p>{homePage("question1.subTitle")}</p>
-            <Link href={ROUTE.AUTH.REGISTER}>
-              <Button size={"sm"} className="w-min">
-                <Play />
-                {homePage("question1.buttonTitle")}
-              </Button>
-            </Link>
-          </div>
+          <div className="max-w-md mx-auto space-y-6">
+            <div className="bg-card border rounded-lg p-6 shadow-sm text-center">
+              <div className="space-y-4">
+                <h2 className="text-lg font-semibold text-foreground">
+                  {homePage("question1.title")}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {homePage("question1.subTitle")}
+                </p>
+              </div>
+              <div className="mt-6">
+                <Link href={ROUTE.AUTH.REGISTER}>
+                  <Button size="lg" className="w-full">
+                    <Play className="mr-2 h-4 w-4" />
+                    {homePage("question1.buttonTitle")}
+                  </Button>
+                </Link>
+              </div>
+            </div>
 
-          <div className="text-center space-y-3 my-8 md:my-12">
-            <p>{homePage("question2.title")}</p>
-            <Link href={ROUTE.AUTH.LOGIN}>
-              <Button size={"sm"} className="w-min">
-                <LogIn />
-                {homePage("question2.buttonTitle")}
-              </Button>
-            </Link>
+            <div className="bg-card border rounded-lg p-6 shadow-sm text-center">
+              <div className="space-y-4">
+                <h2 className="text-lg font-semibold text-foreground">
+                  {homePage("question2.title")}
+                </h2>
+              </div>
+              <div className="mt-6">
+                <Link href={ROUTE.AUTH.LOGIN}>
+                  <Button
+                    variant="outline"
+                    className="w-full border-primary/20 hover:border-primary/30 hover:bg-primary/5"
+                  >
+                    <LogIn className="mr-2 h-4 w-4" />
+                    {homePage("question2.buttonTitle")}
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </div>
         </>
       )}
 
       {/* SUPER ADMIN CHECK */}
       {session?.isSuperAdmin && (
-        <Link href={ROUTE.SUPER_ADMIN.MAIN}>
-          <Button size={"sm"} className="w-min">
-            <Play />
-            {"Gestion des entreprises"}
-          </Button>
-        </Link>
+        <div className="max-w-md mx-auto">
+          <Link href={ROUTE.ENTREPRISES.ALL}>
+            <Button
+              variant="outline"
+              className="w-full border-primary/20 hover:border-primary/30 hover:bg-primary/5"
+            >
+              <Play className="mr-2 h-4 w-4" />
+              {"Gestion des entreprises"}
+            </Button>
+          </Link>
+        </div>
       )}
 
-      <DisplayData data={session} />
+      {/* <DisplayData data={session} /> */}
     </div>
   );
 }

@@ -9,12 +9,7 @@ export const ROUTE = {
     ALL: `/users`,
     USER_DETAIL: (userId: string) => `/users/${userId}`,
   },
-  SUPER_ADMIN: {
-    MAIN: "/super-admin",
-    ENTREPRISES_LIST: "/super-admin/entreprises",
-    ENTREPRISE_DETAILS: (entrepriseId: string) =>
-      `/super-admin/entreprises/${entrepriseId}`,
-    ENTREPRISE_USERS: (entrepriseId: string) =>
-      `/super-admin/entreprises/${entrepriseId}/users`,
+  ENTREPRISES: {
+    ALL: "/entreprises",
   },
 };

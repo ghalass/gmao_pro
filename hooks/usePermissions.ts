@@ -91,3 +91,7 @@ export function useTypeconsommationlubPermissions() {
 export function usePermissionPermissions() {
   return usePermissions("permission");
 }
+
+export function useEntreprisePermissions() {
+  return usePermissions("entreprise");
+}

@@ -78,10 +78,10 @@ const HrmList = () => {
         apiFetch(API.ENGINS.ALL),
       ]);
 
-      if (tpRes.ok) setTypeparcs(tpRes.data);
-      if (pRes.ok) setParcs(pRes.data);
-      if (sRes.ok) setSites(sRes.data);
-      if (eRes.ok) setEngins(eRes.data);
+      if (tpRes.ok) setTypeparcs(tpRes.data || []);
+      if (pRes.ok) setParcs(pRes.data || []);
+      if (sRes.ok) setSites(sRes.data || []);
+      if (eRes.ok) setEngins(eRes.data || []);
     } catch (error) {
       console.error("Error fetching filters data:", error);
     }
@@ -108,7 +108,7 @@ const HrmList = () => {
           `${API.SAISIEHRMS.ALL}?${params.toString()}`
         );
         if (response.ok) {
-          setSaisiehrms(response.data);
+          setSaisiehrms(response.data || []);
         } else {
           toast.error("Erreur lors du chargement des données");
         }
@@ -152,14 +152,21 @@ const HrmList = () => {
   };
 
   // Filter options for cascading
-  const filteredParcs = parcs.filter(
-    (p) => selectedTypeparcId === "ALL" || p.typeparcId === selectedTypeparcId
-  );
-  const filteredEngins = engins.filter((e) => {
-    const siteMatch = selectedSiteId === "ALL" || e.siteId === selectedSiteId;
-    const parcMatch = selectedParcId === "ALL" || e.parcId === selectedParcId;
-    return siteMatch && parcMatch;
-  });
+  const filteredParcs = Array.isArray(parcs)
+    ? parcs.filter(
+        (p) =>
+          selectedTypeparcId === "ALL" || p.typeparcId === selectedTypeparcId
+      )
+    : [];
+  const filteredEngins = Array.isArray(engins)
+    ? engins.filter((e) => {
+        const siteMatch =
+          selectedSiteId === "ALL" || e.siteId === selectedSiteId;
+        const parcMatch =
+          selectedParcId === "ALL" || e.parcId === selectedParcId;
+        return siteMatch && parcMatch;
+      })
+    : [];
 
   return (
     <div className="space-y-6">
@@ -197,7 +204,7 @@ const HrmList = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">Tous les sites</SelectItem>
-                {sites.map((s) => (
+                {(Array.isArray(sites) ? sites : []).map((s) => (
                   <SelectItem key={s.id} value={s.id}>
                     {s.name}
                   </SelectItem>
@@ -222,7 +229,7 @@ const HrmList = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">Tous les types</SelectItem>
-                {typeparcs.map((tp) => (
+                {(Array.isArray(typeparcs) ? typeparcs : []).map((tp) => (
                   <SelectItem key={tp.id} value={tp.id}>
                     {tp.name}
                   </SelectItem>
@@ -313,7 +320,7 @@ const HrmList = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {saisiehrms.length === 0 ? (
+            {!Array.isArray(saisiehrms) || saisiehrms.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={7}
