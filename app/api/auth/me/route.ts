@@ -27,6 +27,7 @@ export async function GET() {
         name: true,
         email: true,
         active: true,
+        isSuperAdmin: true,
         createdAt: true,
         updatedAt: true,
         // Relation directe avec Role
@@ -46,6 +47,10 @@ export async function GET() {
         },
       },
     });
+
+    if (user) {
+      user.isSuperAdmin = session.isSuperAdmin || false;
+    }
 
     if (!user) {
       await logout();

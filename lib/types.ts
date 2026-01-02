@@ -8,6 +8,7 @@ export interface UserDetail {
   roles: Role[];
   permissions: Permission[];
   roleNames: string[];
+  isSuperAdmin?: boolean;
 }
 
 export interface Role {

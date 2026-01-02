@@ -32,6 +32,8 @@ import { toast } from "sonner";
 import React, { useState, useEffect } from "react";
 import FormError from "@/components/form/FormError";
 import { useEntreprisePermissions } from "@/hooks/usePermissions";
+import { useUser } from "@/context/UserContext";
+import { useRouter } from "next/navigation";
 
 interface Entreprise {
   id: string;
@@ -63,6 +65,16 @@ interface EntreprisesResponse {
 type ViewMode = "list";
 
 const EntreprisesPage = () => {
+  const { user } = useUser();
+  const router = useRouter();
+
+  // Check if user is super admin, redirect to home if not
+  useEffect(() => {
+    if (user && !user.isSuperAdmin) {
+      router.push("/");
+    }
+  }, [user, router]);
+
   const [entreprises, setEntreprises] = useState<Entreprise[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -169,7 +181,6 @@ const EntreprisesPage = () => {
     }
   };
 
-  
   const refreshEntreprises = () => {
     setCurrentPage(1);
     setRefreshKey((prev) => prev + 1);

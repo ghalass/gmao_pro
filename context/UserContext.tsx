@@ -49,6 +49,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
           roleNames: Array.isArray(userData.roleNames)
             ? userData.roleNames
             : [],
+          isSuperAdmin: Boolean(userData.isSuperAdmin),
         };
 
         setUser(typedUser);
@@ -93,6 +94,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
           roleNames: Array.isArray(userData?.roleNames)
             ? userData?.roleNames
             : [],
+          isSuperAdmin: Boolean(userData?.isSuperAdmin),
         };
 
         setUser(typedUser);
